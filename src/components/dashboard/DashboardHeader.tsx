@@ -1,11 +1,46 @@
-import { Building2, Bell, User } from "lucide-react";
+import { Building2, Bell, User, LogOut, Shield, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 import SmartSearch from "@/components/ui/smart-search";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const DashboardHeader = () => {
+  const { user, userRole, signOut } = useAuth();
+  const navigate = useNavigate();
+  
   const handleSearch = (query: string) => {
     console.log("Searching for:", query);
     // Implement actual search logic
+  };
+
+  const getRoleBadgeVariant = (role: string | null) => {
+    switch (role) {
+      case 'admin': return 'destructive';
+      case 'operator': return 'default';
+      case 'viewer': return 'secondary';
+      default: return 'outline';
+    }
+  };
+
+  const getRoleIcon = (role: string | null) => {
+    if (role === 'admin') return <Shield className="h-3 w-3" />;
+    return null;
+  };
+
+  const getDisplayName = () => {
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name;
+    }
+    return user?.email?.split('@')[0] || 'User';
   };
 
   return (
@@ -17,8 +52,8 @@ const DashboardHeader = () => {
             <Building2 className="h-5 w-5" />
           </div>
           <div className="hidden sm:block">
-            <h1 className="text-lg font-semibold text-foreground">OilField Billing</h1>
-            <p className="text-xs text-muted-foreground">Enterprise Payment Platform</p>
+            <h1 className="text-lg font-semibold text-foreground">Flow Billing</h1>
+            <p className="text-xs text-muted-foreground">Oil & Gas Payment Platform</p>
           </div>
         </div>
 
@@ -32,7 +67,7 @@ const DashboardHeader = () => {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button 
             variant="ghost" 
             size="sm" 
@@ -44,14 +79,50 @@ const DashboardHeader = () => {
               3
             </span>
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="hover-scale"
-            aria-label="User menu"
-          >
-            <User className="h-4 w-4" />
-          </Button>
+
+          {/* User Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="hover-scale flex items-center gap-2 h-9 px-3"
+              >
+                <User className="h-4 w-4" />
+                <div className="hidden md:block text-left">
+                  <div className="text-sm font-medium">{getDisplayName()}</div>
+                  <div className="text-xs text-muted-foreground">{user?.email}</div>
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">{getDisplayName()}</p>
+                  <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant={getRoleBadgeVariant(userRole)} className="text-xs">
+                      {getRoleIcon(userRole)}
+                      {userRole?.toUpperCase() || 'LOADING...'}
+                    </Badge>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={() => navigate('/profile')} 
+                className="cursor-pointer"
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                Profile Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={signOut} className="text-destructive cursor-pointer">
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
