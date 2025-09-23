@@ -19,27 +19,27 @@
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 20%;
 
-    /* Primary: Professional enterprise amber/yellow */
-    --primary: 45 95% 35%;
-    --primary-foreground: 45 15% 15%;
-    --primary-light: 48 95% 45%;
-    --primary-dark: 42 85% 25%;
+    /* Primary: Professional enterprise amber/yellow with proper contrast */
+    --primary: 45 95% 50%;
+    --primary-foreground: 0 0% 0%;
+    --primary-light: 48 90% 60%;
+    --primary-dark: 42 100% 35%;
 
     /* Secondary: Complementary orange accent */
     --secondary: 25 95% 48%;
     --secondary-foreground: 0 0% 98%;
     --secondary-light: 25 95% 58%;
-    --secondary-muted: 25 35% 95%;
+    --secondary-muted: 45 40% 95%;
 
     /* Status colors for workflow states */
-    --status-pending: 35 95% 55%;
-    --status-pending-foreground: 35 25% 20%;
+    --status-pending: 35 85% 55%;
+    --status-pending-foreground: 35 50% 15%;
     --status-approved: 142 70% 35%;
     --status-approved-foreground: 0 0% 98%;
     --status-rejected: 0 84% 45%;
     --status-rejected-foreground: 0 0% 98%;
-    --status-processing: 45 85% 45%;
-    --status-processing-foreground: 45 15% 15%;
+    --status-processing: 45 80% 45%;
+    --status-processing-foreground: 0 0% 0%;
 
     /* Enterprise grays */
     --muted: 215 15% 96%;
@@ -53,7 +53,7 @@
 
     --border: 215 15% 88%;
     --input: 215 15% 94%;
-    --ring: 45 95% 35%;
+    --ring: 45 95% 50%;
 
     --radius: 0.5rem;
 
@@ -73,12 +73,12 @@
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 45 95% 35%;
-    --sidebar-primary-foreground: 45 15% 15%;
+    --sidebar-primary: 45 95% 50%;
+    --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 45 95% 35%;
+    --sidebar-ring: 45 95% 50%;
   }
 
   .dark {
@@ -91,11 +91,11 @@
     --popover: 215 25% 15%;
     --popover-foreground: 0 0% 98%;
 
-    /* Primary: Bright amber for dark mode */
-    --primary: 48 95% 55%;
-    --primary-foreground: 45 25% 15%;
-    --primary-light: 50 95% 65%;
-    --primary-dark: 45 85% 45%;
+    /* Primary: Brighter amber for dark mode with white text */
+    --primary: 48 100% 65%;
+    --primary-foreground: 0 0% 0%;
+    --primary-light: 50 100% 75%;
+    --primary-dark: 45 95% 55%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -111,15 +111,15 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 48 95% 55%;
+    --ring: 48 100% 65%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 48 95% 55%;
-    --sidebar-primary-foreground: 45 25% 15%;
+    --sidebar-primary: 48 100% 65%;
+    --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 48 95% 55%;
+    --sidebar-ring: 48 100% 65%;
   }
 }
 
