@@ -24,6 +24,7 @@ import InvoiceUpload from "@/components/dashboard/InvoiceUpload";
 import ValidationRules from "@/components/dashboard/ValidationRules";
 import ExceptionQueue from "@/components/dashboard/ExceptionQueue";
 import SystemHealthCheck from "@/components/dashboard/SystemHealthCheck";
+import SecurityDashboard from "@/components/dashboard/SecurityDashboard";
 import FloatingActionButton from "@/components/ui/floating-action-button";
 import heroImage from "@/assets/hero-oilgas.jpg";
 
@@ -231,6 +232,7 @@ const Index = () => {
                 Security & Compliance Dashboard
               </h2>
               <div className="grid grid-cols-1 gap-8">
+                <SecurityDashboard />
                 <CompliancePanel />
               </div>
             </section>
