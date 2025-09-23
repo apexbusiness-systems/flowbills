@@ -13,6 +13,7 @@ import Exceptions from "./pages/Exceptions";
 import ValidationRules from "./pages/ValidationRules";
 import Compliance from "./pages/Compliance";
 import Integrations from "./pages/Integrations";
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -82,6 +83,14 @@ const AuthRoutes = () => {
         element={
           <ProtectedRoute requiredRole="operator">
             <Integrations />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/analytics" 
+        element={
+          <ProtectedRoute requiredRole="viewer">
+            <Analytics />
           </ProtectedRoute>
         } 
       />
