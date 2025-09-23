@@ -17,12 +17,14 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, DollarSign, FileText, Save, X, Upload, AlertTriangle } from 'lucide-react';
+import { CalendarIcon, DollarSign, FileText, Save, X, Upload, AlertTriangle, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Invoice } from '@/hooks/useInvoices';
+import { useValidationRules, InvoiceValidationResult } from '@/hooks/useValidationRules';
 import FileUploadZone from './FileUploadZone';
 import DocumentList from './DocumentList';
 import CreateExceptionDialog from '@/components/exceptions/CreateExceptionDialog';
+import ValidationResultsPanel from '@/components/validation/ValidationResultsPanel';
 
 interface InvoiceFormProps {
   invoice?: Invoice | null;
@@ -33,6 +35,7 @@ interface InvoiceFormProps {
 
 const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceFormProps) => {
   const { hasRole } = useAuth();
+  const { validateInvoice } = useValidationRules();
   const [formData, setFormData] = useState({
     invoice_number: invoice?.invoice_number || '',
     vendor_name: invoice?.vendor_name || '',
@@ -48,10 +51,12 @@ const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceForm
   const [invoiceDateOpen, setInvoiceDateOpen] = useState(false);
   const [dueDateOpen, setDueDateOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
+  const [validationResult, setValidationResult] = useState<InvoiceValidationResult | null>(null);
+  const [validating, setValidating] = useState(false);
 
   const canUpload = hasRole('operator') || hasRole('admin');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
@@ -68,7 +73,26 @@ const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceForm
       return;
     }
 
+    // Run validation rules before saving
+    await runValidation();
+
     onSave(formData);
+  };
+
+  const runValidation = async () => {
+    if (!formData.invoice_number || !formData.vendor_name || !formData.amount) {
+      return;
+    }
+
+    setValidating(true);
+    try {
+      const result = await validateInvoice(formData);
+      setValidationResult(result);
+    } catch (error) {
+      console.error('Validation error:', error);
+    } finally {
+      setValidating(false);
+    }
   };
 
   const handleInputChange = (field: string, value: any) => {
@@ -104,8 +128,12 @@ const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceForm
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details">Invoice Details</TabsTrigger>
+            <TabsTrigger value="validation">
+              <Shield className="mr-2 h-4 w-4" />
+              Validation
+            </TabsTrigger>
             <TabsTrigger value="documents" disabled={!invoice}>
               <Upload className="mr-2 h-4 w-4" />
               Documents {invoice && `(${invoice.id ? 'Available' : 'Save first'})`}
@@ -270,6 +298,33 @@ const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceForm
                 )}
               </div>
             </form>
+          </TabsContent>
+
+          <TabsContent value="validation" className="space-y-6 mt-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Invoice Validation</h3>
+                  <p className="text-muted-foreground">
+                    Run validation rules to check for issues before processing
+                  </p>
+                </div>
+                <Button
+                  onClick={runValidation}
+                  disabled={validating || !formData.invoice_number}
+                  variant="outline"
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  {validating ? 'Validating...' : 'Run Validation'}
+                </Button>
+              </div>
+              
+              <ValidationResultsPanel
+                validationResult={validationResult}
+                loading={validating}
+                onRevalidate={runValidation}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-6 mt-6">

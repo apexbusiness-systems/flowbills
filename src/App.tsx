@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Invoices from "./pages/Invoices";
 import Exceptions from "./pages/Exceptions";
+import ValidationRules from "./pages/ValidationRules";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,14 @@ const AuthRoutes = () => {
         element={
           <ProtectedRoute requiredRole="viewer">
             <Exceptions />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/validation-rules" 
+        element={
+          <ProtectedRoute requiredRole="operator">
+            <ValidationRules />
           </ProtectedRoute>
         } 
       />
