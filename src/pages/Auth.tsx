@@ -125,6 +125,7 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Sign in attempt with:", { email: formData.email, passwordLength: formData.password.length });
     setIsLoading(true);
     setError("");
 
@@ -133,6 +134,8 @@ const Auth = () => {
         email: formData.email,
         password: formData.password,
       });
+
+      console.log("Sign in result:", { error });
 
       if (error) {
         if (error.message === 'Invalid login credentials') {
@@ -151,6 +154,7 @@ const Auth = () => {
       
       navigate("/");
     } catch (err: any) {
+      console.error("Sign in error:", err);
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -159,10 +163,16 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Sign up attempt with:", { 
+      email: formData.email, 
+      passwordLength: formData.password.length, 
+      fullName: formData.fullName 
+    });
     setIsLoading(true);
     setError("");
 
     if (!formData.fullName.trim()) {
+      console.log("Missing full name");
       setError("Full name is required");
       setIsLoading(false);
       return;
@@ -170,6 +180,7 @@ const Auth = () => {
 
     try {
       const redirectUrl = `${window.location.origin}/`;
+      console.log("Redirect URL:", redirectUrl);
       
       const { error } = await supabase.auth.signUp({
         email: formData.email,
@@ -183,6 +194,8 @@ const Auth = () => {
           }
         }
       });
+
+      console.log("Sign up result:", { error });
 
       if (error) {
         if (error.message === 'User already registered') {
@@ -201,6 +214,7 @@ const Auth = () => {
       
       navigate("/");
     } catch (err: any) {
+      console.error("Sign up error:", err);
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -474,21 +488,22 @@ const Auth = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signupEmail">Email *</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signupEmail"
-                        type="email"
-                        placeholder="john@oilcompany.com"
-                        className="pl-10"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
-                        required
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="signupEmail">Email *</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="signupEmail"
+                          name="signupEmail"
+                          type="email"
+                          placeholder="john@oilcompany.com"
+                          className="pl-10"
+                          value={formData.email}
+                          onChange={(e) => handleInputChange("email", e.target.value)}
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="companyName">Company Name</Label>
