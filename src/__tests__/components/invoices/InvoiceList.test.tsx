@@ -1,6 +1,5 @@
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
-import { render, mockSupabase, generateMockInvoice, setupTestEnvironment } from '@/lib/test-utils';
+import { render, mockSupabase, generateMockInvoice, setupTestEnvironment, screen, waitFor } from '@/lib/test-utils';
 import InvoiceList from '@/components/invoices/InvoiceList';
 import { vi, describe, it, beforeEach, expect } from 'vitest';
 

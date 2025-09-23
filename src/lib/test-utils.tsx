@@ -1,5 +1,7 @@
 import React, { ReactElement } from 'react';
-import { render, RenderOptions, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, RenderOptions } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/dom';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -62,9 +64,10 @@ export const mockUser = {
 export const mockAuthContext = {
   user: mockUser,
   loading: false,
-  signIn: vi.fn(),
   signOut: vi.fn(),
-  signUp: vi.fn(),
+  session: null,
+  userRole: 'admin',
+  hasRole: vi.fn(() => true),
 };
 
 // Mock Supabase client
@@ -132,19 +135,17 @@ export const setupTestEnvironment = () => {
     })),
   });
 
-  global.IntersectionObserver = class IntersectionObserver {
-    constructor() {}
-    observe() {}
-    disconnect() {}
-    unobserve() {}
-  };
+  global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    disconnect: vi.fn(),
+    unobserve: vi.fn(),
+  })) as any;
 
-  global.ResizeObserver = class ResizeObserver {
-    constructor() {}
-    observe() {}
-    disconnect() {}
-    unobserve() {}
-  };
+  global.ResizeObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    disconnect: vi.fn(),
+    unobserve: vi.fn(),
+  })) as any;
 
   global.fetch = vi.fn();
   
@@ -160,6 +161,6 @@ export const setupTestEnvironment = () => {
 };
 
 // Re-export everything
-export { screen, fireEvent, waitFor };
+export { screen, waitFor, userEvent };
 export { customRender as render };
 export { createTestQueryClient };

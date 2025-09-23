@@ -1,6 +1,6 @@
 import React from 'react';
-import { screen, fireEvent } from '@testing-library/react';
-import { render, mockAuthContext, setupTestEnvironment } from '@/lib/test-utils';
+import userEvent from '@testing-library/user-event';
+import { render, mockAuthContext, setupTestEnvironment, screen } from '@/lib/test-utils';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { vi, describe, it, beforeEach, expect } from 'vitest';
 
@@ -31,24 +31,26 @@ describe('DashboardHeader', () => {
     expect(userButton).toBeInTheDocument();
   });
 
-  it('opens user menu on click', () => {
+  it('opens user menu on click', async () => {
+    const user = userEvent.setup();
     render(<DashboardHeader />);
     
     const userButton = screen.getByRole('button', { name: /user menu/i });
-    fireEvent.click(userButton);
+    await user.click(userButton);
     
     expect(screen.getByText(/Profile/)).toBeInTheDocument();
     expect(screen.getByText(/Sign out/)).toBeInTheDocument();
   });
 
-  it('calls signOut when logout is clicked', () => {
+  it('calls signOut when logout is clicked', async () => {
+    const user = userEvent.setup();
     render(<DashboardHeader />);
     
     const userButton = screen.getByRole('button', { name: /user menu/i });
-    fireEvent.click(userButton);
+    await user.click(userButton);
     
     const signOutButton = screen.getByText(/Sign out/);
-    fireEvent.click(signOutButton);
+    await user.click(signOutButton);
     
     expect(mockAuthContext.signOut).toHaveBeenCalledTimes(1);
   });
@@ -60,11 +62,12 @@ describe('DashboardHeader', () => {
     expect(searchInput).toBeInTheDocument();
   });
 
-  it('handles search input changes', () => {
+  it('handles search input changes', async () => {
+    const user = userEvent.setup();
     render(<DashboardHeader />);
     
     const searchInput = screen.getByPlaceholderText(/Search invoices/i);
-    fireEvent.change(searchInput, { target: { value: 'test search' } });
+    await user.type(searchInput, 'test search');
     
     expect(searchInput).toHaveValue('test search');
   });

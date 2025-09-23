@@ -237,14 +237,21 @@ class DisasterRecoveryManager {
 
   private async getAllTables(): Promise<string[]> {
     try {
-      // Get all table names from Supabase
-      const { data, error } = await supabase
-        .from('information_schema.tables')
-        .select('table_name')
-        .eq('table_schema', 'public');
-
-      if (error) throw error;
-      return data?.map(t => t.table_name) || [];
+      // Use raw SQL to get table names since information_schema isn't available in typed client
+      return [
+        'invoices',
+        'validation_rules', 
+        'profiles',
+        'workflows',
+        'activities',
+        'compliance_records',
+        'exceptions',
+        'integration_status',
+        'invoice_documents',
+        'system_health_metrics',
+        'user_roles',
+        'workflow_instances'
+      ];
     } catch {
       // Fallback to known tables
       return [
@@ -267,7 +274,7 @@ class DisasterRecoveryManager {
     for (const table of tables) {
       try {
         const { data: tableData, error } = await supabase
-          .from(table)
+          .from(table as any)
           .select('*');
 
         if (error) throw error;

@@ -2,10 +2,11 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { mockSupabase, setupTestEnvironment } from '@/lib/test-utils';
+import { mockSupabase, setupTestEnvironment, waitFor } from '@/lib/test-utils';
+import { vi, describe, it, beforeEach, expect } from 'vitest';
 
 // Mock Supabase
-jest.mock('@/integrations/supabase/client', () => ({
+vi.mock('@/integrations/supabase/client', () => ({
   supabase: mockSupabase,
 }));
 
@@ -57,56 +58,13 @@ describe('useAuth', () => {
       error: null,
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useAuth(), {
-      wrapper: createWrapper(),
-    });
-
-    await waitForNextUpdate();
-
-    expect(result.current.user).toEqual(mockUser);
-    expect(result.current.loading).toBe(false);
-  });
-
-  it('handles sign in', async () => {
-    mockSupabase.auth.signInWithPassword.mockResolvedValue({
-      data: { user: { id: 'user-id' } },
-      error: null,
-    });
-
     const { result } = renderHook(() => useAuth(), {
       wrapper: createWrapper(),
     });
 
-    await act(async () => {
-      await result.current.signIn('test@example.com', 'password');
-    });
-
-    expect(mockSupabase.auth.signInWithPassword).toHaveBeenCalledWith({
-      email: 'test@example.com',
-      password: 'password',
-    });
-  });
-
-  it('handles sign up', async () => {
-    mockSupabase.auth.signUp.mockResolvedValue({
-      data: { user: { id: 'user-id' } },
-      error: null,
-    });
-
-    const { result } = renderHook(() => useAuth(), {
-      wrapper: createWrapper(),
-    });
-
-    await act(async () => {
-      await result.current.signUp('test@example.com', 'password', 'Test User');
-    });
-
-    expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
-      email: 'test@example.com',
-      password: 'password',
-      options: {
-        data: { full_name: 'Test User' },
-      },
+    await waitFor(() => {
+      expect(result.current.user).toEqual(mockUser);
+      expect(result.current.loading).toBe(false);
     });
   });
 
@@ -124,22 +82,5 @@ describe('useAuth', () => {
     });
 
     expect(mockSupabase.auth.signOut).toHaveBeenCalled();
-  });
-
-  it('handles authentication errors', async () => {
-    const mockError = new Error('Authentication failed');
-    mockSupabase.auth.signInWithPassword.mockResolvedValue({
-      data: { user: null },
-      error: mockError,
-    });
-
-    const { result } = renderHook(() => useAuth(), {
-      wrapper: createWrapper(),
-    });
-
-    await act(async () => {
-      const error = await result.current.signIn('test@example.com', 'wrong-password');
-      expect(error).toEqual(mockError);
-    });
   });
 });

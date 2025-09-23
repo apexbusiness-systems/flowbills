@@ -1,16 +1,15 @@
-// Environment configuration management
+// Environment Configuration Management
+// Centralized configuration system for managing different environments
+
+export type Environment = 'development' | 'staging' | 'production';
+
 export interface EnvironmentConfig {
   app: {
     name: string;
     version: string;
-    environment: 'development' | 'staging' | 'production';
+    environment: Environment;
     debug: boolean;
     logLevel: 'error' | 'warn' | 'info' | 'debug';
-  };
-  supabase: {
-    url: string;
-    anonKey: string;
-    serviceRoleKey?: string;
   };
   api: {
     baseUrl: string;
@@ -40,13 +39,9 @@ const defaultConfig: EnvironmentConfig = {
     debug: true,
     logLevel: 'debug',
   },
-  supabase: {
-    url: 'https://ullqluvzkgnwwqijhvjr.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVsbHFsdXZ6a2dud3dxaWpodmpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2MTY2OTEsImV4cCI6MjA3NDE5MjY5MX0.UjijCIx4OrtbSgmyDqdf455nUPD9AS0OIgOPopzaJGI',
-  },
   api: {
-    baseUrl: '/api',
-    timeout: 10000,
+    baseUrl: 'http://localhost:3000/api',
+    timeout: 5000,
     retryAttempts: 3,
   },
   features: {
@@ -58,8 +53,8 @@ const defaultConfig: EnvironmentConfig = {
   },
   security: {
     enableCSP: true,
-    trustedDomains: ['*.supabase.co', '*.lovableproject.com'],
-    sessionTimeout: 8 * 60 * 60 * 1000, // 8 hours
+    trustedDomains: ['localhost'],
+    sessionTimeout: 24 * 60 * 60 * 1000, // 24 hours
   },
 };
 
@@ -67,244 +62,253 @@ const defaultConfig: EnvironmentConfig = {
 const environmentConfigs: Record<string, Partial<EnvironmentConfig>> = {
   development: {
     app: {
+      name: 'Oil & Gas Billing - Dev',
+      version: '1.0.0-dev',
+      environment: 'development',
       debug: true,
       logLevel: 'debug',
     },
+    api: {
+      baseUrl: 'http://localhost:3000/api',
+      timeout: 10000,
+      retryAttempts: 1,
+    },
     features: {
+      enableAnalytics: true,
+      enablePerformanceMonitoring: true,
+      enableErrorReporting: true,
       enableLoadTesting: true,
+      maxFileUploadSize: 10 * 1024 * 1024, // 10MB
     },
     security: {
-      enableCSP: false, // Disable in dev for easier debugging
+      enableCSP: false,
+      trustedDomains: ['localhost:5173', 'localhost:3000'],
+      sessionTimeout: 24 * 60 * 60 * 1000, // 24 hours
     },
   },
   
   staging: {
     app: {
+      name: 'Oil & Gas Billing - Staging',
+      version: '1.0.0-staging',
       environment: 'staging',
       debug: false,
       logLevel: 'info',
     },
+    api: {
+      baseUrl: 'https://staging-api.oilgasbilling.com',
+      timeout: 8000,
+      retryAttempts: 2,
+    },
     features: {
+      enableAnalytics: true,
+      enablePerformanceMonitoring: true,
+      enableErrorReporting: true,
       enableLoadTesting: true,
+      maxFileUploadSize: 25 * 1024 * 1024, // 25MB
+    },
+    security: {
+      enableCSP: true,
+      trustedDomains: ['staging.oilgasbilling.com'],
+      sessionTimeout: 8 * 60 * 60 * 1000, // 8 hours
     },
   },
   
   production: {
     app: {
+      name: 'Oil & Gas Billing',
+      version: '1.0.0',
       environment: 'production',
       debug: false,
       logLevel: 'error',
     },
     api: {
-      timeout: 5000, // Shorter timeout in production
+      baseUrl: 'https://api.oilgasbilling.com',
+      timeout: 5000,
+      retryAttempts: 3,
     },
     features: {
-      enableLoadTesting: false, // Disable load testing in production
+      enableAnalytics: true,
+      enablePerformanceMonitoring: true,
+      enableErrorReporting: true,
+      enableLoadTesting: false,
+      maxFileUploadSize: 50 * 1024 * 1024, // 50MB
     },
     security: {
       enableCSP: true,
-      sessionTimeout: 4 * 60 * 60 * 1000, // 4 hours in production
+      trustedDomains: ['oilgasbilling.com', 'www.oilgasbilling.com'],
+      sessionTimeout: 4 * 60 * 60 * 1000, // 4 hours
     },
   },
 };
 
 class EnvironmentManager {
-  private static instance: EnvironmentManager;
   private config: EnvironmentConfig;
-  
-  private constructor() {
-    this.config = this.loadConfiguration();
+  private currentEnvironment: Environment;
+
+  constructor() {
+    this.currentEnvironment = this.detectEnvironment();
+    this.config = this.buildConfig();
   }
-  
-  static getInstance(): EnvironmentManager {
-    if (!EnvironmentManager.instance) {
-      EnvironmentManager.instance = new EnvironmentManager();
-    }
-    return EnvironmentManager.instance;
-  }
-  
-  private loadConfiguration(): EnvironmentConfig {
-    const environment = this.detectEnvironment();
-    const envConfig = environmentConfigs[environment] || {};
-    
-    // Deep merge configurations
-    const merged = this.deepMerge(defaultConfig, envConfig);
-    
-    // Override with runtime environment variables if available
-    return this.applyRuntimeOverrides(merged);
-  }
-  
-  private detectEnvironment(): string {
-    // Detect environment from various sources
+
+  private detectEnvironment(): Environment {
+    // Check environment variables
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname;
       
-      if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-        return 'development';
+      if (hostname.includes('staging')) {
+        return 'staging';
       }
       
-      if (hostname.includes('staging') || hostname.includes('preview')) {
-        return 'staging';
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'development';
       }
       
       return 'production';
     }
     
-    return process.env.NODE_ENV || 'development';
+    // Server-side detection
+    const nodeEnv = process.env.NODE_ENV;
+    if (nodeEnv === 'production') return 'production';
+    if (nodeEnv === 'staging') return 'staging';
+    return 'development';
   }
-  
-  private deepMerge(target: any, source: any): any {
-    const result = { ...target };
+
+  private buildConfig(): EnvironmentConfig {
+    const envConfig = environmentConfigs[this.currentEnvironment] || {};
+    return this.mergeConfigs(defaultConfig, envConfig);
+  }
+
+  private mergeConfigs(base: EnvironmentConfig, override: Partial<EnvironmentConfig>): EnvironmentConfig {
+    const merged = { ...base };
     
-    for (const key in source) {
-      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-        result[key] = this.deepMerge(target[key] || {}, source[key]);
-      } else {
-        result[key] = source[key];
+    for (const key in override) {
+      if (override[key as keyof EnvironmentConfig] && typeof override[key as keyof EnvironmentConfig] === 'object') {
+        merged[key as keyof EnvironmentConfig] = {
+          ...base[key as keyof EnvironmentConfig],
+          ...override[key as keyof EnvironmentConfig]
+        } as any;
+      } else if (override[key as keyof EnvironmentConfig] !== undefined) {
+        merged[key as keyof EnvironmentConfig] = override[key as keyof EnvironmentConfig] as any;
       }
     }
     
-    return result;
+    return merged;
   }
-  
-  private applyRuntimeOverrides(config: EnvironmentConfig): EnvironmentConfig {
-    // In a real application, you might load these from environment variables
-    // or a remote configuration service
-    
-    return config;
-  }
-  
+
   // Public API
-  get(): EnvironmentConfig {
+  getConfig(): EnvironmentConfig {
     return { ...this.config };
   }
-  
-  getApp() {
-    return this.config.app;
+
+  getCurrentEnvironment(): Environment {
+    return this.currentEnvironment;
   }
-  
-  getSupabase() {
-    return this.config.supabase;
+
+  isProduction(): boolean {
+    return this.currentEnvironment === 'production';
   }
-  
-  getAPI() {
+
+  isDevelopment(): boolean {
+    return this.currentEnvironment === 'development';
+  }
+
+  isStaging(): boolean {
+    return this.currentEnvironment === 'staging';
+  }
+
+  getApiConfig() {
     return this.config.api;
   }
-  
-  getFeatures() {
-    return this.config.features;
+
+  getAppConfig() {
+    return this.config.app;
   }
-  
-  getSecurity() {
+
+  getSecurityConfig() {
     return this.config.security;
   }
-  
-  isProduction(): boolean {
-    return this.config.app.environment === 'production';
+
+  getFeaturesConfig() {
+    return this.config.features;
   }
-  
-  isStaging(): boolean {
-    return this.config.app.environment === 'staging';
-  }
-  
-  isDevelopment(): boolean {
-    return this.config.app.environment === 'development';
-  }
-  
+
+  // Feature flag helpers
   isFeatureEnabled(feature: keyof EnvironmentConfig['features']): boolean {
     return this.config.features[feature] as boolean;
   }
   
   // Update configuration at runtime (for A/B testing, feature flags, etc.)
   updateFeature(feature: keyof EnvironmentConfig['features'], value: any) {
-    this.config.features[feature] = value;
+    this.config.features[feature] = value as never;
   }
   
   // Validate configuration
   validate(): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
     
-    // Required fields validation
-    if (!this.config.supabase.url) {
-      errors.push('Supabase URL is required');
+    if (!this.config.app.name) {
+      errors.push('App name is required');
     }
     
-    if (!this.config.supabase.anonKey) {
-      errors.push('Supabase anon key is required');
+    if (!this.config.api.baseUrl) {
+      errors.push('API base URL is required');
     }
     
-    // URL validation
-    try {
-      new URL(this.config.supabase.url);
-    } catch {
-      errors.push('Invalid Supabase URL');
-    }
-    
-    // Timeout validation
     if (this.config.api.timeout <= 0) {
       errors.push('API timeout must be positive');
     }
     
-    // File size validation
     if (this.config.features.maxFileUploadSize <= 0) {
       errors.push('Max file upload size must be positive');
     }
     
+    if (this.config.security.sessionTimeout <= 0) {
+      errors.push('Session timeout must be positive');
+    }
+    
     return {
       valid: errors.length === 0,
-      errors,
+      errors
     };
   }
-  
-  // Export configuration for debugging
-  export(): string {
-    const safeConfig = { ...this.config };
+
+  // Environment-specific logging
+  log(level: 'error' | 'warn' | 'info' | 'debug', message: string, data?: any) {
+    const logLevels = ['error', 'warn', 'info', 'debug'];
+    const currentLevelIndex = logLevels.indexOf(this.config.app.logLevel);
+    const messageLevelIndex = logLevels.indexOf(level);
     
-    // Remove sensitive information
-    if (safeConfig.supabase.serviceRoleKey) {
-      safeConfig.supabase.serviceRoleKey = '***REDACTED***';
+    if (messageLevelIndex <= currentLevelIndex) {
+      const timestamp = new Date().toISOString();
+      const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+      
+      if (data) {
+        console[level](logMessage, data);
+      } else {
+        console[level](logMessage);
+      }
     }
-    
-    return JSON.stringify(safeConfig, null, 2);
   }
-  
-  // Health check
-  async healthCheck(): Promise<{ healthy: boolean; checks: Record<string, boolean> }> {
-    const checks: Record<string, boolean> = {};
-    
-    // Configuration validation
-    const validation = this.validate();
-    checks.configuration = validation.valid;
-    
-    // Supabase connectivity
-    try {
-      const response = await fetch(`${this.config.supabase.url}/rest/v1/`, {
-        method: 'HEAD',
-        headers: {
-          'apikey': this.config.supabase.anonKey,
-        },
-      });
-      checks.supabase = response.ok;
-    } catch {
-      checks.supabase = false;
+
+  // Performance monitoring helpers
+  startPerformanceTimer(label: string): () => void {
+    if (!this.isFeatureEnabled('enablePerformanceMonitoring')) {
+      return () => {};
     }
     
-    // Feature flags
-    checks.features = Object.keys(this.config.features).length > 0;
+    const startTime = performance.now();
     
-    const healthy = Object.values(checks).every(check => check);
-    
-    return { healthy, checks };
+    return () => {
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      this.log('debug', `Performance: ${label} took ${duration.toFixed(2)}ms`);
+    };
   }
 }
 
 // Singleton instance
-export const environmentConfig = EnvironmentManager.getInstance();
+const environmentManager = new EnvironmentManager();
 
-// Convenience exports
-export const config = environmentConfig.get();
-export const appConfig = environmentConfig.getApp();
-export const supabaseConfig = environmentConfig.getSupabase();
-export const apiConfig = environmentConfig.getAPI();
-export const featureConfig = environmentConfig.getFeatures();
-export const securityConfig = environmentConfig.getSecurity();
+export default environmentManager;
+export { EnvironmentManager };
