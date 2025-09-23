@@ -97,10 +97,82 @@ export class ErrorHandler {
   }
 
   private reportError(error: AppError) {
-    // In production, send to error monitoring service
-    if (process.env.NODE_ENV === 'production') {
-      // Would integrate with services like Sentry, LogRocket, etc.
-      console.log('Would report to monitoring service:', error);
+    // Enhanced error reporting with performance context
+    const errorReport = {
+      ...error,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+      performanceContext: this.gatherPerformanceContext()
+    };
+
+    // Send to monitoring service
+    if (typeof window !== 'undefined') {
+      // Store in localStorage for batch reporting
+      const errors = JSON.parse(localStorage.getItem('error_reports') || '[]');
+      errors.push(errorReport);
+      
+      // Keep only last 50 errors
+      if (errors.length > 50) {
+        errors.splice(0, errors.length - 50);
+      }
+      
+      localStorage.setItem('error_reports', JSON.stringify(errors));
+      
+      // In production, send to monitoring service immediately for critical errors
+      if (error.severity === 'critical') {
+        this.sendToMonitoringService(errorReport);
+      }
+    }
+  }
+
+  private gatherPerformanceContext() {
+    if (typeof window === 'undefined') return {};
+
+    return {
+      memory: (performance as any).memory ? {
+        usedJSHeapSize: (performance as any).memory.usedJSHeapSize,
+        totalJSHeapSize: (performance as any).memory.totalJSHeapSize,
+        jsHeapSizeLimit: (performance as any).memory.jsHeapSizeLimit
+      } : null,
+      connection: (navigator as any).connection ? {
+        effectiveType: (navigator as any).connection.effectiveType,
+        downlink: (navigator as any).connection.downlink
+      } : null,
+      timing: performance.timing ? {
+        loadEventEnd: performance.timing.loadEventEnd,
+        navigationStart: performance.timing.navigationStart
+      } : null
+    };
+  }
+
+  private async sendToMonitoringService(errorReport: any) {
+    try {
+      // In production, replace with actual monitoring service endpoint
+      const response = await fetch('/api/errors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(errorReport)
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to send error report to monitoring service');
+      }
+    } catch (error) {
+      console.error('Error reporting failed:', error);
+    }
+  }
+
+  // Get stored error reports
+  getStoredErrors(): any[] {
+    if (typeof window === 'undefined') return [];
+    return JSON.parse(localStorage.getItem('error_reports') || '[]');
+  }
+
+  // Clear stored errors
+  clearStoredErrors() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('error_reports');
     }
   }
 
