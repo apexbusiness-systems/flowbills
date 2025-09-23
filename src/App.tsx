@@ -20,6 +20,7 @@ import Analytics from "./pages/Analytics";
 import Workflows from "./pages/Workflows";
 import Search from "./pages/Search";
 import NotFound from "./pages/NotFound";
+import { Footer } from "@/components/ui/footer";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -155,7 +156,12 @@ function App() {
             <Sonner />
             <BrowserRouter>
               <AuthProvider>
-                <AuthRoutes />
+                <div className="min-h-screen flex flex-col">
+                  <div className="flex-1">
+                    <AuthRoutes />
+                  </div>
+                  <Footer />
+                </div>
               </AuthProvider>
             </BrowserRouter>
           </TooltipProvider>
