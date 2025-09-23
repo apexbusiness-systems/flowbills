@@ -9,7 +9,9 @@ import {
   Settings,
   Bell,
   Plus,
-  Zap
+  Zap,
+  Workflow,
+  Search
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -40,6 +42,7 @@ const Index = () => {
     { icon: Upload, label: "Upload Invoice", action: () => navigate('/invoices') },
     { icon: AlertTriangle, label: "View Exceptions", action: () => setActiveTab("exceptions") },
     { icon: Zap, label: "Create Workflow", action: () => navigate('/workflows') },
+    { icon: Search, label: "Global Search", action: () => navigate('/search') },
     { icon: Settings, label: "Manage Rules", action: () => setActiveTab("validation") },
     { icon: Bell, label: "Notifications", action: () => console.log("Show notifications") }
   ];
@@ -104,13 +107,21 @@ const Index = () => {
                 <Settings className="h-4 w-4" />
                 Configure Rules
               </Button>
-              <Button 
+               <Button 
                 variant="outline" 
                 className="gap-2 hover-scale"
                 onClick={() => navigate('/workflows')}
               >
                 <Zap className="h-4 w-4" />
                 Workflows
+              </Button>
+              <Button 
+                variant="outline" 
+                className="gap-2 hover-scale"
+                onClick={() => navigate('/search')}
+              >
+                <Search className="h-4 w-4" />
+                Global Search
               </Button>
             </div>
             <Button variant="ghost" className="gap-2 relative hover-scale">
