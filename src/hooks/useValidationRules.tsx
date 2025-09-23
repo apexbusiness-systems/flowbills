@@ -401,23 +401,12 @@ export const useValidationRules = () => {
     const { check_fields } = config;
     
     try {
-      let query = supabase
+      // Use explicit typing to avoid infinite recursion in TypeScript
+      const { data: duplicates, error } = await supabase
         .from('invoices')
-        .select('id, invoice_number, vendor_name, amount');
-
-      // Build duplicate check query
-      for (const field of check_fields || ['invoice_number']) {
-        if (invoice[field]) {
-          query = query.eq(field, invoice[field]);
-        }
-      }
-
-      // Exclude current invoice if it's an update
-      if (invoice.id) {
-        query = query.neq('id', invoice.id);
-      }
-
-      const { data: duplicates, error } = await query;
+        .select('id, invoice_number, vendor_name, amount')
+        .eq('invoice_number', invoice.invoice_number)
+        .neq('id', invoice.id || 'none');
 
       if (error) throw error;
 
