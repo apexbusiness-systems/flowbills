@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,22 @@ import {
   DollarSign,
   Award
 } from "lucide-react";
+import LeadCaptureDialog from "./LeadCaptureDialog";
+import { useToast } from "@/hooks/use-toast";
 
 export const ProductSnapshot = () => {
+  const [leadCaptureOpen, setLeadCaptureOpen] = useState(false);
+  const [interestType, setInterestType] = useState<'demo' | 'roi_calculator' | 'contact'>('demo');
+  const { toast } = useToast();
+
+  const handleLeadSuccess = () => {
+    // Track conversion and provide next steps
+    toast({
+      title: "Thank you for your interest!",
+      description: "Check your email for next steps and our team will be in touch soon.",
+    });
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">
       {/* Hero Section */}
@@ -203,10 +217,22 @@ export const ProductSnapshot = () => {
             ensure compliance, and drive significant cost savings.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button size="lg" variant="secondary" className="text-primary bg-primary-foreground hover:bg-primary-foreground/90">
+            <Button 
+              size="lg" 
+              variant="secondary" 
+              className="text-primary bg-primary-foreground hover:bg-primary-foreground/90"
+              onClick={() => setLeadCaptureOpen(true)}
+              onPointerDown={() => setInterestType('demo')}
+            >
               Schedule Demo
             </Button>
-            <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+              onClick={() => setLeadCaptureOpen(true)}
+              onPointerDown={() => setInterestType('roi_calculator')}
+            >
               Download ROI Calculator
             </Button>
           </div>
@@ -220,6 +246,14 @@ export const ProductSnapshot = () => {
           <span>Trusted by 500+ energy companies across North America</span>
         </div>
       </div>
+
+      {/* Lead Capture Dialog */}
+      <LeadCaptureDialog
+        open={leadCaptureOpen}
+        onOpenChange={setLeadCaptureOpen}
+        interestType={interestType}
+        onSuccess={handleLeadSuccess}
+      />
     </div>
   );
 };
