@@ -204,7 +204,7 @@ const OnboardingFlow: React.FC = () => {
         <Card className="shadow-lg">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-              <stepStates[currentStep].icon className="h-8 w-8 text-primary" />
+              {React.createElement(stepStates[currentStep].icon, { className: "h-8 w-8 text-primary" })}
             </div>
             <CardTitle className="text-2xl">{stepStates[currentStep].title}</CardTitle>
             <CardDescription className="text-lg">
