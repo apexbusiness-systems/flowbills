@@ -1,4 +1,4 @@
-import { Building2, Bell, User, LogOut, Shield, Settings } from "lucide-react";
+import { Building2, Bell, User, LogOut, Shield, Settings, Home, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -11,12 +11,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import SmartSearch from "@/components/ui/smart-search";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 
 const DashboardHeader = () => {
   const { user, userRole, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Check if we're on the homepage
+  const isHomePage = location.pathname === '/';
   
   const handleSearch = (query: string) => {
     console.log("Searching for:", query);
@@ -49,13 +53,51 @@ const DashboardHeader = () => {
       <div className="flex h-16 items-center gap-4 px-6">
         {/* Logo and Brand */}
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light text-primary-foreground shadow-sm">
+          <button
+            onClick={() => navigate('/')}
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light text-primary-foreground shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
+            aria-label="Go to homepage"
+          >
             <Building2 className="h-5 w-5" />
-          </div>
+          </button>
           <div className="hidden sm:block">
-            <h1 className="text-lg font-semibold text-foreground">Flow Billing</h1>
-            <p className="text-xs text-muted-foreground">Oil & Gas Payment Platform</p>
+            <button 
+              onClick={() => navigate('/')}
+              className="text-left hover:opacity-80 transition-opacity"
+            >
+              <h1 className="text-lg font-semibold text-foreground">Flow Billing</h1>
+              <p className="text-xs text-muted-foreground">Oil & Gas Payment Platform</p>
+            </button>
           </div>
+        </div>
+
+        {/* Navigation Controls */}
+        <div className="flex items-center gap-2 ml-4">
+          {!isHomePage && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/')}
+              className="gap-2 hover:bg-primary/10"
+              aria-label="Back to dashboard"
+            >
+              <Home className="h-4 w-4" />
+              <span className="hidden md:inline">Dashboard</span>
+            </Button>
+          )}
+          
+          {!isHomePage && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.history.back()}
+              className="gap-2 hover:bg-muted"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden md:inline">Back</span>
+            </Button>
+          )}
         </div>
 
         {/* Smart Search */}
