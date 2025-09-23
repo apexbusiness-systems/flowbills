@@ -9,47 +9,39 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-const integrations = [
-  {
-    id: "nov-access",
-    name: "NOV AccessNOV",
-    type: "Portal Access",
-    status: "connected",
-    lastSync: "5 minutes ago",
-    icon: Network,
-    description: "MYNOV portal integration active"
-  },
-  {
-    id: "oracle-ebs",
-    name: "Oracle E-Business Suite",
-    type: "ERP Integration",
-    status: "connected",
-    lastSync: "2 hours ago", 
-    icon: Database,
-    description: "JIB CSV import/export operational"
-  },
-  {
-    id: "edi-x12",
-    name: "EDI X12 810/820",
-    type: "Electronic Data Interchange",
-    status: "processing",
-    lastSync: "15 minutes ago",
-    icon: FileText,
-    description: "Processing invoice batch INV-240315"
-  },
-  {
-    id: "openinvoice",
-    name: "OpenInvoice API",
-    type: "Invoice Automation",
-    status: "attention",
-    lastSync: "4 hours ago",
-    icon: AlertTriangle,
-    description: "Connection timeout detected"
-  }
-];
+import { useIntegrations } from "@/hooks/useIntegrations";
+import { useNavigate } from "react-router-dom";
 
 const NOVIntegrationStatus = () => {
+  const { integrations, getIntegrationStats } = useIntegrations();
+  const navigate = useNavigate();
+  const stats = getIntegrationStats();
+
+  const getIntegrationIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'portal access':
+        return Network;
+      case 'erp integration':
+        return Database;
+      case 'electronic data interchange':
+        return FileText;
+      default:
+        return Database;
+    }
+  };
+
+  const formatLastSync = (lastSyncAt?: string) => {
+    if (!lastSyncAt) return 'Never';
+    
+    const now = new Date();
+    const syncTime = new Date(lastSyncAt);
+    const diffMinutes = Math.floor((now.getTime() - syncTime.getTime()) / (1000 * 60));
+    
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes} minutes ago`;
+    if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)} hours ago`;
+    return `${Math.floor(diffMinutes / 1440)} days ago`;
+  };
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "connected":
@@ -76,7 +68,25 @@ const NOVIntegrationStatus = () => {
     }
   };
 
-  const connectedCount = integrations.filter(i => i.status === "connected").length;
+  // Show sample data if no integrations exist
+  const displayIntegrations = integrations.length > 0 ? integrations.slice(0, 4) : [
+    {
+      id: "sample-nov",
+      integration_name: "NOV AccessNOV",
+      integration_type: "Portal Access",
+      status: "disconnected" as const,
+      last_sync_at: undefined,
+      config: { description: "MYNOV portal integration" }
+    },
+    {
+      id: "sample-oracle",
+      integration_name: "Oracle E-Business Suite",
+      integration_type: "ERP Integration", 
+      status: "disconnected" as const,
+      last_sync_at: undefined,
+      config: { description: "JIB CSV import/export" }
+    }
+  ];
 
   return (
     <div className="card-enterprise">
@@ -86,7 +96,7 @@ const NOVIntegrationStatus = () => {
             NOV & System Integrations
           </h3>
           <Badge className="status-approved">
-            {connectedCount}/{integrations.length} Active
+            {stats.connected}/{stats.total} Active
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
@@ -95,8 +105,8 @@ const NOVIntegrationStatus = () => {
       </div>
 
       <div className="space-y-3">
-        {integrations.map((integration) => {
-          const Icon = integration.icon;
+        {displayIntegrations.map((integration) => {
+          const Icon = getIntegrationIcon(integration.integration_type);
           return (
             <div 
               key={integration.id}
@@ -109,15 +119,15 @@ const NOVIntegrationStatus = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="text-sm font-medium text-foreground truncate">
-                      {integration.name}
+                      {integration.integration_name}
                     </h4>
                     {getStatusIcon(integration.status)}
                   </div>
                   <p className="text-xs text-muted-foreground mb-1">
-                    {integration.type}
+                    {integration.integration_type}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {integration.description}
+                    {integration.config?.description || 'Integration description'}
                   </p>
                 </div>
               </div>
@@ -128,7 +138,7 @@ const NOVIntegrationStatus = () => {
                     Last sync
                   </div>
                   <div className="text-xs font-medium text-foreground">
-                    {integration.lastSync}
+                    {formatLastSync(integration.last_sync_at)}
                   </div>
                 </div>
                 {getStatusBadge(integration.status)}
@@ -144,7 +154,12 @@ const NOVIntegrationStatus = () => {
             NOV certification status: 
             <span className="font-medium text-status-approved ml-1">Active</span>
           </div>
-          <Button size="sm" variant="outline" className="gap-2">
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="gap-2"
+            onClick={() => navigate('/integrations')}
+          >
             Manage Integrations
             <ExternalLink className="h-3 w-3" />
           </Button>
