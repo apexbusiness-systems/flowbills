@@ -7,12 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Loader2, Droplet, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -27,6 +30,36 @@ const Auth = () => {
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setError("");
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth?type=recovery`
+      });
+
+      if (error) {
+        setError(error.message);
+        return;
+      }
+
+      toast({
+        title: "Password reset sent!",
+        description: "Check your email for password reset instructions.",
+        variant: "default",
+      });
+      
+      setShowForgotPassword(false);
+      setResetEmail("");
+    } catch (err: any) {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -207,6 +240,59 @@ const Auth = () => {
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Sign In
                   </Button>
+
+                  <div className="text-center mt-4">
+                    <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+                      <DialogTrigger asChild>
+                        <Button variant="link" className="text-sm text-muted-foreground">
+                          Forgot your password?
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Reset Password</DialogTitle>
+                          <DialogDescription>
+                            Enter your email address and we'll send you a link to reset your password.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handlePasswordReset} className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="resetEmail">Email</Label>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="resetEmail"
+                                type="email"
+                                placeholder="your@company.com"
+                                className="pl-10"
+                                value={resetEmail}
+                                onChange={(e) => setResetEmail(e.target.value)}
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              className="flex-1"
+                              onClick={() => setShowForgotPassword(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              type="submit" 
+                              className="flex-1" 
+                              disabled={isLoading}
+                            >
+                              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                              Send Reset Link
+                            </Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </form>
               </TabsContent>
 
