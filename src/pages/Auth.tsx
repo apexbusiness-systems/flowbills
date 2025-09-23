@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Building2, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Loader2, Droplet, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
@@ -118,8 +118,8 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
-              <Building2 className="h-6 w-6 text-primary-foreground" />
+            <div className="h-10 w-10 bg-black rounded-lg flex items-center justify-center">
+              <Droplet className="h-6 w-6 text-white fill-white" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">FLOW Bills</h1>
           </div>
@@ -245,7 +245,7 @@ const Auth = () => {
                   <div className="space-y-2">
                     <Label htmlFor="companyName">Company Name</Label>
                     <div className="relative">
-                      <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Droplet className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="companyName"
                         type="text"
