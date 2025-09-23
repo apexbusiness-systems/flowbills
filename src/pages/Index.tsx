@@ -31,6 +31,7 @@ import QuickUpload from "@/components/dashboard/QuickUpload";
 import FloatingActionButton from "@/components/ui/floating-action-button";
 import OilGasAssistant from "@/components/ai/OilGasAssistant";
 import SmartSuggestions from "@/components/ai/SmartSuggestions";
+import { ProductSnapshot } from "@/components/marketing/ProductSnapshot";
 import heroImage from "@/assets/hero-oilgas.jpg";
 
 const Index = () => {
@@ -87,6 +88,10 @@ const Index = () => {
       </div>
 
       <main className="p-6">
+        {/* Professional Product Snapshot */}
+        <section className="mb-12 animate-fade-in">
+          <ProductSnapshot />
+        </section>
         {/* Enhanced Quick Actions Bar */}
         <div className="mb-6 animate-fade-in">
           <div className="flex flex-wrap gap-3 items-center justify-between">
