@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -36,9 +37,11 @@ import {
   FileText,
   DollarSign,
   Calendar,
-  Filter
+  Filter,
+  Paperclip
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useFileUpload } from '@/hooks/useFileUpload';
 import { Invoice } from '@/hooks/useInvoices';
 import { format } from 'date-fns';
 
@@ -52,14 +55,38 @@ interface InvoiceListProps {
 
 const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceListProps) => {
   const { hasRole } = useAuth();
+  const { getDocuments } = useFileUpload();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+  const [documentCounts, setDocumentCounts] = useState<Record<string, number>>({});
 
   const canEdit = hasRole('operator') || hasRole('admin');
   const canDelete = hasRole('operator') || hasRole('admin');
   const canCreate = hasRole('operator') || hasRole('admin');
+
+  // Load document counts for invoices
+  React.useEffect(() => {
+    const loadDocumentCounts = async () => {
+      const counts: Record<string, number> = {};
+      
+      for (const invoice of invoices) {
+        try {
+          const docs = await getDocuments(invoice.id);
+          counts[invoice.id] = docs.length;
+        } catch (error) {
+          counts[invoice.id] = 0;
+        }
+      }
+      
+      setDocumentCounts(counts);
+    };
+
+    if (invoices.length > 0) {
+      loadDocumentCounts();
+    }
+  }, [invoices, getDocuments]);
 
   const getStatusBadgeVariant = (status: Invoice['status']) => {
     switch (status) {
@@ -222,21 +249,20 @@ const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceL
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Invoice #</TableHead>
-                    <TableHead>Vendor</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Due Date</TableHead>
-                    <TableHead>Status</TableHead>
+                  <TableHead>Invoice #</TableHead>
+                  <TableHead>Vendor</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Due Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Files</TableHead>
                     {(canEdit || canDelete) && <TableHead className="text-right">Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredInvoices.map((invoice) => (
                     <TableRow key={invoice.id}>
-                      <TableCell className="font-medium">
-                        {invoice.invoice_number}
-                      </TableCell>
+                      <TableCell>{invoice.invoice_number}</TableCell>
                       <TableCell>{invoice.vendor_name}</TableCell>
                       <TableCell className="font-mono">
                         {formatCurrency(invoice.amount)}
@@ -247,6 +273,16 @@ const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceL
                         <Badge variant={getStatusBadgeVariant(invoice.status)}>
                           {invoice.status.toUpperCase()}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {documentCounts[invoice.id] > 0 && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Paperclip className="h-3 w-3" />
+                              {documentCounts[invoice.id]}
+                            </div>
+                          )}
+                        </div>
                       </TableCell>
                       {(canEdit || canDelete) && (
                         <TableCell className="text-right">

@@ -11,12 +11,17 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, DollarSign, FileText, Save, X } from 'lucide-react';
+import { CalendarIcon, DollarSign, FileText, Save, X, Upload } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import { Invoice } from '@/hooks/useInvoices';
+import FileUploadZone from './FileUploadZone';
+import DocumentList from './DocumentList';
 
 interface InvoiceFormProps {
   invoice?: Invoice | null;
@@ -26,6 +31,7 @@ interface InvoiceFormProps {
 }
 
 const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceFormProps) => {
+  const { hasRole } = useAuth();
   const [formData, setFormData] = useState({
     invoice_number: invoice?.invoice_number || '',
     vendor_name: invoice?.vendor_name || '',
@@ -40,6 +46,9 @@ const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceForm
 
   const [invoiceDateOpen, setInvoiceDateOpen] = useState(false);
   const [dueDateOpen, setDueDateOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('details');
+
+  const canUpload = hasRole('operator') || hasRole('admin');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,152 +102,197 @@ const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceForm
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Invoice Number */}
-            <div className="space-y-2">
-              <Label htmlFor="invoice_number">Invoice Number *</Label>
-              <Input
-                id="invoice_number"
-                placeholder="INV-2024-001"
-                value={formData.invoice_number}
-                onChange={(e) => handleInputChange('invoice_number', e.target.value)}
-                required
-              />
-            </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="details">Invoice Details</TabsTrigger>
+            <TabsTrigger value="documents" disabled={!invoice}>
+              <Upload className="mr-2 h-4 w-4" />
+              Documents {invoice && `(${invoice.id ? 'Available' : 'Save first'})`}
+            </TabsTrigger>
+          </TabsList>
 
-            {/* Vendor Name */}
-            <div className="space-y-2">
-              <Label htmlFor="vendor_name">Vendor Name *</Label>
-              <Input
-                id="vendor_name"
-                placeholder="Acme Oil Services"
-                value={formData.vendor_name}
-                onChange={(e) => handleInputChange('vendor_name', e.target.value)}
-                required
-              />
-            </div>
+          <TabsContent value="details" className="space-y-6 mt-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Invoice Number */}
+                <div className="space-y-2">
+                  <Label htmlFor="invoice_number">Invoice Number *</Label>
+                  <Input
+                    id="invoice_number"
+                    placeholder="INV-2024-001"
+                    value={formData.invoice_number}
+                    onChange={(e) => handleInputChange('invoice_number', e.target.value)}
+                    required
+                  />
+                </div>
 
-            {/* Amount */}
-            <div className="space-y-2">
-              <Label htmlFor="amount">Amount *</Label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="amount"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  className="pl-10"
-                  value={formData.amount}
-                  onChange={(e) => handleInputChange('amount', parseFloat(e.target.value) || 0)}
-                  required
+                {/* Vendor Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="vendor_name">Vendor Name *</Label>
+                  <Input
+                    id="vendor_name"
+                    placeholder="Acme Oil Services"
+                    value={formData.vendor_name}
+                    onChange={(e) => handleInputChange('vendor_name', e.target.value)}
+                    required
+                  />
+                </div>
+
+                {/* Amount */}
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Amount *</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="amount"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      className="pl-10"
+                      value={formData.amount}
+                      onChange={(e) => handleInputChange('amount', parseFloat(e.target.value) || 0)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select 
+                    value={formData.status} 
+                    onValueChange={(value) => handleInputChange('status', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Invoice Date */}
+                <div className="space-y-2">
+                  <Label>Invoice Date *</Label>
+                  <Popover open={invoiceDateOpen} onOpenChange={setInvoiceDateOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !formData.invoice_date && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formatDateForDisplay(formData.invoice_date)}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData.invoice_date ? new Date(formData.invoice_date) : undefined}
+                        onSelect={(date) => handleDateChange(date, 'invoice_date')}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Due Date */}
+                <div className="space-y-2">
+                  <Label>Due Date</Label>
+                  <Popover open={dueDateOpen} onOpenChange={setDueDateOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !formData.due_date && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.due_date ? formatDateForDisplay(formData.due_date) : 'Pick a date'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData.due_date ? new Date(formData.due_date) : undefined}
+                        onSelect={(date) => handleDateChange(date, 'due_date')}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Additional notes or comments..."
+                  rows={3}
+                  value={formData.notes}
+                  onChange={(e) => handleInputChange('notes', e.target.value)}
                 />
               </div>
-            </div>
 
-            {/* Status */}
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select 
-                value={formData.status} 
-                onValueChange={(value) => handleInputChange('status', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+              {/* Form Actions */}
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
+                  <X className="mr-2 h-4 w-4" />
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={loading}>
+                  {loading && <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-foreground" />}
+                  <Save className="mr-2 h-4 w-4" />
+                  {invoice ? 'Update' : 'Create'} Invoice
+                </Button>
+              </div>
+            </form>
+          </TabsContent>
 
-            {/* Invoice Date */}
-            <div className="space-y-2">
-              <Label>Invoice Date *</Label>
-              <Popover open={invoiceDateOpen} onOpenChange={setInvoiceDateOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.invoice_date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formatDateForDisplay(formData.invoice_date)}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={formData.invoice_date ? new Date(formData.invoice_date) : undefined}
-                    onSelect={(date) => handleDateChange(date, 'invoice_date')}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Due Date */}
-            <div className="space-y-2">
-              <Label>Due Date</Label>
-              <Popover open={dueDateOpen} onOpenChange={setDueDateOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.due_date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.due_date ? formatDateForDisplay(formData.due_date) : 'Pick a date'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={formData.due_date ? new Date(formData.due_date) : undefined}
-                    onSelect={(date) => handleDateChange(date, 'due_date')}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              placeholder="Additional notes or comments..."
-              rows={3}
-              value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
-            />
-          </div>
-
-          {/* Form Actions */}
-          <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
-              <X className="mr-2 h-4 w-4" />
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading && <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-foreground" />}
-              <Save className="mr-2 h-4 w-4" />
-              {invoice ? 'Update' : 'Create'} Invoice
-            </Button>
-          </div>
-        </form>
+          <TabsContent value="documents" className="space-y-6 mt-6">
+            {invoice ? (
+              <div className="space-y-6">
+                {canUpload && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-4">Upload Documents</h3>
+                    <FileUploadZone 
+                      invoiceId={invoice.id}
+                      onUploadComplete={() => {
+                        // Refresh document list - will be handled by DocumentList component
+                      }}
+                    />
+                  </div>
+                )}
+                
+                <Separator />
+                
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Attached Documents</h3>
+                  <DocumentList invoiceId={invoice.id} />
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">Save Invoice First</h3>
+                <p className="text-muted-foreground">
+                  Please save the invoice details before uploading documents.
+                </p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

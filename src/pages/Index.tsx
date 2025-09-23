@@ -21,11 +21,11 @@ import WorkflowPipeline from "@/components/dashboard/WorkflowPipeline";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import CompliancePanel from "@/components/dashboard/CompliancePanel";
 import NOVIntegrationStatus from "@/components/dashboard/NOVIntegrationStatus";
-import InvoiceUpload from "@/components/dashboard/InvoiceUpload";
 import ValidationRules from "@/components/dashboard/ValidationRules";
 import ExceptionQueue from "@/components/dashboard/ExceptionQueue";
 import SystemHealthCheck from "@/components/dashboard/SystemHealthCheck";
 import SecurityDashboard from "@/components/dashboard/SecurityDashboard";
+import QuickUpload from "@/components/dashboard/QuickUpload";
 import FloatingActionButton from "@/components/ui/floating-action-button";
 import OilGasAssistant from "@/components/ai/OilGasAssistant";
 import SmartSuggestions from "@/components/ai/SmartSuggestions";
@@ -210,9 +210,24 @@ const Index = () => {
           <TabsContent value="inbox" className="animate-fade-in">
             <section aria-labelledby="inbox-heading">
               <h2 id="inbox-heading" className="text-2xl font-semibold text-foreground mb-4">
-                Invoice Inbox & Upload
+                Invoice Management & Upload
               </h2>
-              <InvoiceUpload />
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <p className="text-muted-foreground mb-4">
+                    Access the full invoice management system to create, edit, and manage invoices with document attachments.
+                  </p>
+                  <Button 
+                    onClick={() => navigate('/invoices')}
+                    className="w-full sm:w-auto"
+                  >
+                    Open Invoice Management
+                  </Button>
+                </div>
+                <div>
+                  <QuickUpload />
+                </div>
+              </div>
             </section>
           </TabsContent>
 
