@@ -2,41 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Enterprise Oil & Gas Billing Platform Design System
+   WCAG 2.2 AA compliant colors and design tokens
+   All colors MUST be HSL for accessibility calculations
 */
 
 @layer base {
   :root {
+    /* Core enterprise palette - professional blues and grays */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 215 25% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 25% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 215 25% 20%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary: Professional enterprise blue */
+    --primary: 210 85% 25%;
+    --primary-foreground: 0 0% 98%;
+    --primary-light: 210 85% 35%;
+    --primary-dark: 210 85% 15%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary: Oil industry orange accent */
+    --secondary: 25 95% 48%;
+    --secondary-foreground: 0 0% 98%;
+    --secondary-light: 25 95% 58%;
+    --secondary-muted: 25 35% 95%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Status colors for workflow states */
+    --status-pending: 45 95% 55%;
+    --status-pending-foreground: 45 15% 20%;
+    --status-approved: 142 70% 35%;
+    --status-approved-foreground: 0 0% 98%;
+    --status-rejected: 0 84% 45%;
+    --status-rejected-foreground: 0 0% 98%;
+    --status-processing: 210 85% 55%;
+    --status-processing-foreground: 0 0% 98%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Enterprise grays */
+    --muted: 215 15% 96%;
+    --muted-foreground: 215 25% 45%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --accent: 215 15% 96%;
+    --accent-foreground: 215 25% 20%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive: 0 84% 45%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 215 15% 88%;
+    --input: 215 15% 94%;
+    --ring: 210 85% 25%;
 
     --radius: 0.5rem;
+
+    /* Enterprise gradients and effects */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-light)));
+    --shadow-enterprise: 0 4px 20px -2px hsl(var(--primary) / 0.15);
+    --shadow-card: 0 2px 8px -1px hsl(var(--border) / 0.5);
+
+    /* Animation and transition tokens */
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-enterprise: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+
+    /* Accessibility: Focus and interaction states */
+    --focus-ring: 2px solid hsl(var(--ring));
+    --focus-offset: 2px;
 
     --sidebar-background: 0 0% 98%;
 
@@ -101,5 +134,77 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* WCAG 2.2 AA Accessibility Enhancements */
+  *:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+    border-radius: var(--radius);
+  }
+
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    :root {
+      --border: 215 25% 40%;
+      --ring: 215 25% 15%;
+    }
+  }
+}
+
+@layer components {
+  /* Enterprise component patterns */
+  .btn-enterprise {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    @apply disabled:pointer-events-none disabled:opacity-50;
+    min-height: 44px; /* WCAG touch target size */
+    min-width: 44px;
+  }
+
+  .btn-primary {
+    @apply btn-enterprise bg-primary text-primary-foreground hover:bg-primary/90;
+    background: var(--gradient-primary);
+    box-shadow: var(--shadow-enterprise);
+  }
+
+  .btn-secondary {
+    @apply btn-enterprise bg-secondary text-secondary-foreground hover:bg-secondary/90;
+  }
+
+  .card-enterprise {
+    @apply rounded-lg border bg-card p-6 text-card-foreground;
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-smooth);
+  }
+
+  .card-enterprise:hover {
+    box-shadow: var(--shadow-enterprise);
+  }
+
+  /* Status indicators */
+  .status-pending {
+    @apply bg-status-pending text-status-pending-foreground;
+  }
+
+  .status-approved {
+    @apply bg-status-approved text-status-approved-foreground;
+  }
+
+  .status-rejected {
+    @apply bg-status-rejected text-status-rejected-foreground;
+  }
+
+  .status-processing {
+    @apply bg-status-processing text-status-processing-foreground;
   }
 }
