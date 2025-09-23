@@ -17,11 +17,12 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, DollarSign, FileText, Save, X, Upload } from 'lucide-react';
+import { CalendarIcon, DollarSign, FileText, Save, X, Upload, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Invoice } from '@/hooks/useInvoices';
 import FileUploadZone from './FileUploadZone';
 import DocumentList from './DocumentList';
+import CreateExceptionDialog from '@/components/exceptions/CreateExceptionDialog';
 
 interface InvoiceFormProps {
   invoice?: Invoice | null;
@@ -256,6 +257,17 @@ const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceForm
                   <Save className="mr-2 h-4 w-4" />
                   {invoice ? 'Update' : 'Create'} Invoice
                 </Button>
+                {invoice && (
+                  <CreateExceptionDialog 
+                    invoiceId={invoice.id}
+                    trigger={
+                      <Button type="button" variant="outline">
+                        <AlertTriangle className="mr-2 h-4 w-4" />
+                        Report Issue
+                      </Button>
+                    }
+                  />
+                )}
               </div>
             </form>
           </TabsContent>

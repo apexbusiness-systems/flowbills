@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Invoices from "./pages/Invoices";
+import Exceptions from "./pages/Exceptions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,14 @@ const AuthRoutes = () => {
         element={
           <ProtectedRoute requiredRole="viewer">
             <Invoices />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/exceptions" 
+        element={
+          <ProtectedRoute requiredRole="viewer">
+            <Exceptions />
           </ProtectedRoute>
         } 
       />
