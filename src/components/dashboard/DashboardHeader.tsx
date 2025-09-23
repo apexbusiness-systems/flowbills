@@ -12,6 +12,7 @@ import {
 import SmartSearch from "@/components/ui/smart-search";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { PerformanceIndicator } from "@/components/ui/performance-indicator";
 
 const DashboardHeader = () => {
   const { user, userRole, signOut } = useAuth();
@@ -68,6 +69,9 @@ const DashboardHeader = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
+          {/* System Performance Indicator */}
+          <PerformanceIndicator />
+          
           <Button 
             variant="ghost" 
             size="sm" 
