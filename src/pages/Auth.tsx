@@ -15,7 +15,13 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [passwordChange, setPasswordChange] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -30,6 +36,61 @@ const Auth = () => {
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setError("");
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    if (passwordChange.newPassword !== passwordChange.confirmPassword) {
+      setError("New passwords don't match");
+      setIsLoading(false);
+      return;
+    }
+
+    if (passwordChange.newPassword.length < 6) {
+      setError("New password must be at least 6 characters");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // First sign in with current credentials to verify
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: passwordChange.currentPassword,
+      });
+
+      if (signInError) {
+        setError("Current password is incorrect");
+        setIsLoading(false);
+        return;
+      }
+
+      // Update password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: passwordChange.newPassword
+      });
+
+      if (updateError) {
+        setError(updateError.message);
+        return;
+      }
+
+      toast({
+        title: "Password updated!",
+        description: "Your password has been successfully changed.",
+        variant: "default",
+      });
+      
+      setShowChangePassword(false);
+      setPasswordChange({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (err: any) {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePasswordReset = async (e: React.FormEvent) => {
@@ -242,56 +303,155 @@ const Auth = () => {
                   </Button>
 
                   <div className="text-center mt-4">
-                    <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
-                      <DialogTrigger asChild>
-                        <Button variant="link" className="text-sm text-muted-foreground">
-                          Forgot your password?
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Reset Password</DialogTitle>
-                          <DialogDescription>
-                            Enter your email address and we'll send you a link to reset your password.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={handlePasswordReset} className="space-y-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="resetEmail">Email</Label>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input
-                                id="resetEmail"
-                                type="email"
-                                placeholder="your@company.com"
-                                className="pl-10"
-                                value={resetEmail}
-                                onChange={(e) => setResetEmail(e.target.value)}
-                                required
-                              />
+                    <div className="flex gap-2 justify-center">
+                      <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+                        <DialogTrigger asChild>
+                          <Button variant="link" className="text-sm text-muted-foreground">
+                            Forgot password?
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Reset Password</DialogTitle>
+                            <DialogDescription>
+                              Enter your email address and we'll send you a link to reset your password.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <form onSubmit={handlePasswordReset} className="space-y-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="resetEmail">Email</Label>
+                              <div className="relative">
+                                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  id="resetEmail"
+                                  type="email"
+                                  placeholder="your@company.com"
+                                  className="pl-10"
+                                  value={resetEmail}
+                                  onChange={(e) => setResetEmail(e.target.value)}
+                                  required
+                                />
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button 
-                              type="button" 
-                              variant="outline" 
-                              className="flex-1"
-                              onClick={() => setShowForgotPassword(false)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button 
-                              type="submit" 
-                              className="flex-1" 
-                              disabled={isLoading}
-                            >
-                              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                              Send Reset Link
-                            </Button>
-                          </div>
-                        </form>
-                      </DialogContent>
-                    </Dialog>
+                            <div className="flex gap-2">
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                className="flex-1"
+                                onClick={() => setShowForgotPassword(false)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button 
+                                type="submit" 
+                                className="flex-1" 
+                                disabled={isLoading}
+                              >
+                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Send Reset Link
+                              </Button>
+                            </div>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
+
+                      <Dialog open={showChangePassword} onOpenChange={setShowChangePassword}>
+                        <DialogTrigger asChild>
+                          <Button variant="link" className="text-sm text-muted-foreground">
+                            Change password?
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Change Password</DialogTitle>
+                            <DialogDescription>
+                              Enter your current password and choose a new one.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <form onSubmit={handlePasswordChange} className="space-y-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="currentEmail">Email</Label>
+                              <div className="relative">
+                                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  id="currentEmail"
+                                  type="email"
+                                  placeholder="your@company.com"
+                                  className="pl-10"
+                                  value={formData.email}
+                                  onChange={(e) => handleInputChange("email", e.target.value)}
+                                  required
+                                />
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="currentPassword">Current Password</Label>
+                              <div className="relative">
+                                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  id="currentPassword"
+                                  type="password"
+                                  placeholder="Enter current password"
+                                  className="pl-10"
+                                  value={passwordChange.currentPassword}
+                                  onChange={(e) => setPasswordChange(prev => ({ ...prev, currentPassword: e.target.value }))}
+                                  required
+                                />
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="newPassword">New Password</Label>
+                              <div className="relative">
+                                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  id="newPassword"
+                                  type="password"
+                                  placeholder="Flow143"
+                                  className="pl-10"
+                                  value={passwordChange.newPassword}
+                                  onChange={(e) => setPasswordChange(prev => ({ ...prev, newPassword: e.target.value }))}
+                                  required
+                                  minLength={6}
+                                />
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                              <div className="relative">
+                                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  id="confirmPassword"
+                                  type="password"
+                                  placeholder="Confirm new password"
+                                  className="pl-10"
+                                  value={passwordChange.confirmPassword}
+                                  onChange={(e) => setPasswordChange(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                                  required
+                                />
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                className="flex-1"
+                                onClick={() => setShowChangePassword(false)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button 
+                                type="submit" 
+                                className="flex-1" 
+                                disabled={isLoading}
+                              >
+                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Change Password
+                              </Button>
+                            </div>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </div>
                 </form>
               </TabsContent>
