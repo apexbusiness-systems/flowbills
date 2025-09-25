@@ -49,8 +49,8 @@ const Auth = () => {
       return;
     }
 
-    if (passwordChange.newPassword.length < 6) {
-      setError("New password must be at least 6 characters");
+    if (passwordChange.newPassword.length < 8) {
+      setError("New password must be at least 8 characters");
       setIsLoading(false);
       return;
     }
@@ -125,7 +125,7 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Sign in attempt with:", { email: formData.email, passwordLength: formData.password.length });
+    
     setIsLoading(true);
     setError("");
 
@@ -135,7 +135,7 @@ const Auth = () => {
         password: formData.password,
       });
 
-      console.log("Sign in result:", { error });
+      
 
       if (error) {
         if (error.message === 'Invalid login credentials') {
@@ -163,16 +163,11 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Sign up attempt with:", { 
-      email: formData.email, 
-      passwordLength: formData.password.length, 
-      fullName: formData.fullName 
-    });
     setIsLoading(true);
     setError("");
 
     if (!formData.fullName.trim()) {
-      console.log("Missing full name");
+      
       setError("Full name is required");
       setIsLoading(false);
       return;
@@ -180,7 +175,7 @@ const Auth = () => {
 
     try {
       const redirectUrl = `${window.location.origin}/`;
-      console.log("Redirect URL:", redirectUrl);
+      
       
       const { error } = await supabase.auth.signUp({
         email: formData.email,
@@ -195,7 +190,7 @@ const Auth = () => {
         }
       });
 
-      console.log("Sign up result:", { error });
+      
 
       if (error) {
         if (error.message === 'User already registered') {
@@ -420,12 +415,12 @@ const Auth = () => {
                                 <Input
                                   id="newPassword"
                                   type="password"
-                                  placeholder="Flow143"
+                                  placeholder="Enter a strong password (min 8 characters)"
                                   className="pl-10"
                                   value={passwordChange.newPassword}
                                   onChange={(e) => setPasswordChange(prev => ({ ...prev, newPassword: e.target.value }))}
-                                  required
-                                  minLength={6}
+                  required
+                  minLength={8}
                                 />
                               </div>
                             </div>
