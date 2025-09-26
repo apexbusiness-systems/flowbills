@@ -15,17 +15,19 @@ const AnalyticsDashboard = () => {
 
   const handleFilterChange = (filters: AnalyticsFilters) => {
     setCurrentFilters(filters);
-    fetchAnalytics(filters);
+    fetchAnalytics({ start: filters.startDate, end: filters.endDate });
   };
 
   const handleRefresh = () => {
-    fetchAnalytics(currentFilters);
+    if (currentFilters) {
+      fetchAnalytics({ start: currentFilters.startDate, end: currentFilters.endDate });
+    }
   };
 
   const formatDateRange = () => {
-    if (currentFilters?.start_date && currentFilters?.end_date) {
-      const startDate = new Date(currentFilters.start_date).toLocaleDateString();
-      const endDate = new Date(currentFilters.end_date).toLocaleDateString();
+    if (currentFilters?.startDate && currentFilters?.endDate) {
+      const startDate = new Date(currentFilters.startDate).toLocaleDateString();
+      const endDate = new Date(currentFilters.endDate).toLocaleDateString();
       return `${startDate} - ${endDate}`;
     }
     return "Last 30 days";

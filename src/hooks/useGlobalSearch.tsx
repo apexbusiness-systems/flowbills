@@ -61,8 +61,7 @@ export const useGlobalSearch = () => {
       const { data: invoices } = await supabase
         .from('invoices')
         .select('*')
-        .eq('user_id', user.id)
-        .or(`invoice_number.ilike.%${query}%,vendor_name.ilike.%${query}%,notes.ilike.%${query}%`);
+        .or(`invoice_number.ilike.%${query}%,description.ilike.%${query}%,po_number.ilike.%${query}%`);
 
       if (invoices) {
         invoices.forEach(invoice => {
@@ -70,10 +69,10 @@ export const useGlobalSearch = () => {
             id: invoice.id,
             title: `Invoice ${invoice.invoice_number}`,
             type: 'invoice',
-            description: `${invoice.vendor_name} - $${invoice.amount}`,
+            description: `$${invoice.amount} - ${invoice.description || 'No description'}`,
             metadata: invoice,
             url: `/invoices`,
-            score: calculateRelevanceScore(query, [invoice.invoice_number, invoice.vendor_name, invoice.notes || ''])
+            score: calculateRelevanceScore(query, [invoice.invoice_number, invoice.description || '', invoice.po_number || ''])
           });
         });
       }
@@ -82,19 +81,18 @@ export const useGlobalSearch = () => {
       const { data: compliance } = await supabase
         .from('compliance_records')
         .select('*')
-        .eq('user_id', user.id)
-        .or(`title.ilike.%${query}%,description.ilike.%${query}%,responsible_party.ilike.%${query}%`);
+        .or(`regulation.ilike.%${query}%,audit_notes.ilike.%${query}%,entity_type.ilike.%${query}%`);
 
       if (compliance) {
         compliance.forEach(record => {
           searchResults.push({
             id: record.id,
-            title: record.title,
+            title: `${record.regulation} Compliance`,
             type: 'compliance',
-            description: `${record.record_type} - ${record.status}`,
+            description: `${record.entity_type} - ${record.status}`,
             metadata: record,
             url: `/compliance`,
-            score: calculateRelevanceScore(query, [record.title, record.description || '', record.responsible_party || ''])
+            score: calculateRelevanceScore(query, [record.regulation, record.audit_notes || '', record.entity_type])
           });
         });
       }
@@ -103,7 +101,6 @@ export const useGlobalSearch = () => {
       const { data: exceptions } = await supabase
         .from('exceptions')
         .select('*')
-        .eq('user_id', user.id)
         .or(`description.ilike.%${query}%,resolution_notes.ilike.%${query}%`);
 
       if (exceptions) {
@@ -116,27 +113,6 @@ export const useGlobalSearch = () => {
             metadata: exception,
             url: `/exceptions`,
             score: calculateRelevanceScore(query, [exception.description, exception.resolution_notes || ''])
-          });
-        });
-      }
-
-      // Search workflows
-      const { data: workflows } = await supabase
-        .from('workflows')
-        .select('*')
-        .eq('user_id', user.id)
-        .or(`name.ilike.%${query}%,description.ilike.%${query}%`);
-
-      if (workflows) {
-        workflows.forEach(workflow => {
-          searchResults.push({
-            id: workflow.id,
-            title: workflow.name,
-            type: 'workflow',
-            description: workflow.description || 'Workflow automation',
-            metadata: workflow,
-            url: `/workflows`,
-            score: calculateRelevanceScore(query, [workflow.name, workflow.description || ''])
           });
         });
       }

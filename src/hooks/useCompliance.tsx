@@ -51,7 +51,7 @@ export const useCompliance = () => {
         query = query.eq('status', filters.status);
       }
       if (filters?.risk_level) {
-        query = query.eq('risk_level', filters.risk_level);
+        query = query.eq('risk_level', filters.risk_level as 'low' | 'medium' | 'high' | 'critical');
       }
       if (filters?.entity_type) {
         query = query.eq('entity_type', filters.entity_type);

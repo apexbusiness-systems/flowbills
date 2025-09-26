@@ -18,6 +18,28 @@ export interface AnalyticsData {
   complianceScore: number;
 }
 
+export interface AnalyticsFilters {
+  startDate: Date;
+  endDate: Date;
+  status?: string;
+  category?: string;
+}
+
+export interface KPIMetrics {
+  totalInvoices: number;
+  approvedInvoices: number;
+  pendingInvoices: number;
+  rejectedInvoices: number;
+  efficiencyRate: number;
+  complianceScore: number;
+}
+
+export interface ChartData {
+  invoicesTrend: Array<{ date: string; count: number; }>;
+  exceptionsTrend: Array<{ date: string; count: number; }>;
+  complianceTrend: Array<{ date: string; score: number; }>;
+}
+
 export const useAnalytics = () => {
   const [loading, setLoading] = useState(false);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
@@ -103,10 +125,41 @@ export const useAnalytics = () => {
   const getExceptionMetrics = useCallback(async () => null, []);  
   const getTrendData = useCallback(async () => null, []);
 
+  // Derive metrics and chartData from analyticsData for compatibility
+  const metrics: KPIMetrics = analyticsData ? {
+    totalInvoices: analyticsData.totalInvoices,
+    approvedInvoices: analyticsData.approvedInvoices,
+    pendingInvoices: analyticsData.pendingInvoices,
+    rejectedInvoices: Math.max(0, analyticsData.totalInvoices - analyticsData.approvedInvoices - analyticsData.pendingInvoices),
+    efficiencyRate: analyticsData.processingEfficiency,
+    complianceScore: analyticsData.complianceScore,
+  } : {
+    totalInvoices: 0,
+    approvedInvoices: 0,
+    pendingInvoices: 0,
+    rejectedInvoices: 0,
+    efficiencyRate: 0,
+    complianceScore: 0,
+  };
+
+  const chartData: ChartData = {
+    invoicesTrend: [],
+    exceptionsTrend: [],
+    complianceTrend: [],
+  };
+
+  const exportData = useCallback(async (format: 'csv' | 'pdf', filters?: AnalyticsFilters) => {
+    // Stub implementation for now
+    console.log(`Exporting ${format} with filters:`, filters);
+  }, []);
+
   return {
     loading,
     analyticsData,
+    metrics,
+    chartData,
     fetchAnalytics,
+    exportData,
     getInvoiceMetrics,
     getExceptionMetrics,
     getTrendData,

@@ -14,21 +14,27 @@ import { Plus, FileText, CalendarIcon, Flag } from 'lucide-react';
 
 interface CreateComplianceDialogProps {
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onRecordCreated?: () => Promise<void>;
 }
 
-const CreateComplianceDialog = ({ trigger }: CreateComplianceDialogProps) => {
+const CreateComplianceDialog = ({ trigger, open: controlledOpen, onOpenChange, onRecordCreated }: CreateComplianceDialogProps) => {
   const { createRecord } = useCompliance();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const [complianceDateOpen, setComplianceDateOpen] = useState(false);
   const [dueDateOpen, setDueDateOpen] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    record_type: '',
-    description: '',
-    compliance_date: new Date().toISOString().split('T')[0],
-    due_date: '',
+    entity_id: '',
+    entity_type: '',
+    regulation: '',
+    status: 'pending',
     risk_level: 'medium' as 'low' | 'medium' | 'high' | 'critical',
-    responsible_party: ''
+    last_audit_date: '',
+    next_audit_date: '',
+    audit_notes: ''
   });
 
   const complianceTypes = [
@@ -47,39 +53,44 @@ const CreateComplianceDialog = ({ trigger }: CreateComplianceDialogProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.record_type || !formData.compliance_date) {
+    if (!formData.entity_id || !formData.regulation) {
       return;
     }
 
     const success = await createRecord({
-      title: formData.title,
-      record_type: formData.record_type,
-      description: formData.description || undefined,
-      compliance_date: formData.compliance_date,
-      due_date: formData.due_date || undefined,
+      entity_id: formData.entity_id,
+      entity_type: formData.entity_type,
+      regulation: formData.regulation,
+      status: formData.status,
       risk_level: formData.risk_level,
-      responsible_party: formData.responsible_party || undefined
+      last_audit_date: formData.last_audit_date || undefined,
+      next_audit_date: formData.next_audit_date || undefined,
+      audit_notes: formData.audit_notes || undefined
     });
 
     if (success) {
       setOpen(false);
+      if (onRecordCreated) {
+        await onRecordCreated();
+      }
       setFormData({
-        title: '',
-        record_type: '',
-        description: '',
-        compliance_date: new Date().toISOString().split('T')[0],
-        due_date: '',
+        entity_id: '',
+        entity_type: '',
+        regulation: '',
+        status: 'pending',  
         risk_level: 'medium',
-        responsible_party: ''
+        last_audit_date: '',
+        next_audit_date: '',
+        audit_notes: ''
       });
     }
   };
 
-  const handleDateChange = (date: Date | undefined, field: 'compliance_date' | 'due_date') => {
+  const handleDateChange = (date: Date | undefined, field: 'last_audit_date' | 'next_audit_date') => {
     if (date) {
       setFormData(prev => ({ ...prev, [field]: date.toISOString().split('T')[0] }));
     }
-    if (field === 'compliance_date') {
+    if (field === 'last_audit_date') {
       setComplianceDateOpen(false);
     } else {
       setDueDateOpen(false);
@@ -113,67 +124,69 @@ const CreateComplianceDialog = ({ trigger }: CreateComplianceDialogProps) => {
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="entity_id">Entity ID *</Label>
             <Input
-              id="title"
-              placeholder="Environmental Impact Assessment"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              id="entity_id"
+              placeholder="Entity identifier"
+              value={formData.entity_id}
+              onChange={(e) => setFormData(prev => ({ ...prev, entity_id: e.target.value }))}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="record_type">Compliance Type *</Label>
-            <Select
-              value={formData.record_type}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, record_type: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select compliance type" />
-              </SelectTrigger>
-              <SelectContent>
-                {complianceTypes.map(type => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="entity_type">Entity Type</Label>
+            <Input
+              id="entity_type"
+              placeholder="e.g., contract, vendor, project"
+              value={formData.entity_type}
+              onChange={(e) => setFormData(prev => ({ ...prev, entity_type: e.target.value }))}
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="regulation">Regulation *</Label>
+            <Input
+              id="regulation"
+              placeholder="Regulatory requirement"
+              value={formData.regulation}
+              onChange={(e) => setFormData(prev => ({ ...prev, regulation: e.target.value }))}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="audit_notes">Audit Notes</Label>
             <Textarea
-              id="description"
-              placeholder="Describe the compliance requirement..."
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              id="audit_notes"
+              placeholder="Additional notes..."
+              value={formData.audit_notes}
+              onChange={(e) => setFormData(prev => ({ ...prev, audit_notes: e.target.value }))}
               rows={3}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Compliance Date *</Label>
+              <Label>Last Audit Date</Label>
               <Popover open={complianceDateOpen} onOpenChange={setComplianceDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !formData.compliance_date && "text-muted-foreground"
+                      !formData.last_audit_date && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formatDateForDisplay(formData.compliance_date)}
+                    {formData.last_audit_date ? formatDateForDisplay(formData.last_audit_date) : 'Pick a date'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={formData.compliance_date ? new Date(formData.compliance_date) : undefined}
-                    onSelect={(date) => handleDateChange(date, 'compliance_date')}
+                    selected={formData.last_audit_date ? new Date(formData.last_audit_date) : undefined}
+                    onSelect={(date) => handleDateChange(date, 'last_audit_date')}
                     initialFocus
                   />
                 </PopoverContent>
@@ -181,25 +194,25 @@ const CreateComplianceDialog = ({ trigger }: CreateComplianceDialogProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label>Due Date</Label>
+              <Label>Next Audit Date</Label>
               <Popover open={dueDateOpen} onOpenChange={setDueDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !formData.due_date && "text-muted-foreground"
+                      !formData.next_audit_date && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.due_date ? formatDateForDisplay(formData.due_date) : 'Pick a date'}
+                    {formData.next_audit_date ? formatDateForDisplay(formData.next_audit_date) : 'Pick a date'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={formData.due_date ? new Date(formData.due_date) : undefined}
-                    onSelect={(date) => handleDateChange(date, 'due_date')}
+                    selected={formData.next_audit_date ? new Date(formData.next_audit_date) : undefined}
+                    onSelect={(date) => handleDateChange(date, 'next_audit_date')}
                     initialFocus
                   />
                 </PopoverContent>
@@ -226,23 +239,13 @@ const CreateComplianceDialog = ({ trigger }: CreateComplianceDialogProps) => {
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="responsible_party">Responsible Party</Label>
-            <Input
-              id="responsible_party"
-              placeholder="Department or person responsible"
-              value={formData.responsible_party}
-              onChange={(e) => setFormData(prev => ({ ...prev, responsible_party: e.target.value }))}
-            />
-          </div>
-
           <div className="flex gap-2 justify-end">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
             <Button 
               type="submit"
-              disabled={!formData.title || !formData.record_type || !formData.compliance_date}
+              disabled={!formData.entity_id || !formData.regulation}
             >
               Create Record
             </Button>
