@@ -1,0 +1,72 @@
+{
+  "name": "Oil & Gas Industry Knowledge Base",
+  "version": "1.0.0",
+  "description": "Industry-specific RAG corpus for oil and gas operations, standards, and regulations",
+  "sources": [
+    {
+      "name": "OSDU Platform",
+      "type": "data_model",
+      "url": "https://osdu.projects.opengroup.org",
+      "entities": ["Wells", "Wellbore", "Seismic", "Production", "Reservoir"],
+      "last_updated": "2025-01-15"
+    },
+    {
+      "name": "WITSML Standards",
+      "type": "technical_standard",
+      "url": "https://energistics.org/witsml",
+      "scope": "wells_drilling_data",
+      "version": "v2.1",
+      "last_updated": "2024-12-01"
+    },
+    {
+      "name": "RESQML Standards", 
+      "type": "technical_standard",
+      "url": "https://energistics.org/resqml",
+      "scope": "subsurface_models",
+      "version": "v2.2",
+      "last_updated": "2024-11-15"
+    },
+    {
+      "name": "PRODML Standards",
+      "type": "technical_standard", 
+      "url": "https://energistics.org/prodml",
+      "scope": "production_data",
+      "version": "v2.1",
+      "last_updated": "2024-10-30"
+    },
+    {
+      "name": "SPE PRMS 2018",
+      "type": "classification_standard",
+      "url": "https://spe.org/prms",
+      "scope": "reserves_resources_definitions",
+      "compliance_required": true,
+      "last_updated": "2018-06-30"
+    },
+    {
+      "name": "ISO 15926",
+      "type": "lifecycle_standard",
+      "url": "https://iso.org/standard/29557.html",
+      "scope": "asset_lifecycle_semantics",
+      "last_updated": "2023-03-15"
+    },
+    {
+      "name": "PPDM Model",
+      "type": "data_management",
+      "url": "https://ppdm.org",
+      "scope": "petroleum_data_management",
+      "last_updated": "2024-08-20"
+    }
+  ],
+  "chunking_policy": {
+    "chunk_size_tokens": 1500,
+    "overlap_tokens": 150,
+    "metadata_fields": ["standard", "section", "version", "entity", "country", "classification"],
+    "citation_required": true
+  },
+  "retrieval_policy": {
+    "min_citations": 1,
+    "confidence_threshold": 0.7,
+    "max_chunks_per_query": 5,
+    "fallback_action": "request_document_upload"
+  }
+}
