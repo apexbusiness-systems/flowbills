@@ -80,7 +80,7 @@ const Approvals = () => {
         .order('created_at', { ascending: false });
 
       if (status) {
-        query = query.eq('status', status);
+        query = query.eq('status', status as 'pending' | 'approved' | 'rejected');
       }
 
       const { data, error } = await query;
@@ -122,45 +122,45 @@ const Approvals = () => {
       const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
       // Fetch pending approvals
-      const { data: pendingApprovals } = await supabase
+      const { count: pendingApprovals } = await supabase
         .from('approvals')
-        .select('id', { count: 'exact' })
+        .select('*', { count: 'exact', head: true })
         .eq('status', 'pending');
 
       // Fetch today's approvals/rejections
-      const { data: todayApproved } = await supabase
+      const { count: todayApproved } = await supabase
         .from('approvals')
-        .select('id', { count: 'exact' })
+        .select('*', { count: 'exact', head: true })
         .eq('status', 'approved')
         .gte('approval_date', todayStart.toISOString());
 
-      const { data: todayRejected } = await supabase
+      const { count: todayRejected } = await supabase
         .from('approvals')
-        .select('id', { count: 'exact' })
+        .select('*', { count: 'exact', head: true })
         .eq('status', 'rejected')
         .gte('approval_date', todayStart.toISOString());
 
       // Fetch auto-approval rate (last 30 days)
-      const { data: totalApprovals } = await supabase
+      const { count: totalApprovals } = await supabase
         .from('approvals')
-        .select('auto_approved', { count: 'exact' })
+        .select('*', { count: 'exact', head: true })
         .gte('created_at', last30Days.toISOString());
 
-      const { data: autoApprovals } = await supabase
+      const { count: autoApprovals } = await supabase
         .from('approvals')
-        .select('id', { count: 'exact' })
+        .select('*', { count: 'exact', head: true })
         .eq('auto_approved', true)
         .gte('created_at', last30Days.toISOString());
 
       // Calculate auto-approval rate
-      const totalCount = totalApprovals?.count || 0;
-      const autoCount = autoApprovals?.count || 0;
+      const totalCount = totalApprovals || 0;
+      const autoCount = autoApprovals || 0;
       const autoApprovalRate = totalCount > 0 ? (autoCount / totalCount) * 100 : 0;
 
       setStats({
-        pending_approvals: pendingApprovals?.count || 0,
-        approved_today: todayApproved?.count || 0,
-        rejected_today: todayRejected?.count || 0,
+        pending_approvals: pendingApprovals || 0,
+        approved_today: todayApproved || 0,
+        rejected_today: todayRejected || 0,
         auto_approved_rate: autoApprovalRate,
         average_approval_time: 2.5, // Mock data - would calculate from actual approval times
       });
@@ -175,7 +175,7 @@ const Approvals = () => {
 
     try {
       const updateData = {
-        status: action === 'approve' ? 'approved' : 'rejected',
+        status: (action === 'approve' ? 'approved' : 'rejected') as 'approved' | 'rejected',
         approver_id: user.id,
         approval_date: new Date().toISOString(),
         comments: comments || null,

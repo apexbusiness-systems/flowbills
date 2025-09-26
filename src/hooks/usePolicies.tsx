@@ -171,9 +171,9 @@ export const usePolicies = () => {
         .from('policies')
         .select('*');
 
-      const { data: recentTriggers } = await supabase
+      const { count: recentTriggers } = await supabase
         .from('audit_logs')
-        .select('*', { count: 'exact' })
+        .select('*', { count: 'exact', head: true })
         .eq('action', 'POLICY_EVALUATION')
         .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
@@ -184,7 +184,7 @@ export const usePolicies = () => {
         active_policies: allPolicies.filter(p => p.is_active).length,
         approval_policies: allPolicies.filter(p => p.policy_type === 'approval').length,
         fraud_policies: allPolicies.filter(p => p.policy_type === 'fraud').length,
-        recent_triggers: recentTriggers?.count || 0,
+        recent_triggers: recentTriggers || 0,
       };
     } catch (error) {
       console.error('Error getting policy stats:', error);
