@@ -679,6 +679,18 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      log_admin_pii_access: {
+        Args: { record_id: string; table_name: string }
+        Returns: boolean
+      }
+      validate_session_security: {
+        Args: {
+          ip_address?: unknown
+          session_token: string
+          user_agent?: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       approval_status: "pending" | "approved" | "rejected"
