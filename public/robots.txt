@@ -4,11 +4,8 @@ Allow: /
 User-agent: Bingbot
 Allow: /
 
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+
+# JubeeKids - Safe digital experiences for children
+# Sitemap: https://jubeekids.com/sitemap.xml
