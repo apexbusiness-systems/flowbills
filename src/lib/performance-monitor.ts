@@ -89,43 +89,32 @@ class PerformanceMonitor {
     }
   }
 
-  // Start API call monitoring
+  // Start API call monitoring using PerformanceObserver
   private startAPIMonitoring() {
     if (typeof window === 'undefined') return;
 
-    // Intercept fetch calls
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-      const startTime = performance.now();
-      const [resource, config] = args;
-      const url = resource.toString();
-      const method = config?.method || 'GET';
-
-      try {
-        const response = await originalFetch(...args);
-        const endTime = performance.now();
-        
-        this.recordAPIMetric({
-          endpoint: url,
-          method,
-          duration: endTime - startTime,
-          status: response.status,
-          timestamp: Date.now(),
-          size: parseInt(response.headers.get('content-length') || '0')
-        });
-
-        return response;
-      } catch (error) {
-        const endTime = performance.now();
-        this.recordAPIMetric({
-          endpoint: url,
-          method,
-          duration: endTime - startTime,
-          status: 0,
-          timestamp: Date.now()
-        });
-        throw error;
+    const queue: any[] = [];
+    const obs = new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) {
+        queue.push(this.serialize(e));
       }
+    });
+    
+    obs.observe({ entryTypes: ["resource","navigation","longtask","largest-contentful-paint","first-input"] });
+    
+    window.addEventListener("pagehide", () => {
+      try {
+        navigator.sendBeacon("/api/metrics", new Blob([JSON.stringify({ events: queue.splice(0) })], { type: "application/json" }));
+      } catch {}
+    });
+  }
+
+  private serialize(entry: any): any {
+    return {
+      name: entry.name,
+      duration: entry.duration,
+      startTime: entry.startTime,
+      entryType: entry.entryType
     };
   }
 

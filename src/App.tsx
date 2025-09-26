@@ -178,26 +178,24 @@ function App() {
   }, []);
 
   return (
-    <ErrorBoundary>
-      <React.StrictMode>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AuthProvider>
-                <div className="min-h-screen flex flex-col">
-                  <div className="flex-1">
-                    <AuthRoutes />
-                  </div>
-                  <Footer />
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <ErrorBoundary>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <div className="min-h-screen flex flex-col">
+                <div className="flex-1">
+                  <AuthRoutes />
                 </div>
-              </AuthProvider>
-            </BrowserRouter>
-          </TooltipProvider>
-        </QueryClientProvider>
-      </React.StrictMode>
-    </ErrorBoundary>
+                <Footer />
+              </div>
+            </AuthProvider>
+          </BrowserRouter>
+        </ErrorBoundary>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 

@@ -212,27 +212,21 @@ async function evaluatePolicy(policy: any, invoiceData: any, supabase: any): Pro
     // Evaluate fraud policies
     if (policy.policy_type === 'fraud') {
       if (conditions.check_bank_duplicates && invoiceData.vendor_id) {
-        // Check for duplicate bank accounts across vendors
+        // Check for duplicate bank accounts across vendors using safe queries
         const { data: vendors } = await supabase
           .from('vendors')
           .select('bank_account, id')
           .neq('id', invoiceData.vendor_id)
           .not('bank_account', 'is', null);
 
-        const currentVendor = await supabase
-          .from('vendors')
-          .select('bank_account')
-          .eq('id', invoiceData.vendor_id)
-          .single();
+        const { data: list } = await supabase.from("vendors").select("bank_account").eq("id", invoiceData.vendor_id).limit(1);
+        const target = list?.[0]?.bank_account ?? null;
+        const vendorList: Vendor[] = vendors ?? [];
+        const duplicates = vendorList.filter((v: Vendor) => v.bank_account != null && v.bank_account === target);
 
-        if (currentVendor.data?.bank_account) {
-          const list: Vendor[] = vendors ?? [];
-          const targetAcct = currentVendor.data?.bank_account ?? null;
-          const duplicates = list.filter((v: Vendor) => v.bank_account != null && v.bank_account === targetAcct);
-          if (duplicates && duplicates.length > 0) {
-            triggered = true;
-            details = `Bank account shared with ${duplicates.length} other vendors`;
-          }
+        if (duplicates && duplicates.length > 0) {
+          triggered = true;
+          details = `Bank account shared with ${duplicates.length} other vendors`;
         }
       }
 

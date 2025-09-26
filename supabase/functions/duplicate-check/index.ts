@@ -1,13 +1,27 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 
-interface InvoiceData {
-  vendor_id: string;
-  amount: number;
-  invoice_date: string;
-  po_number?: string;
-  invoice_number: string;
+const InvoiceIn = z.object({
+  vendor_id: z.string().uuid(),
+  invoice_number: z.string().min(1).max(100),
+  amount_cents: z.number().int().nonnegative(),
+  currency: z.string().length(3),
+  invoice_date: z.string().min(4),
+  po_number: z.string().optional(),
+});
+
+function minusDays(dateStr: string, days: number): string {
+  const date = new Date(dateStr);
+  date.setDate(date.getDate() - days);
+  return date.toISOString().split('T')[0];
+}
+
+function plusDays(dateStr: string, days: number): string {
+  const date = new Date(dateStr);
+  date.setDate(date.getDate() + days);
+  return date.toISOString().split('T')[0];
 }
 
 serve(async (req) => {
@@ -21,24 +35,31 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { invoice } = await req.json() as { invoice: InvoiceData };
+    const parsed = InvoiceIn.safeParse(await req.json().catch(() => ({})));
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: "invalid input" }), { 
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+    const invoice = parsed.data;
     
     console.log('Duplicate check for invoice:', invoice.invoice_number);
 
     // Generate hash for duplicate detection
-    const hashString = `${invoice.vendor_id}-${invoice.amount}-${invoice.invoice_date}-${invoice.po_number || 'no-po'}`;
+    const hashString = `${invoice.vendor_id}-${invoice.amount_cents}-${invoice.invoice_date}-${invoice.po_number || 'no-po'}`;
     const encoder = new TextEncoder();
     const data = encoder.encode(hashString);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const duplicateHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    // Check for exact hash match
+    // Check for exact hash match using safe queries
     const { data: exactDuplicate, error: exactError } = await supabase
       .from('invoices')
-      .select('id, invoice_number, vendor_id, amount')
+      .select('id, invoice_number, vendor_id, amount_cents')
       .eq('duplicate_hash', duplicateHash)
-      .neq('id', invoice.invoice_number) // Exclude self if updating
+      .neq('id', invoice.invoice_number)
       .limit(1);
 
     if (exactError) {
@@ -46,21 +67,15 @@ serve(async (req) => {
       throw exactError;
     }
 
-    // Fuzzy matching for near-duplicates
-    const amountTolerance = invoice.amount * 0.05; // 5% tolerance
-    const dateThreshold = new Date(invoice.invoice_date);
-    dateThreshold.setDate(dateThreshold.getDate() - 7); // 7 days before
-    const dateThresholdAfter = new Date(invoice.invoice_date);
-    dateThresholdAfter.setDate(dateThresholdAfter.getDate() + 7); // 7 days after
-
+    // Fuzzy matching with safe parameterized queries
     const { data: fuzzyDuplicates, error: fuzzyError } = await supabase
       .from('invoices')
-      .select('id, invoice_number, vendor_id, amount, invoice_date')
+      .select('id, invoice_number, vendor_id, amount_cents, invoice_date')
       .eq('vendor_id', invoice.vendor_id)
-      .gte('amount', invoice.amount - amountTolerance)
-      .lte('amount', invoice.amount + amountTolerance)
-      .gte('invoice_date', dateThreshold.toISOString().split('T')[0])
-      .lte('invoice_date', dateThresholdAfter.toISOString().split('T')[0])
+      .gte('invoice_date', minusDays(invoice.invoice_date, 7))
+      .lte('invoice_date', plusDays(invoice.invoice_date, 7))
+      .gte('amount_cents', Math.round(invoice.amount_cents * 0.99))
+      .lte('amount_cents', Math.round(invoice.amount_cents * 1.01))
       .neq('id', invoice.invoice_number)
       .limit(5);
 

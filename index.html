@@ -3,15 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JubeeKids</title>
-    <meta name="description" content="Safe, engaging digital experiences designed for children with thoughtful parental controls and age-appropriate content." />
-    <meta name="author" content="JubeeKids" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://static.klaviyo.com https://a.klaviyo.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://region1.google-analytics.com https://a.klaviyo.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests;" />
+    <title>FlowBills - Oil & Gas Invoice Management</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#FFD54A" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="JubeeKids" />
+    <meta name="apple-mobile-web-app-title" content="FlowBills" />
     
     <!-- PWA Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
@@ -22,15 +21,28 @@
     <!-- Manifest -->
     <link rel="manifest" href="/manifest.webmanifest" />
 
-    <meta property="og:title" content="JubeeKids - Safe Digital Experiences for Children" />
-    <meta property="og:description" content="Thoughtfully designed digital experiences for children with built-in parental controls and age-appropriate content." />
+    <meta property="og:title" content="FlowBills - Oil & Gas Invoice Management" />
+    <meta property="og:description" content="Secure, compliant invoice processing for the oil & gas industry." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/icons/og-image.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="JubeeKids" />
-    <meta name="twitter:description" content="Safe digital experiences for children" />
+    <meta name="twitter:title" content="FlowBills" />
+    <meta name="twitter:description" content="Oil & Gas Invoice Management" />
     <meta name="twitter:image" content="/icons/og-image.png" />
+    
+    <!-- GTM -->
+    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-XXXX"></script>
+    <script>
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id=GTM-XXXX'+dl;f.parentNode.insertBefore(j,f);})
+      (window,document,'script','dataLayer','GTM-XXXX');
+    </script>
+    
+    <!-- Klaviyo -->
+    <script async src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=KLAVIYO_PUBLIC_KEY"></script>
   </head>
 
   <body>

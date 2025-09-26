@@ -8,23 +8,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// LLM Security Guardrails - Runtime Verification
-function assertLLMLock() {
-  console.log("🔒 Verifying LLM security lock...");
-  
-  if (Deno.env.get('LLM_LOCK') !== "1") {
-    throw new Error("SECURITY: LLM_LOCK disabled - oil & gas model access denied");
-  }
-
-  const requiredEnvs = ['OPENAI_API_KEY', 'LLM_MODEL_ID', 'LLM_PROVIDER'];
-  for (const env of requiredEnvs) {
-    if (!Deno.env.get(env)) {
-      throw new Error(`SECURITY: Missing required environment variable: ${env}`);
-    }
-  }
-
-  console.log("✅ LLM security lock verified");
-}
+import { assertLLMLock, DENO_MODEL_ID, DENO_ENDPOINT } from "../_shared/llm_guard.ts";
 
 // Oil & Gas Query Validation
 function validateOilGasQuery(query: string): void {
@@ -141,7 +125,7 @@ Remember: You must provide citations for any industry-specific claims. If you ca
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: Deno.env.get('LLM_MODEL_ID') || 'gpt-4o',
+        model: DENO_MODEL_ID,
         messages: messages,
         temperature: 0.2,
         top_p: 0.9,

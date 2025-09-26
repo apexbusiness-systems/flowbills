@@ -11,10 +11,12 @@ export interface AuditEvent {
   compliance_flags?: string[];
 }
 
+const FLUSH_MS = 10000;
+const MAX_QUEUE = 500;
+const queue: AuditEvent[] = [];
+
 export class AuditLogger {
   private static instance: AuditLogger;
-  private pendingEvents: AuditEvent[] = [];
-  private flushInterval: NodeJS.Timeout | null = null;
 
   static getInstance(): AuditLogger {
     if (!AuditLogger.instance) {
@@ -24,10 +26,19 @@ export class AuditLogger {
   }
 
   constructor() {
-    // Batch audit events for performance
-    this.flushInterval = setInterval(() => {
-      this.flush();
-    }, 5000); // Flush every 5 seconds
+    // Setup periodic flush
+    setInterval(() => this.flush("/api/audit", queue.splice(0)), FLUSH_MS);
+    
+    // Flush on page unload
+    window.addEventListener("pagehide", () => {
+      try {
+        navigator.sendBeacon("/api/audit", new Blob([JSON.stringify(queue.splice(0))], { type: "application/json" }));
+      } catch {}
+    });
+  }
+
+  log(evt: AuditEvent) { 
+    if (queue.length < MAX_QUEUE) queue.push(evt); 
   }
 
   /**
@@ -71,7 +82,7 @@ export class AuditLogger {
       compliance_flags: ['REGULATORY_COMPLIANCE', ...(event.compliance_flags || [])]
     });
 
-    this.pendingEvents.push(auditRecord);
+    queue.push(auditRecord);
   }
 
   /**
@@ -83,7 +94,7 @@ export class AuditLogger {
       risk_level: event.metadata?.sensitive ? 'medium' : 'low'
     });
 
-    this.pendingEvents.push(auditRecord);
+    queue.push(auditRecord);
   }
 
   /**
@@ -140,18 +151,20 @@ export class AuditLogger {
     }
   }
 
-  private async flush(): Promise<void> {
-    if (this.pendingEvents.length === 0) return;
-
-    const events = [...this.pendingEvents];
-    this.pendingEvents = [];
+  private async flush(endpoint: string, events: AuditEvent[]): Promise<void> {
+    if (events.length === 0) return;
 
     try {
-      await Promise.all(events.map(event => this.persistAuditEvent(event)));
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(events)
+      });
+      if (!response.ok) {
+        console.error('Failed to flush audit events:', response.status);
+      }
     } catch (error) {
       console.error('Failed to flush audit events:', error);
-      // Re-queue failed events
-      this.pendingEvents.unshift(...events);
     }
   }
 
@@ -202,11 +215,7 @@ export class AuditLogger {
    * Clean up resources
    */
   destroy(): void {
-    if (this.flushInterval) {
-      clearInterval(this.flushInterval);
-      this.flushInterval = null;
-    }
-    this.flush(); // Final flush
+    // Cleanup handled by window events
   }
 }
 

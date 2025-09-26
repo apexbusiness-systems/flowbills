@@ -7,6 +7,35 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const BUCKET = new Map<string,{tokens:number,ts:number}>();
+const RATE = { refillPerSec: 1, burst: 10 };
+
+function take(key: string): boolean {
+  const now = Date.now() / 1000;
+  const s = BUCKET.get(key) ?? { tokens: RATE.burst, ts: now };
+  const refill = Math.max(0, now - s.ts) * RATE.refillPerSec;
+  s.tokens = Math.min(RATE.burst, s.tokens + refill);
+  s.ts = now;
+  if (s.tokens < 1) {
+    BUCKET.set(key, s);
+    return false;
+  }
+  s.tokens -= 1;
+  BUCKET.set(key, s);
+  return true;
+}
+
+function userIdFromAuth(req: Request): Promise<string | null> {
+  // Simplified auth extraction
+  return Promise.resolve(req.headers.get('x-user-id') || null);
+}
+
+function clientIp(req: Request): string {
+  return req.headers.get('x-forwarded-for')?.split(',')[0] || 
+         req.headers.get('x-real-ip') || 
+         'unknown';
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -18,6 +47,15 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Rate limiting
+    const userId = (await userIdFromAuth(req)) ?? clientIp(req);
+    if (!take(userId)) {
+      return new Response("Too Many Requests", { 
+        status: 429,
+        headers: corsHeaders
+      });
+    }
 
     // Get auth token from request
     const authToken = req.headers.get('Authorization')?.replace('Bearer ', '');

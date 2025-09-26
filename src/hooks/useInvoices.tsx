@@ -19,6 +19,8 @@ export interface Invoice {
   vendor_name?: string; // Computed field for display
 }
 
+type Page = { items: Invoice[]; nextCursor?: { created_at: string; id: string } };
+
 export const useInvoices = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,25 +29,43 @@ export const useInvoices = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
+  const fetchPage = async (cursor?: { created_at: string; id: string }): Promise<Page> => {
+    if (!user) return { items: [] };
+
+    const q = supabase
+      .from('invoices')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(50);
+      
+    if (cursor) {
+      q.lt('created_at', cursor.created_at).or(`created_at.eq.${cursor.created_at},id.lt.${cursor.id}`);
+    }
+    
+    const { data, error } = await q;
+    
+    if (error) throw error;
+    
+    const mappedInvoices = data?.map(record => ({
+      ...record,
+      vendor_name: 'Unknown Vendor'
+    })) as Invoice[] || [];
+    
+    const last = mappedInvoices[mappedInvoices.length - 1];
+    return { 
+      items: mappedInvoices, 
+      nextCursor: last ? { created_at: last.created_at, id: last.id } : undefined 
+    };
+  };
+
   const fetchInvoices = async () => {
     if (!user) return;
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      
-      // Map database records to Invoice interface
-      const mappedInvoices = data?.map(record => ({
-        ...record,
-        vendor_name: 'Unknown Vendor' // Stub - would join with vendors table
-      })) as Invoice[] || [];
-      
-      setInvoices(mappedInvoices);
+      const page = await fetchPage();
+      setInvoices(page.items);
     } catch (error: any) {
       console.error('Error fetching invoices:', error);
       toast({
@@ -200,6 +220,7 @@ export const useInvoices = () => {
     creating,
     updating,
     fetchInvoices,
+    fetchPage,
     createInvoice,
     updateInvoice,
     deleteInvoice,
