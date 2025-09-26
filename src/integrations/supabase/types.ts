@@ -187,6 +187,42 @@ export type Database = {
         }
         Relationships: []
       }
+      email_templates: {
+        Row: {
+          body_template: string
+          created_at: string
+          id: string
+          is_active: boolean
+          subject_template: string
+          template_name: string
+          template_type: string
+          updated_at: string
+          variables: Json | null
+        }
+        Insert: {
+          body_template: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          subject_template: string
+          template_name: string
+          template_type: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Update: {
+          body_template?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          subject_template?: string
+          template_name?: string
+          template_type?: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Relationships: []
+      }
       exceptions: {
         Row: {
           created_at: string
@@ -234,9 +270,49 @@ export type Database = {
           },
         ]
       }
+      fraud_flags: {
+        Row: {
+          created_at: string
+          details: Json
+          entity_id: string
+          entity_type: string
+          flag_type: string
+          id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          risk_score: number
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          details: Json
+          entity_id: string
+          entity_type: string
+          flag_type: string
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          risk_score?: number
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          entity_id?: string
+          entity_type?: string
+          flag_type?: string
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          risk_score?: number
+          status?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount: number
+          approval_policy_id: string | null
           confidence_score: number | null
           created_at: string
           currency: string | null
@@ -244,12 +320,15 @@ export type Database = {
           due_date: string | null
           duplicate_hash: string | null
           extracted_data: Json | null
+          field_confidence_scores: Json | null
           file_url: string | null
           id: string
           invoice_date: string
           invoice_number: string
           line_items: Json | null
+          ocr_metadata: Json | null
           po_number: string | null
+          raw_text: string | null
           status: Database["public"]["Enums"]["invoice_status"] | null
           tax_amount: number | null
           updated_at: string
@@ -258,6 +337,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          approval_policy_id?: string | null
           confidence_score?: number | null
           created_at?: string
           currency?: string | null
@@ -265,12 +345,15 @@ export type Database = {
           due_date?: string | null
           duplicate_hash?: string | null
           extracted_data?: Json | null
+          field_confidence_scores?: Json | null
           file_url?: string | null
           id?: string
           invoice_date: string
           invoice_number: string
           line_items?: Json | null
+          ocr_metadata?: Json | null
           po_number?: string | null
+          raw_text?: string | null
           status?: Database["public"]["Enums"]["invoice_status"] | null
           tax_amount?: number | null
           updated_at?: string
@@ -279,6 +362,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          approval_policy_id?: string | null
           confidence_score?: number | null
           created_at?: string
           currency?: string | null
@@ -286,12 +370,15 @@ export type Database = {
           due_date?: string | null
           duplicate_hash?: string | null
           extracted_data?: Json | null
+          field_confidence_scores?: Json | null
           file_url?: string | null
           id?: string
           invoice_date?: string
           invoice_number?: string
           line_items?: Json | null
+          ocr_metadata?: Json | null
           po_number?: string | null
+          raw_text?: string | null
           status?: Database["public"]["Enums"]["invoice_status"] | null
           tax_amount?: number | null
           updated_at?: string
@@ -346,6 +433,42 @@ export type Database = {
           lead_status?: string | null
           message?: string | null
           phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      policies: {
+        Row: {
+          actions: Json
+          conditions: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          policy_name: string
+          policy_type: string
+          priority: number
+          updated_at: string
+        }
+        Insert: {
+          actions: Json
+          conditions: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          policy_name: string
+          policy_type: string
+          priority?: number
+          updated_at?: string
+        }
+        Update: {
+          actions?: Json
+          conditions?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          policy_name?: string
+          policy_type?: string
+          priority?: number
           updated_at?: string
         }
         Relationships: []
@@ -427,42 +550,54 @@ export type Database = {
       vendors: {
         Row: {
           address: Json | null
+          bank_account: string | null
           contact_info: Json | null
           created_at: string
+          iban: string | null
           id: string
           is_active: boolean | null
           payment_terms: number | null
           risk_score: number | null
+          swift_code: string | null
           tax_id: string | null
           updated_at: string
           vendor_code: string | null
           vendor_name: string
+          verification_status: string | null
         }
         Insert: {
           address?: Json | null
+          bank_account?: string | null
           contact_info?: Json | null
           created_at?: string
+          iban?: string | null
           id?: string
           is_active?: boolean | null
           payment_terms?: number | null
           risk_score?: number | null
+          swift_code?: string | null
           tax_id?: string | null
           updated_at?: string
           vendor_code?: string | null
           vendor_name: string
+          verification_status?: string | null
         }
         Update: {
           address?: Json | null
+          bank_account?: string | null
           contact_info?: Json | null
           created_at?: string
+          iban?: string | null
           id?: string
           is_active?: boolean | null
           payment_terms?: number | null
           risk_score?: number | null
+          swift_code?: string | null
           tax_id?: string | null
           updated_at?: string
           vendor_code?: string | null
           vendor_name?: string
+          verification_status?: string | null
         }
         Relationships: []
       }
