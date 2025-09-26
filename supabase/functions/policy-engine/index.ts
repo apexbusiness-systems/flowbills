@@ -180,7 +180,7 @@ serve(async (req) => {
       final_decision: 'block',
       required_approvals: 0,
       routing_reason: 'Policy engine error',
-      error: error.message
+      error: error instanceof Error ? error.message : 'Unknown error'
     };
 
     return new Response(JSON.stringify(errorResponse), {
@@ -223,7 +223,7 @@ async function evaluatePolicy(policy: any, invoiceData: any, supabase: any): Pro
           .single();
 
         if (currentVendor.data?.bank_account) {
-          const duplicates = vendors?.filter(v => v.bank_account === currentVendor.data.bank_account);
+          const duplicates = vendors?.filter((v: any) => v.bank_account === currentVendor.data.bank_account);
           if (duplicates && duplicates.length > 0) {
             triggered = true;
             details = `Bank account shared with ${duplicates.length} other vendors`;

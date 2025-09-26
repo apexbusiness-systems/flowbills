@@ -57,7 +57,15 @@ serve(async (req) => {
     
     const response: OCRResponse = {
       success: true,
-      extracted_data: mockExtraction.fields,
+      extracted_data: {
+        invoice_number: mockExtraction.fields.invoice_number || undefined,
+        amount: mockExtraction.fields.amount || undefined,
+        currency: mockExtraction.fields.currency || undefined,
+        vendor_name: mockExtraction.fields.vendor_name || undefined,
+        invoice_date: mockExtraction.fields.invoice_date || undefined,
+        due_date: mockExtraction.fields.due_date || undefined,
+        po_number: mockExtraction.fields.po_number || undefined,
+      },
       raw_text: mockExtraction.raw_text,
       confidence_scores: mockExtraction.confidence_scores,
       ocr_metadata: {
@@ -76,7 +84,7 @@ serve(async (req) => {
           field_confidence_scores: mockExtraction.confidence_scores,
           ocr_metadata: response.ocr_metadata,
           extracted_data: mockExtraction.fields,
-          confidence_score: Math.round(response.ocr_metadata.confidence_average)
+          confidence_score: Math.round(response.ocr_metadata?.confidence_average || 0)
         })
         .eq('id', invoice_id);
 
@@ -90,7 +98,7 @@ serve(async (req) => {
       action: 'OCR_EXTRACTION',
       entity_type: 'invoice',
       entity_id: invoice_id || crypto.randomUUID(),
-      new_values: { ocr_confidence: response.ocr_metadata.confidence_average },
+      new_values: { ocr_confidence: response.ocr_metadata?.confidence_average || 0 },
       user_id: null // System action
     });
 
@@ -103,7 +111,7 @@ serve(async (req) => {
     
     const errorResponse: OCRResponse = {
       success: false,
-      error: error.message
+      error: error instanceof Error ? error.message : 'Unknown error'
     };
 
     return new Response(JSON.stringify(errorResponse), {
