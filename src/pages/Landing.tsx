@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Shield, Zap, BarChart3, FileText, Clock, ArrowRight } from 'lucide-react';
 import LeadCaptureDialog from '@/components/marketing/LeadCaptureDialog';
 import { useAuth } from '@/hooks/useAuth';
+import heroImage from '@/assets/hero-oilgas.jpg';
 
 const Landing = () => {
   const [showLeadCapture, setShowLeadCapture] = useState(false);
@@ -23,24 +24,29 @@ const Landing = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl transform translate-x-32 -translate-y-32"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-secondary/10 to-transparent rounded-full blur-3xl transform -translate-x-32 translate-y-32"></div>
+
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="relative z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <FileText className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-foreground">FlowBills.ca</span>
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">FlowBills.ca</span>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => handleCTA('contact')}>
+            <Button variant="ghost" onClick={() => handleCTA('contact')} className="hover:bg-primary/10">
               Contact
             </Button>
             {user ? (
-              <Button onClick={() => navigate('/dashboard')}>
+              <Button onClick={() => navigate('/dashboard')} className="btn-primary shadow-lg">
                 Dashboard
               </Button>
             ) : (
-              <Button onClick={() => navigate('/auth')}>
+              <Button onClick={() => navigate('/auth')} className="btn-primary shadow-lg">
                 Sign In
               </Button>
             )}
@@ -49,46 +55,57 @@ const Landing = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <Badge variant="secondary" className="mb-6">
-          <Shield className="h-4 w-4 mr-1" />
-          PIPEDA & CASL Compliant
-        </Badge>
-        
-        <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
-          AI-Powered Invoice Processing for
-          <span className="text-primary block">Canadian Oil & Gas</span>
-        </h1>
-        
-        <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-          Automate your accounts payable with enterprise-grade security, PIPEDA compliance, 
-          and intelligent duplicate detection. Built specifically for Canadian energy sector requirements.
-        </p>
+      <section 
+        className="relative container mx-auto px-4 py-20 text-center"
+        style={{
+          backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.3)), url(${heroImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20 rounded-lg"></div>
+        <div className="relative z-10">
+          <Badge variant="secondary" className="mb-6 bg-background/90 backdrop-blur-sm border-primary/20">
+            <Shield className="h-4 w-4 mr-1" />
+            PIPEDA & CASL Compliant
+          </Badge>
+          
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
+            AI-Powered Invoice Processing for
+            <span className="text-primary block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent drop-shadow-none">Canadian Oil & Gas</span>
+          </h1>
+          
+          <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+            Automate your accounts payable with enterprise-grade security, PIPEDA compliance, 
+            and intelligent duplicate detection. Built specifically for Canadian energy sector requirements.
+          </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-          <Button size="lg" onClick={() => handleCTA('demo')} className="text-lg px-8 py-6">
-            Book Free Demo
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-          <Button size="lg" variant="outline" onClick={() => handleCTA('roi_calculator')} className="text-lg px-8 py-6">
-            Calculate ROI
-            <BarChart3 className="ml-2 h-5 w-5" />
-          </Button>
-        </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <Button size="lg" onClick={() => handleCTA('demo')} className="btn-primary text-lg px-8 py-6 hover:scale-105 transition-all duration-300">
+              Book Free Demo
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => handleCTA('roi_calculator')} className="text-lg px-8 py-6 bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:scale-105 transition-all duration-300">
+              Calculate ROI
+              <BarChart3 className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
 
-        {/* Key Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary mb-2">95%</div>
-            <div className="text-muted-foreground">Straight-Through Processing</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary mb-2">80%</div>
-            <div className="text-muted-foreground">Cost Reduction</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary mb-2">24/7</div>
-            <div className="text-muted-foreground">Processing Uptime</div>
+          {/* Key Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+              <div className="text-3xl font-bold text-primary mb-2 drop-shadow-md">95%</div>
+              <div className="text-white/90">Straight-Through Processing</div>
+            </div>
+            <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+              <div className="text-3xl font-bold text-primary mb-2 drop-shadow-md">80%</div>
+              <div className="text-white/90">Cost Reduction</div>
+            </div>
+            <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+              <div className="text-3xl font-bold text-primary mb-2 drop-shadow-md">24/7</div>
+              <div className="text-white/90">Processing Uptime</div>
+            </div>
           </div>
         </div>
       </section>
