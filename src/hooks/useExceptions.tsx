@@ -33,9 +33,9 @@ export const useExceptions = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (filters?.severity) {
-        query = query.eq('severity', filters.severity);
-      }
+        if (filters?.severity) {
+          query = query.eq('severity', filters.severity);
+        }
       if (filters?.invoice_id) {
         query = query.eq('invoice_id', filters.invoice_id);
       }

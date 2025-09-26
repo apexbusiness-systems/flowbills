@@ -74,6 +74,7 @@ const ExceptionQueue = () => {
                     <div className="text-sm text-muted-foreground">
                       Severity: {exception.severity}
                     </div>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={getSeverityColor(exception.severity)}>

@@ -17,7 +17,7 @@ const CreateExceptionDialog = ({ invoiceId, trigger }: CreateExceptionDialogProp
   const { createException } = useExceptions();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    exception_type: '',
+    exception_type: '' as 'duplicate' | 'amount_variance' | 'vendor_mismatch' | 'missing_po' | 'compliance_issue' | '',
     description: '',
     severity: 'medium' as 'low' | 'medium' | 'high' | 'critical',
   });
@@ -30,7 +30,9 @@ const CreateExceptionDialog = ({ invoiceId, trigger }: CreateExceptionDialogProp
     }
 
     const success = await createException({
-      ...formData,
+      exception_type: formData.exception_type as 'duplicate' | 'amount_variance' | 'vendor_mismatch' | 'missing_po' | 'compliance_issue',
+      description: formData.description,
+      severity: formData.severity,
       invoice_id: invoiceId,
     });
 
@@ -69,20 +71,20 @@ const CreateExceptionDialog = ({ invoiceId, trigger }: CreateExceptionDialogProp
             <Label htmlFor="exception-type">Exception Type</Label>
             <Select
               value={formData.exception_type}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, exception_type: value }))}
+              onValueChange={(value: string) => setFormData(prev => ({ 
+                ...prev, 
+                exception_type: value as 'duplicate' | 'amount_variance' | 'vendor_mismatch' | 'missing_po' | 'compliance_issue' 
+              }))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select exception type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="data_validation">Data Validation Error</SelectItem>
-                <SelectItem value="format_error">Format Error</SelectItem>
-                <SelectItem value="missing_information">Missing Information</SelectItem>
-                <SelectItem value="calculation_error">Calculation Error</SelectItem>
+                <SelectItem value="duplicate">Duplicate Invoice</SelectItem>
+                <SelectItem value="amount_variance">Amount Variance</SelectItem>
+                <SelectItem value="vendor_mismatch">Vendor Mismatch</SelectItem>
+                <SelectItem value="missing_po">Missing PO Number</SelectItem>
                 <SelectItem value="compliance_issue">Compliance Issue</SelectItem>
-                <SelectItem value="system_error">System Error</SelectItem>
-                <SelectItem value="integration_failure">Integration Failure</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
