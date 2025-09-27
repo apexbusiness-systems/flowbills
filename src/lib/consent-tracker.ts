@@ -1,11 +1,10 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export type ConsentType = 
-  | 'commercial_email'
-  | 'invoice_notification' 
-  | 'marketing_communication'
-  | 'system_notification'
-  | 'sms_notification';
+  | 'email'
+  | 'marketing' 
+  | 'sms'
+  | 'data_processing';
 
 export interface ConsentEvent {
   email?: string;
@@ -26,7 +25,7 @@ export const logConsentEvent = async (event: ConsentEvent): Promise<void> => {
   try {
     const { error } = await supabase
       .from('consent_logs')
-      .insert({
+      .insert([{
         user_id: event.userId,
         email: event.email,
         phone: event.phone,
@@ -35,7 +34,7 @@ export const logConsentEvent = async (event: ConsentEvent): Promise<void> => {
         consent_text: event.consentText || null,
         ip_address: event.ipAddress || null,
         user_agent: event.userAgent || null
-      });
+      }]);
 
     if (error) {
       console.error('Failed to log consent event:', error);
@@ -151,7 +150,7 @@ export const processUnsubscribe = async (params: {
     // Log withdrawal of consent
     await logConsentEvent({
       email: params.email,
-      consentType: params.consentType || 'commercial_email',
+      consentType: params.consentType || 'email',
       consentGiven: false,
       consentText: 'User requested unsubscribe via web form',
       ipAddress: getClientIP(),

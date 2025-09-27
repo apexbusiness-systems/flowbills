@@ -29,20 +29,20 @@ const mockEmailTemplate = {
 // Mock consent logging function
 const logConsentEvent = async (eventData: {
   email: string;
-  consentType: string;
+  consentType: 'email' | 'marketing' | 'sms' | 'data_processing';
   consentGiven: boolean;
   consentText?: string;
 }) => {
   const { data, error } = await supabase
     .from('consent_logs')
-    .insert({
+    .insert([{
       email: eventData.email,
       consent_type: eventData.consentType,
       consent_given: eventData.consentGiven,
       consent_text: eventData.consentText,
       ip_address: '192.168.1.1', // Mock IP
       user_agent: 'Mozilla/5.0 Test Agent'
-    });
+    }]);
   
   if (error) throw error;
   return data;
@@ -91,48 +91,54 @@ describe('CASL/PIPEDA Compliance Tests', () => {
     it('should log consent events when sending commercial emails', async () => {
       const consentData = {
         email: 'test@example.com',
-        consentType: 'commercial_email',
+        consentType: 'email' as const,
         consentGiven: true,
         consentText: 'User agreed to receive invoice notifications via email'
       };
 
       // Mock successful consent logging
       vi.spyOn(supabase.from('consent_logs'), 'insert').mockResolvedValue({
-        data: [{ id: '123', ...consentData }],
-        error: null
-      });
+        data: [{ id: '123', email: consentData.email, consent_type: consentData.consentType, consent_given: consentData.consentGiven, consent_text: consentData.consentText }],
+        error: null,
+        status: 201,
+        statusText: 'Created',
+        count: null
+      } as any);
 
       const result = await logConsentEvent(consentData);
       
       expect(supabase.from('consent_logs').insert).toHaveBeenCalledWith(
-        expect.objectContaining({
+        expect.arrayContaining([expect.objectContaining({
           email: consentData.email,
           consent_type: consentData.consentType,
           consent_given: consentData.consentGiven,
           consent_text: consentData.consentText
-        })
+        })])
       );
     });
 
     it('should log withdrawal of consent', async () => {
       const withdrawalData = {
         email: 'test@example.com',
-        consentType: 'commercial_email',
+        consentType: 'email' as const,
         consentGiven: false,
         consentText: 'User withdrew consent for commercial emails'
       };
 
       vi.spyOn(supabase.from('consent_logs'), 'insert').mockResolvedValue({
-        data: [{ id: '456', ...withdrawalData }],
-        error: null
-      });
+        data: [{ id: '456', email: withdrawalData.email, consent_type: withdrawalData.consentType, consent_given: withdrawalData.consentGiven, consent_text: withdrawalData.consentText }],
+        error: null,
+        status: 201,
+        statusText: 'Created',
+        count: null
+      } as any);
 
       await logConsentEvent(withdrawalData);
       
       expect(supabase.from('consent_logs').insert).toHaveBeenCalledWith(
-        expect.objectContaining({
+        expect.arrayContaining([expect.objectContaining({
           consent_given: false
-        })
+        })])
       );
     });
   });
@@ -141,7 +147,7 @@ describe('CASL/PIPEDA Compliance Tests', () => {
     it('should track all outbound commercial communications', async () => {
       const communicationData = {
         email: 'customer@example.com',
-        consentType: 'invoice_notification',
+        consentType: 'email' as const,
         consentGiven: true,
         consentText: 'Implicit consent - existing business relationship for invoice processing'
       };
@@ -156,9 +162,12 @@ describe('CASL/PIPEDA Compliance Tests', () => {
       };
 
       vi.spyOn(supabase.from('consent_logs'), 'insert').mockResolvedValue({
-        data: [{ id: '789', ...communicationData }],
-        error: null
-      });
+        data: [{ id: '789', email: communicationData.email, consent_type: communicationData.consentType, consent_given: communicationData.consentGiven, consent_text: communicationData.consentText }],
+        error: null,
+        status: 201,
+        statusText: 'Created',
+        count: null
+      } as any);
 
       const result = await sendEmailWithConsent(communicationData);
       
@@ -195,12 +204,15 @@ describe('CASL/PIPEDA Compliance Tests', () => {
           {
             id: '1',
             email: userEmail,
-            consent_type: 'commercial_email',
+            consent_type: 'email',
             consent_given: true,
             created_at: '2025-09-27T00:00:00Z'
           }
         ],
-        error: null
+        error: null,
+        status: 200,
+        statusText: 'OK',
+        count: 1
       });
 
       const { data } = await supabase
@@ -250,7 +262,7 @@ describe('Consent Logging Integration', () => {
     // This test would run against actual Supabase in integration testing
     const testConsent = {
       email: 'integration.test@example.com',
-      consent_type: 'invoice_notification' as const,
+      consent_type: 'email' as const,
       consent_given: true,
       consent_text: 'Integration test consent',
       ip_address: '127.0.0.1',
@@ -261,12 +273,15 @@ describe('Consent Logging Integration', () => {
     // For unit testing, we mock it
     vi.spyOn(supabase.from('consent_logs'), 'insert').mockResolvedValue({
       data: [{ id: 'test-id', ...testConsent }],
-      error: null
-    });
+      error: null,
+      status: 201,
+      statusText: 'Created',
+      count: null
+    } as any);
 
     const { data, error } = await supabase
       .from('consent_logs')
-      .insert(testConsent);
+      .insert([testConsent]);
 
     expect(error).toBeNull();
     expect(data).toBeDefined();

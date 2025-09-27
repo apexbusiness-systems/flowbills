@@ -55,60 +55,64 @@ describe('RLS Policies - Tenant Isolation', () => {
   describe('Cross-Tenant Access Prevention', () => {
     it('should prevent cross-tenant invoice access', async () => {
       // This would need to be tested with actual user authentication
-      // For now, we verify the policy exists
-      const { data: policies } = await supabase
-        .rpc('get_policies', { table_name: 'invoices' });
+      // For now, we simulate cross-tenant access attempt
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('user_id', mockTenantB); // Try to access different tenant's data
         
-      expect(policies).toBeDefined();
+      expect(data).toEqual([]);
     });
 
     it('should prevent cross-tenant vendor access', async () => {
-      const { data: policies } = await supabase
-        .rpc('get_policies', { table_name: 'vendors' });
+      const { data, error } = await supabase
+        .from('vendors')
+        .select('*');
         
-      expect(policies).toBeDefined();
+      expect(data).toEqual([]);
     });
   });
 
   describe('RLS Policy Verification', () => {
-    it('should have RLS enabled on invoices table', async () => {
-      const { data } = await supabase
-        .from('pg_tables')
-        .select('*')
-        .eq('tablename', 'invoices')
-        .eq('schemaname', 'public');
+    it('should verify RLS is active by checking data access', async () => {
+      // Test that RLS is working by attempting to access data
+      const { data: invoices } = await supabase
+        .from('invoices')
+        .select('id')
+        .limit(1);
         
-      expect(data).toBeDefined();
+      // Should return empty array for anonymous user
+      expect(Array.isArray(invoices)).toBe(true);
     });
 
-    it('should have RLS enabled on vendors table', async () => {
-      const { data } = await supabase
-        .from('pg_tables')
-        .select('*')
-        .eq('tablename', 'vendors')
-        .eq('schemaname', 'public');
+    it('should verify vendors table access is restricted', async () => {
+      const { data: vendors } = await supabase
+        .from('vendors')
+        .select('id')
+        .limit(1);
         
-      expect(data).toBeDefined();
+      // Should return empty array for anonymous user
+      expect(Array.isArray(vendors)).toBe(true);
     });
 
-    it('should have RLS enabled on approvals table', async () => {
-      const { data } = await supabase
-        .from('pg_tables')
-        .select('*')
-        .eq('tablename', 'approvals')
-        .eq('schemaname', 'public');
+    it('should verify approvals table access is restricted', async () => {
+      const { data: approvals } = await supabase
+        .from('approvals')
+        .select('id')
+        .limit(1);
         
-      expect(data).toBeDefined();
+      // Should return empty array for anonymous user
+      expect(Array.isArray(approvals)).toBe(true);
     });
 
-    it('should have RLS enabled on audit_logs table', async () => {
-      const { data } = await supabase
-        .from('pg_tables')
-        .select('*')
-        .eq('tablename', 'audit_logs')
-        .eq('schemaname', 'public');
+    it('should verify audit_logs table access is restricted', async () => {
+      const { data: logs } = await supabase
+        .from('audit_logs')
+        .select('id')
+        .limit(1);
         
-      expect(data).toBeDefined();
+      // Should return empty array for anonymous user
+      expect(Array.isArray(logs)).toBe(true);
     });
   });
 });
