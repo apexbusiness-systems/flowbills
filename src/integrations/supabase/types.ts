@@ -187,6 +187,152 @@ export type Database = {
         }
         Relationships: []
       }
+      country_validations: {
+        Row: {
+          country_code: string
+          created_at: string
+          document_id: string | null
+          error_messages: Json | null
+          id: string
+          rule_type: Database["public"]["Enums"]["validation_rule_type"]
+          tenant_id: string
+          validation_metadata: Json | null
+          validation_passed: boolean
+          warnings: Json | null
+        }
+        Insert: {
+          country_code: string
+          created_at?: string
+          document_id?: string | null
+          error_messages?: Json | null
+          id?: string
+          rule_type: Database["public"]["Enums"]["validation_rule_type"]
+          tenant_id?: string
+          validation_metadata?: Json | null
+          validation_passed: boolean
+          warnings?: Json | null
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          document_id?: string | null
+          error_messages?: Json | null
+          id?: string
+          rule_type?: Database["public"]["Enums"]["validation_rule_type"]
+          tenant_id?: string
+          validation_metadata?: Json | null
+          validation_passed?: boolean
+          warnings?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "country_validations_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "einvoice_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      einvoice_documents: {
+        Row: {
+          confidence_score: number | null
+          country_code: string | null
+          created_at: string
+          currency: string | null
+          document_id: string
+          due_date: string | null
+          format: Database["public"]["Enums"]["einvoice_format"]
+          id: string
+          issue_date: string | null
+          receiver_id: string | null
+          sender_id: string | null
+          status: Database["public"]["Enums"]["einvoice_status"]
+          tenant_id: string
+          total_amount: number | null
+          updated_at: string
+          validation_results: Json | null
+          xml_content: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          country_code?: string | null
+          created_at?: string
+          currency?: string | null
+          document_id: string
+          due_date?: string | null
+          format: Database["public"]["Enums"]["einvoice_format"]
+          id?: string
+          issue_date?: string | null
+          receiver_id?: string | null
+          sender_id?: string | null
+          status?: Database["public"]["Enums"]["einvoice_status"]
+          tenant_id?: string
+          total_amount?: number | null
+          updated_at?: string
+          validation_results?: Json | null
+          xml_content?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          country_code?: string | null
+          created_at?: string
+          currency?: string | null
+          document_id?: string
+          due_date?: string | null
+          format?: Database["public"]["Enums"]["einvoice_format"]
+          id?: string
+          issue_date?: string | null
+          receiver_id?: string | null
+          sender_id?: string | null
+          status?: Database["public"]["Enums"]["einvoice_status"]
+          tenant_id?: string
+          total_amount?: number | null
+          updated_at?: string
+          validation_results?: Json | null
+          xml_content?: string | null
+        }
+        Relationships: []
+      }
+      einvoice_policies: {
+        Row: {
+          actions: Json
+          conditions: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          policy_name: string
+          policy_type: string
+          priority: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          actions?: Json
+          conditions?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          policy_name: string
+          policy_type: string
+          priority?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Update: {
+          actions?: Json
+          conditions?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          policy_name?: string
+          policy_type?: string
+          priority?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_templates: {
         Row: {
           body_template: string
@@ -308,6 +454,53 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      fraud_flags_einvoice: {
+        Row: {
+          created_at: string
+          details: Json
+          document_id: string | null
+          flag_type: Database["public"]["Enums"]["fraud_flag_type"]
+          id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          risk_score: number
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          document_id?: string | null
+          flag_type: Database["public"]["Enums"]["fraud_flag_type"]
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          risk_score?: number
+          status?: string
+          tenant_id?: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          document_id?: string | null
+          flag_type?: Database["public"]["Enums"]["fraud_flag_type"]
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          risk_score?: number
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fraud_flags_einvoice_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "einvoice_documents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invoices: {
         Row: {
@@ -437,6 +630,110 @@ export type Database = {
         }
         Relationships: []
       }
+      model_stats: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          drift_stat: Json | null
+          id: string
+          model: string
+          payload: Json | null
+          stage: string
+          tenant_id: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          drift_stat?: Json | null
+          id?: string
+          model: string
+          payload?: Json | null
+          stage: string
+          tenant_id?: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          drift_stat?: Json | null
+          id?: string
+          model?: string
+          payload?: Json | null
+          stage?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
+      peppol_messages: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          direction: string
+          document_id: string | null
+          document_type_id: string | null
+          error_details: Json | null
+          id: string
+          last_attempt_at: string | null
+          max_retries: number | null
+          message_id: string
+          process_id: string | null
+          receiver_participant_id: string | null
+          retry_count: number | null
+          scheduled_at: string | null
+          sender_participant_id: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          direction: string
+          document_id?: string | null
+          document_type_id?: string | null
+          error_details?: Json | null
+          id?: string
+          last_attempt_at?: string | null
+          max_retries?: number | null
+          message_id: string
+          process_id?: string | null
+          receiver_participant_id?: string | null
+          retry_count?: number | null
+          scheduled_at?: string | null
+          sender_participant_id?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          direction?: string
+          document_id?: string | null
+          document_type_id?: string | null
+          error_details?: Json | null
+          id?: string
+          last_attempt_at?: string | null
+          max_retries?: number | null
+          message_id?: string
+          process_id?: string | null
+          receiver_participant_id?: string | null
+          retry_count?: number | null
+          scheduled_at?: string | null
+          sender_participant_id?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "peppol_messages_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "einvoice_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       policies: {
         Row: {
           actions: Json
@@ -470,6 +767,45 @@ export type Database = {
           policy_type?: string
           priority?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      queue_jobs: {
+        Row: {
+          attempts: number | null
+          created_at: string
+          error_message: string | null
+          id: string
+          job_data: Json
+          max_attempts: number | null
+          processed_at: string | null
+          queue_name: string
+          scheduled_at: string | null
+          status: string | null
+        }
+        Insert: {
+          attempts?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_data: Json
+          max_attempts?: number | null
+          processed_at?: string | null
+          queue_name: string
+          scheduled_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          attempts?: number | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_data?: Json
+          max_attempts?: number | null
+          processed_at?: string | null
+          queue_name?: string
+          scheduled_at?: string | null
+          status?: string | null
         }
         Relationships: []
       }
@@ -716,12 +1052,26 @@ export type Database = {
     Enums: {
       approval_status: "pending" | "approved" | "rejected"
       consent_type: "email" | "sms" | "data_processing" | "marketing"
+      einvoice_format: "bis30" | "xrechnung" | "facturx" | "pint"
+      einvoice_status:
+        | "pending"
+        | "validated"
+        | "sent"
+        | "received"
+        | "failed"
+        | "rejected"
       exception_type:
         | "duplicate"
         | "amount_variance"
         | "vendor_mismatch"
         | "missing_po"
         | "compliance_issue"
+      fraud_flag_type:
+        | "duplicate_bank"
+        | "duplicate_tax_id"
+        | "amount_anomaly"
+        | "frequency_anomaly"
+        | "vendor_mismatch"
       invoice_status:
         | "pending"
         | "approved"
@@ -730,6 +1080,12 @@ export type Database = {
         | "duplicate"
       risk_level: "low" | "medium" | "high" | "critical"
       user_role: "admin" | "operator" | "viewer"
+      validation_rule_type:
+        | "en16931"
+        | "bis30"
+        | "xrechnung"
+        | "facturx"
+        | "country_specific"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -859,12 +1215,28 @@ export const Constants = {
     Enums: {
       approval_status: ["pending", "approved", "rejected"],
       consent_type: ["email", "sms", "data_processing", "marketing"],
+      einvoice_format: ["bis30", "xrechnung", "facturx", "pint"],
+      einvoice_status: [
+        "pending",
+        "validated",
+        "sent",
+        "received",
+        "failed",
+        "rejected",
+      ],
       exception_type: [
         "duplicate",
         "amount_variance",
         "vendor_mismatch",
         "missing_po",
         "compliance_issue",
+      ],
+      fraud_flag_type: [
+        "duplicate_bank",
+        "duplicate_tax_id",
+        "amount_anomaly",
+        "frequency_anomaly",
+        "vendor_mismatch",
       ],
       invoice_status: [
         "pending",
@@ -875,6 +1247,13 @@ export const Constants = {
       ],
       risk_level: ["low", "medium", "high", "critical"],
       user_role: ["admin", "operator", "viewer"],
+      validation_rule_type: [
+        "en16931",
+        "bis30",
+        "xrechnung",
+        "facturx",
+        "country_specific",
+      ],
     },
   },
 } as const
