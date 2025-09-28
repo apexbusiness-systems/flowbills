@@ -48,11 +48,11 @@ serve(async (req) => {
     const ksefToken = Deno.env.get('KSEF_TOKEN')
     const ksefEnvironment = Deno.env.get('KSEF_ENVIRONMENT') || 'test'
     const ksefBaseUrl = ksefEnvironment === 'production' 
-      ? 'https://ksef.mf.gov.pl/api'
+      ? 'https://ksef.mf.gov.pl/api' 
       : 'https://ksef-test.mf.gov.pl/api'
 
-    if (!ksefToken) {
-      throw new Error('KSeF token not configured')
+    if (!ksefToken && (operation === 'send' || operation === 'status')) {
+      console.warn('KSeF token not configured - using mock mode')
     }
 
     let response: KSeFResponse

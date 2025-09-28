@@ -50,7 +50,9 @@ serve(async (req) => {
       : 'https://prewww7.aeat.es/wlpl/TIKE-CONT-REG-PREV'
 
     if (!aeatCertificate || !aeatPrivateKey) {
-      throw new Error('AEAT certificate or private key not configured')
+      if (operation === 'submit') {
+        console.warn('AEAT certificate/key not configured - using mock mode')
+      }
     }
 
     let response: VerifactuResponse
