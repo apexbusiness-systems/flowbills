@@ -1,13 +1,13 @@
 {
-  "name": "JubeeKids",
-  "short_name": "JubeeKids",
-  "description": "Safe, engaging digital experiences designed for children",
+  "name": "FLOWBills.ca",
+  "short_name": "FLOWBills",
+  "description": "Automate invoices. Approve faster. Close with confidence.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FFF8E1",
-  "theme_color": "#FFD54A",
+  "background_color": "#0A0A0A",
+  "theme_color": "#D4AF37",
   "orientation": "portrait-primary",
-  "categories": ["kids", "education", "entertainment"],
+  "categories": ["business", "finance", "productivity"],
   "lang": "en",
   "icons": [
     {
@@ -67,27 +67,27 @@
   ],
   "shortcuts": [
     {
-      "name": "Play Stories",
-      "short_name": "Stories",
-      "description": "Interactive storytelling experiences",
-      "url": "/story",
+      "name": "Upload Invoice",
+      "short_name": "Upload",
+      "description": "Quick invoice upload and processing",
+      "url": "/invoices",
       "icons": [
         {
-          "src": "/icons/shortcut-story.png",
-          "sizes": "96x96",
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192",
           "type": "image/png"
         }
       ]
     },
     {
-      "name": "Calm Kit",
-      "short_name": "Calm",
-      "description": "Mindfulness and calming activities",
-      "url": "/calm-kit",
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View approval queue and analytics",
+      "url": "/dashboard",
       "icons": [
         {
-          "src": "/icons/shortcut-calm.png",
-          "sizes": "96x96", 
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192", 
           "type": "image/png"
         }
       ]
