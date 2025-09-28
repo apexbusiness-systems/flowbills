@@ -25,6 +25,8 @@ import Integrations from "./pages/Integrations";
 import Analytics from "./pages/Analytics";
 import Workflows from "./pages/Workflows";
 import Search from "./pages/Search";
+import CountryPacks from "./pages/CountryPacks";
+import Dashboard from "./pages/Dashboard";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Security from "./pages/Security";
@@ -141,6 +143,14 @@ const AuthRoutes = () => {
         } 
       />
       <Route 
+        path="/country-packs" 
+        element={
+          <ProtectedRoute requiredRole="operator">
+            <CountryPacks />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
         path="/client-integration" 
         element={<ClientIntegration />} 
       />
@@ -148,7 +158,7 @@ const AuthRoutes = () => {
         path="/dashboard" 
         element={
           <ProtectedRoute>
-            <Landing />
+            <Dashboard />
           </ProtectedRoute>
         } 
       />
