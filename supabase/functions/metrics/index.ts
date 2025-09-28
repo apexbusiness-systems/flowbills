@@ -75,7 +75,7 @@ serve(async (req) => {
     if (format === 'prometheus') {
       const prometheusMetrics = formatPrometheusMetrics(metrics);
       return new Response(prometheusMetrics, {
-        headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
+        headers: { ...corsHeaders, 'Content-Type': 'text/plain; version=0.0.4' },
       });
     }
 
@@ -232,36 +232,23 @@ async function collectMetrics(supabase: any, startTime: Date, endTime: Date): Pr
 }
 
 function formatPrometheusMetrics(metrics: MetricsData): string {
-  const lines = [
-    `# HELP invoice_autoapproved_total Total number of auto-approved invoices`,
-    `# TYPE invoice_autoapproved_total counter`,
-    `invoice_autoapproved_total ${metrics.invoice_autoapproved_total}`,
-    
-    `# HELP invoice_manual_review_total Total number of invoices requiring manual review`,
-    `# TYPE invoice_manual_review_total counter`, 
-    `invoice_manual_review_total ${metrics.invoice_manual_review_total}`,
-    
-    `# HELP stp_rate Straight Through Processing rate (0-1)`,
-    `# TYPE stp_rate gauge`,
-    `stp_rate ${metrics.stp_rate.toFixed(3)}`,
-    
-    `# HELP fraud_flags_total Total number of fraud flags raised`,
-    `# TYPE fraud_flags_total counter`,
+  const body = [
+    "# HELP einvoice_validated_total Validated e-invoices",
+    "# TYPE einvoice_validated_total counter",
+    `einvoice_validated_total ${metrics.invoice_autoapproved_total}`,
+    "# HELP peppol_send_fail_total Failed Peppol sends",
+    "# TYPE peppol_send_fail_total counter",
+    `peppol_send_fail_total ${metrics.ocr_failures_total}`,
+    "# HELP policy_eval_total Policy evaluations",
+    "# TYPE policy_eval_total counter",
+    `policy_eval_total ${metrics.policy_evaluations_total}`,
+    "# HELP fraud_flags_total Fraud flags emitted",
+    "# TYPE fraud_flags_total counter",
     `fraud_flags_total ${metrics.fraud_flags_total}`,
-    
-    `# HELP hil_queue_size Current size of human-in-loop review queue`,
-    `# TYPE hil_queue_size gauge`,
-    `hil_queue_size ${metrics.hil_queue_size}`,
-    
-    `# HELP ocr_average_confidence Average OCR confidence score (0-1)`,
-    `# TYPE ocr_average_confidence gauge`,
-    `ocr_average_confidence ${metrics.ocr_average_confidence.toFixed(3)}`,
-  ];
-
-  // Add fraud flags by type
-  Object.entries(metrics.fraud_flags_by_type).forEach(([type, count]) => {
-    lines.push(`fraud_flags_by_type{type="${type}"} ${count}`);
-  });
-
-  return lines.join('\n') + '\n';
+    "# HELP ocr_errors_total OCR pipeline errors",
+    "# TYPE ocr_errors_total counter",
+    `ocr_errors_total ${metrics.ocr_failures_total}`,
+  ].join("\n");
+  
+  return body + "\n";
 }

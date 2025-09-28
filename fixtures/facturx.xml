@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rsm:CrossIndustryDocument xmlns:rsm="urn:ferd:CrossIndustryDocument:invoice:1p0"
+                          xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:12"
+                          xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:15">
+    <rsm:DocumentContextParameter>
+        <ram:ID>urn:factur-x.eu:1p0:basicwl</ram:ID>
+    </rsm:DocumentContextParameter>
+    
+    <rsm:HeaderExchangedDocument>
+        <ram:ID>INV-FX-001</ram:ID>
+        <ram:Name>FACTURE</ram:Name>
+        <ram:TypeCode>380</ram:TypeCode>
+        <ram:IssueDateTime>
+            <udt:DateTimeString format="102">20250101</udt:DateTimeString>
+        </ram:IssueDateTime>
+    </rsm:HeaderExchangedDocument>
+    
+    <rsm:SpecifiedSupplyChainTradeTransaction>
+        <ram:ApplicableSupplyChainTradeAgreement>
+            <ram:SellerSupplyChainTradeParty>
+                <ram:Name>Test Factur-X Supplier</ram:Name>
+            </ram:SellerSupplyChainTradeParty>
+            <ram:BuyerSupplyChainTradeParty>
+                <ram:Name>Test Factur-X Customer</ram:Name>
+            </ram:BuyerSupplyChainTradeParty>
+        </ram:ApplicableSupplyChainTradeAgreement>
+        
+        <ram:ApplicableSupplyChainTradeSettlement>
+            <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
+            <ram:SpecifiedSupplyChainTradeSettlementMonetarySummation>
+                <ram:LineTotalAmount currencyID="EUR">100.00</ram:LineTotalAmount>
+                <ram:TaxBasisTotalAmount currencyID="EUR">100.00</ram:TaxBasisTotalAmount>
+                <ram:TaxTotalAmount currencyID="EUR">20.00</ram:TaxTotalAmount>
+                <ram:GrandTotalAmount currencyID="EUR">120.00</ram:GrandTotalAmount>
+                <ram:DuePayableAmount currencyID="EUR">120.00</ram:DuePayableAmount>
+            </ram:SpecifiedSupplyChainTradeSettlementMonetarySummation>
+        </ram:ApplicableSupplyChainTradeSettlement>
+    </rsm:SpecifiedSupplyChainTradeTransaction>
+</rsm:CrossIndustryDocument>

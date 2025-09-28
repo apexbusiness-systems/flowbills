@@ -1,81 +1,73 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Upload, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import type { EinvoiceVM } from "../../lib/types";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 export default function EInvoicing() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [uploading, setUploading] = useState(false);
-  const [validating, setValidating] = useState(false);
-  const [sending, setSending] = useState(false);
+  const [xml, setXml] = useState<string>("");
+  const [doc, setDoc] = useState<EinvoiceVM | null>(null);
+  const [valid, setValid] = useState<boolean | null>(null);
+  const [issues, setIssues] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
   const [documents, setDocuments] = useState<any[]>([]);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    
-    if (!file.name.toLowerCase().endsWith('.xml')) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload an XML file",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setSelectedFile(file);
-    setUploading(true);
-    
+  async function onValidate() {
+    setBusy(true);
+    const { data, error } = await supabase.functions.invoke("einvoice_validate", {
+      body: { xml }
+    });
+    setBusy(false);
+    if (error) return toast({
+      title: "Validation failed",
+      description: error.message,
+      variant: "destructive"
+    });
+    setValid(!!data?.passed);
+    setIssues(data?.issues ?? []);
+    setDoc(data?.doc ?? null);
+  }
+
+  async function onSend() {
+    setBusy(true);
+    const { data, error } = await supabase.functions.invoke("einvoice_send", {
+      body: { docId: doc?.id }
+    });
+    setBusy(false);
+    if (error) return toast({
+      title: "Send failed",
+      description: error.message,
+      variant: "destructive"
+    });
+    toast({
+      title: "Document sent",
+      description: "E-Invoice queued for Peppol send"
+    });
+  }
+
+  const fetchDocuments = async () => {
     try {
-      const xmlContent = await file.text();
-      const documentId = `doc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Detect format based on content
-      let format = 'bis30';
-      if (xmlContent.includes('CrossIndustryInvoice')) format = 'xrechnung';
-      else if (xmlContent.includes('CrossIndustryDocument')) format = 'facturx';
-      
-      // Store document
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('einvoice_documents')
-        .insert({
-          document_id: documentId,
-          format: format as 'bis30' | 'xrechnung' | 'facturx',
-          xml_content: xmlContent,
-          status: 'pending' as const,
-          tenant_id: user?.id || ''
-        });
+        .select('*')
+        .eq('tenant_id', user?.id)
+        .order('created_at', { ascending: false });
         
       if (error) throw error;
-      
-      toast({
-        title: "Document uploaded",
-        description: "E-Invoice document uploaded successfully"
-      });
-      
-      await fetchDocuments();
+      setDocuments(data || []);
     } catch (error) {
-      console.error('Upload error:', error);
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload document",
-        variant: "destructive"
-      });
-    } finally {
-      setUploading(false);
-      setSelectedFile(null);
+      console.error('Fetch error:', error);
     }
   };
 
   const validateDocument = async (documentId: string, format: string, xmlContent: string) => {
-    setValidating(true);
+    setBusy(true);
     try {
       const { error } = await supabase.functions.invoke('einvoice_validate', {
         body: {
@@ -102,12 +94,12 @@ export default function EInvoicing() {
         variant: "destructive"
       });
     } finally {
-      setValidating(false);
+      setBusy(false);
     }
   };
 
   const sendDocument = async (documentId: string) => {
-    setSending(true);
+    setBusy(true);
     try {
       const { error } = await supabase.functions.invoke('einvoice_send', {
         body: {
@@ -134,22 +126,7 @@ export default function EInvoicing() {
         variant: "destructive"
       });
     } finally {
-      setSending(false);
-    }
-  };
-
-  const fetchDocuments = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('einvoice_documents')
-        .select('*')
-        .eq('tenant_id', user?.id)
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
-      setDocuments(data || []);
-    } catch (error) {
-      console.error('Fetch error:', error);
+      setBusy(false);
     }
   };
 
@@ -169,104 +146,82 @@ export default function EInvoicing() {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">E-Invoicing</h1>
-        <p className="text-muted-foreground">Upload, validate, and send electronic invoices via Peppol network</p>
+    <div className="p-6 max-w-3xl">
+      <h1 className="text-xl font-semibold mb-4">E-Invoicing</h1>
+      <textarea 
+        className="w-full min-h-48 border rounded p-3" 
+        placeholder="Paste BIS/XRechnung/Factur-X XML" 
+        value={xml} 
+        onChange={e=>setXml(e.target.value)} 
+      />
+      <div className="mt-3 flex gap-2">
+        <Button onClick={onValidate} disabled={!xml || busy}>Validate</Button>
+        <Button onClick={onSend} disabled={!valid || !doc || busy}>Send via Peppol AP</Button>
       </div>
+      {valid !== null && (
+        <div className="mt-4">
+          <div className={valid ? "text-green-700" : "text-red-700"}>
+            {valid ? "Validation passed" : "Validation failed"}
+          </div>
+          {!valid && issues.length > 0 && (
+            <ul className="list-disc pl-6 mt-2">{issues.map((i,idx)=><li key={idx}>{i}</li>)}</ul>
+          )}
+        </div>
+      )}
 
-      <div className="grid gap-6">
-        {/* Upload Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
-              Upload E-Invoice
-            </CardTitle>
-            <CardDescription>
-              Support for BIS 3.0, XRechnung, Factur-X, and EN 16931 formats
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center">
-              <input
-                type="file"
-                accept=".xml"
-                onChange={handleFileUpload}
-                disabled={uploading}
-                className="hidden"
-                id="file-upload"
-              />
-              <label
-                htmlFor="file-upload"
-                className="cursor-pointer flex flex-col items-center gap-2"
-              >
-                <Upload className="h-8 w-8 text-muted-foreground" />
-                <span className="text-sm font-medium">
-                  {uploading ? 'Uploading...' : 'Click to upload XML file'}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Supports BIS 3.0, XRechnung, Factur-X formats
-                </span>
-              </label>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Documents List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>E-Invoice Documents</CardTitle>
-            <CardDescription>Manage your electronic invoice documents</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {documents.map((doc) => (
-                <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
-                    {getStatusIcon(doc.status)}
-                    <div>
-                      <p className="font-medium">{doc.document_id}</p>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Badge variant="outline">{doc.format.toUpperCase()}</Badge>
-                        <span>•</span>
-                        <span>{doc.total_amount ? `${doc.total_amount} ${doc.currency}` : 'No amount'}</span>
-                        <span>•</span>
-                        <span>Confidence: {doc.confidence_score}%</span>
-                      </div>
+      {/* Documents List */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>E-Invoice Documents</CardTitle>
+          <CardDescription>Manage your electronic invoice documents</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {documents.map((doc) => (
+              <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center gap-4">
+                  {getStatusIcon(doc.status)}
+                  <div>
+                    <p className="font-medium">{doc.document_id}</p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Badge variant="outline">{doc.format.toUpperCase()}</Badge>
+                      <span>•</span>
+                      <span>{doc.total_amount ? `${doc.total_amount} ${doc.currency}` : 'No amount'}</span>
+                      <span>•</span>
+                      <span>Confidence: {doc.confidence_score}%</span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    {doc.status === 'pending' && (
-                      <Button
-                        size="sm"
-                        onClick={() => validateDocument(doc.document_id, doc.format, doc.xml_content)}
-                        disabled={validating}
-                      >
-                        {validating ? 'Validating...' : 'Validate'}
-                      </Button>
-                    )}
-                    {doc.status === 'validated' && (
-                      <Button
-                        size="sm"
-                        onClick={() => sendDocument(doc.document_id)}
-                        disabled={sending}
-                      >
-                        {sending ? 'Sending...' : 'Send via AP'}
-                      </Button>
-                    )}
-                  </div>
                 </div>
-              ))}
-              {documents.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  No documents uploaded yet
+                <div className="flex gap-2">
+                  {doc.status === 'pending' && (
+                    <Button
+                      size="sm"
+                      onClick={() => validateDocument(doc.document_id, doc.format, doc.xml_content)}
+                      disabled={busy}
+                    >
+                      {busy ? 'Validating...' : 'Validate'}
+                    </Button>
+                  )}
+                  {doc.status === 'validated' && (
+                    <Button
+                      size="sm"
+                      onClick={() => sendDocument(doc.document_id)}
+                      disabled={busy}
+                    >
+                      {busy ? 'Sending...' : 'Send via AP'}
+                    </Button>
+                  )}
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              </div>
+            ))}
+            {documents.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No documents uploaded yet
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

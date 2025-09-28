@@ -301,6 +301,15 @@ When error budget reaches:
 - **Incident Response**: SLO-focused incident management
 - **Regular Updates**: Quarterly training updates
 
+## Phase 3 (Supabase)
+- Availability (Edge Functions): 99.9% 30d
+- Latency p95: /einvoice_validate < 300ms; /einvoice_send < 500ms (excluding AP transit)
+- AP send success: ≥ 99.0% over 7d (excluding partner outages)
+- STP uplift target: +10–20 pts (HIL sampling v2)
+
+### Burn-rate Alerts
+Page if: BR_1h ≥ 2.0 AND BR_6h ≥ 1.0. Ticket if: BR_24h ≥ 1.0.
+
 ---
 
 **Document Metadata**:
