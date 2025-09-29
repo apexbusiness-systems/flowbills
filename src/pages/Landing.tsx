@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Shield, Zap, BarChart3, FileText, Clock, ArrowRight } from 'lucide-react';
+import { CheckCircle, Shield, Zap, BarChart3, Clock, ArrowRight } from 'lucide-react';
 import LeadCaptureDialog from '@/components/marketing/LeadCaptureDialog';
 import { useAuth } from '@/hooks/useAuth';
 import heroImage from '@/assets/hero-oilgas.jpg';
+import companyLogo from '@/assets/company-logo.png';
 
 const Landing = () => {
   const [showLeadCapture, setShowLeadCapture] = useState(false);
@@ -34,7 +35,7 @@ const Landing = () => {
       <header className="relative z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <FileText className="h-8 w-8 text-primary" />
+            <img src={companyLogo} alt="FLOWBills.ca Logo" className="h-8 w-8 object-cover rounded-lg" />
             <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">FlowBills.ca</span>
           </div>
           <div className="flex items-center gap-4">
@@ -231,7 +232,7 @@ const Landing = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <FileText className="h-6 w-6 text-primary" />
+                <img src={companyLogo} alt="FLOWBills.ca Logo" className="h-6 w-6 object-cover rounded" />
                 <span className="text-lg font-bold">FlowBills.ca</span>
               </div>
               <p className="text-sm text-muted-foreground">

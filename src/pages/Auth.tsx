@@ -8,8 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Loader2, Droplet, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Loader2, User, Mail, Lock, Eye, EyeOff, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import companyLogo from "@/assets/company-logo.png";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -221,8 +222,12 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-12 animate-fade-in">
           <div className="flex items-center justify-center gap-5 mb-8 group">
-            <div className="h-20 w-20 bg-gradient-to-br from-primary via-primary/90 to-primary/70 rounded-2xl flex items-center justify-center shadow-2xl hover-scale group-hover:shadow-primary/20 transition-all duration-300">
-              <Droplet className="h-14 w-14 text-black fill-black" />
+            <div className="h-20 w-20 rounded-2xl flex items-center justify-center shadow-2xl hover-scale group-hover:shadow-primary/20 transition-all duration-300 overflow-hidden">
+              <img 
+                src={companyLogo} 
+                alt="FLOWBills.ca Logo" 
+                className="h-20 w-20 object-cover"
+              />
             </div>
             <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent tracking-tight">
               FLOW Bills
@@ -503,7 +508,7 @@ const Auth = () => {
                   <div className="space-y-2">
                     <Label htmlFor="companyName">Company Name</Label>
                     <div className="relative">
-                      <Droplet className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="companyName"
                         type="text"
