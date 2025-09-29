@@ -16,4 +16,29 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom"],
   },
+  build: {
+    // Production optimizations
+    minify: 'terser',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          charts: ['recharts'],
+          supabase: ['@supabase/supabase-js'],
+        },
+      },
+    },
+    target: 'es2015',
+    cssCodeSplit: true,
+  },
+  esbuild: {
+    // Remove console.log in production
+    drop: mode === 'production' ? ['console', 'debugger'] : [],
+  },
+  preview: {
+    host: "::",
+    port: 4173,
+  },
 }));

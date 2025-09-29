@@ -110,7 +110,7 @@ const DashboardHeader = () => {
           <SmartSearch
             placeholder="Search invoices, vendors, POs..."
             onSearch={handleSearch}
-            onSelect={(result) => console.log("Selected:", result)}
+            onSelect={(result) => {/* Handle search result selection */}}
           />
         </div>
 

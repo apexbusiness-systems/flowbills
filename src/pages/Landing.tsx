@@ -25,7 +25,30 @@ const Landing = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted relative overflow-hidden">
+    <>
+      {/* SEO Structured Data */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "FlowBills",
+          "description": "Professional oil & gas invoice management platform for Canadian energy companies",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web Browser",
+          "offers": {
+            "@type": "Offer",
+            "price": "Contact for pricing",
+            "priceCurrency": "CAD"
+          },
+          "provider": {
+            "@type": "Organization",
+            "name": "FlowBills.ca",
+            "url": "https://flowbills.ca"
+          }
+        })}
+      </script>
+      
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
       <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl transform translate-x-32 -translate-y-32"></div>
@@ -279,7 +302,8 @@ const Landing = () => {
         onOpenChange={setShowLeadCapture}
         interestType={captureType}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

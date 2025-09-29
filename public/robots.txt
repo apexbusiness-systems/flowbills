@@ -6,6 +6,10 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /dashboard/
+Disallow: /profile/
+Disallow: /invoices/
+Disallow: /admin/
 
-# JubeeKids - Safe digital experiences for children
-# Sitemap: https://jubeekids.com/sitemap.xml
+# FlowBills.ca - Oil & Gas Invoice Management Platform
+# Sitemap: https://flowbills.ca/sitemap.xml

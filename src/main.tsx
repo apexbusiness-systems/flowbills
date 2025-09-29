@@ -12,10 +12,16 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
-        console.log('FlowBills SW registered: ', registration);
+        // Only log in development
+        if (import.meta.env.DEV) {
+          console.log('FlowBills SW registered: ', registration);
+        }
       })
       .catch((registrationError) => {
-        console.log('FlowBills SW registration failed: ', registrationError);
+        // Only log in development
+        if (import.meta.env.DEV) {
+          console.log('FlowBills SW registration failed: ', registrationError);
+        }
       });
   });
 }
