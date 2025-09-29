@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jubeekids-v1';
+const CACHE_NAME = 'flowbills-v2';
 const urlsToCache = [
   '/',
   '/static/js/bundle.js',
@@ -11,7 +11,7 @@ const urlsToCache = [
 
 // Install Service Worker
 self.addEventListener('install', (event) => {
-  console.log('JubeeKids Service Worker installing...');
+  console.log('FlowBills Service Worker installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -21,45 +21,55 @@ self.addEventListener('install', (event) => {
       .catch((error) => {
         console.error('Failed to cache resources:', error);
       })
+      .then(() => self.skipWaiting())
   );
 });
 
 // Fetch Event
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Bypass Vite dev/HMR and source files
+  if (url.pathname.startsWith('/@vite') || url.pathname.startsWith('/@id') || url.pathname.startsWith('/src/')) {
+    return;
+  }
+
+  // Network-first for images and static icons/assets
+  if (request.destination === 'image' || url.pathname.startsWith('/assets/') || url.pathname.startsWith('/icons/')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // Default: cache-first, then network
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        if (response) {
-          return response;
-        }
-        
-        // Clone the request because it's a stream
-        const fetchRequest = event.request.clone();
-        
-        return fetch(fetchRequest).then((response) => {
-          // Check if we received a valid response
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
+    caches.match(request).then((cached) => {
+      return (
+        cached ||
+        fetch(request).then((networkResponse) => {
+          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+            return networkResponse;
           }
-          
-          // Clone the response because it's a stream
-          const responseToCache = response.clone();
-          
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          
-          return response;
-        });
-      })
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
+          return networkResponse;
+        })
+      );
+    })
   );
 });
 
 // Activate Service Worker
 self.addEventListener('activate', (event) => {
-  console.log('JubeeKids Service Worker activating...');
+  console.log('FlowBills Service Worker activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -70,7 +80,7 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
