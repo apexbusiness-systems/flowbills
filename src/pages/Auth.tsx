@@ -222,7 +222,7 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-12 animate-fade-in">
           <div className="flex items-center justify-center gap-5 mb-8 group">
-            <div className="h-20 w-20 rounded-2xl flex items-center justify-center shadow-2xl hover-scale group-hover:shadow-primary/20 transition-all duration-300 overflow-hidden">
+            <div className="h-20 w-20 rounded-2xl flex items-center justify-center bg-muted shadow-2xl hover-scale group-hover:shadow-primary/20 transition-all duration-300 overflow-hidden">
               <img 
                 src={companyLogo} 
                 alt="FLOWBills.ca Logo" 

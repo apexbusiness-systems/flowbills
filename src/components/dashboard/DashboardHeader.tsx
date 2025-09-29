@@ -56,7 +56,7 @@ const DashboardHeader = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/')}
-            className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
             aria-label="Go to homepage"
           >
             <img 
