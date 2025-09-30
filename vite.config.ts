@@ -17,9 +17,9 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom"],
   },
   build: {
-    // Production optimizations
-    minify: 'terser',
-    sourcemap: false,
+    // Production optimizations - only use terser in production
+    minify: mode === 'production' ? 'esbuild' : false,
+    sourcemap: mode !== 'production',
     rollupOptions: {
       output: {
         manualChunks: {
