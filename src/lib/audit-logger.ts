@@ -53,9 +53,13 @@ export class AuditLogger {
     // Critical events are logged immediately
     try {
       await this.persistAuditEvent(auditRecord);
-      console.log('CRITICAL AUDIT EVENT:', auditRecord);
+      if (import.meta.env.DEV) {
+        console.log('CRITICAL AUDIT EVENT:', auditRecord);
+      }
     } catch (error) {
-      console.error('Failed to log critical audit event:', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to log critical audit event:', error);
+      }
       // Store locally as backup
       this.storeLocalBackup(auditRecord);
     }

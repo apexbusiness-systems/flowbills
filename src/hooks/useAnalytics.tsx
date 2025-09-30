@@ -150,7 +150,9 @@ export const useAnalytics = () => {
 
   const exportData = useCallback(async (format: 'csv' | 'pdf', filters?: AnalyticsFilters) => {
     // Stub implementation for now
-    console.log(`Exporting ${format} with filters:`, filters);
+    if (import.meta.env.DEV) {
+      console.log(`Exporting ${format} with filters:`, filters);
+    }
   }, []);
 
   return {

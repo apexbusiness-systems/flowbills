@@ -329,7 +329,9 @@ class DisasterRecoveryManager {
     };
 
     // In a real implementation, you'd store this in a dedicated backups table
-    console.log('Backup stored in Supabase:', backupRecord);
+    if (import.meta.env.DEV) {
+      console.log('Backup stored in Supabase:', backupRecord);
+    }
   }
 
   private async storeInS3(
@@ -338,7 +340,9 @@ class DisasterRecoveryManager {
     location: BackupLocation
   ): Promise<void> {
     // In a real implementation, this would use AWS SDK to upload to S3
-    console.log(`Backup stored in S3 at ${location.endpoint}:`, backup);
+    if (import.meta.env.DEV) {
+      console.log(`Backup stored in S3 at ${location.endpoint}:`, backup);
+    }
   }
 
   private async storeLocally(backup: BackupMetadata, data: any): Promise<void> {
@@ -409,14 +413,18 @@ class DisasterRecoveryManager {
         await this.restartServices();
         break;
       default:
-        console.log(`Automated step not implemented: ${step.type}`);
+        if (import.meta.env.DEV) {
+          console.log(`Automated step not implemented: ${step.type}`);
+        }
     }
   }
 
   private async executeManualStep(step: RecoveryStep): Promise<void> {
     // For manual steps, we would typically notify administrators
     // and wait for confirmation
-    console.log(`Manual step required: ${step.description}`);
+    if (import.meta.env.DEV) {
+      console.log(`Manual step required: ${step.description}`);
+    }
   }
 
   private async restoreLatestBackup(): Promise<void> {
@@ -427,13 +435,17 @@ class DisasterRecoveryManager {
 
     // Simulate restore process
     await new Promise(resolve => setTimeout(resolve, 2000));
-    console.log(`Restored from backup: ${latestBackup.id}`);
+    if (import.meta.env.DEV) {
+      console.log(`Restored from backup: ${latestBackup.id}`);
+    }
   }
 
   private async restartServices(): Promise<void> {
     // Simulate service restart
     await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log('Services restarted');
+    if (import.meta.env.DEV) {
+      console.log('Services restarted');
+    }
   }
 
   // Utility methods

@@ -41,10 +41,13 @@ export const logConsentEvent = async (event: ConsentEvent): Promise<void> => {
       throw new Error('Consent logging failed - communication blocked for compliance');
     }
 
-    console.log('Consent event logged successfully:', {
-      type: event.consentType,
-      given: event.consentGiven,
-      email: event.email ? event.email.replace(/(.{3}).*@/, '$1***@') : undefined
+    if (import.meta.env.DEV) {
+      console.log('Consent event logged successfully:', {
+        type: event.consentType,
+        given: event.consentGiven,
+        email: event.email ? event.email.replace(/(.{3}).*@/, '$1***@') : undefined
+      });
+    }
     });
   } catch (err) {
     console.error('Consent tracking error:', err);
@@ -116,10 +119,13 @@ export const sendCompliantEmail = async (params: {
     // For now, we simulate sending
     const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
-    console.log('Email sent with compliance:', {
-      to: params.to.replace(/(.{3}).*@/, '$1***@'),
-      subject: params.subject,
-      messageId,
+    if (import.meta.env.DEV) {
+      console.log('Email sent with compliance:', {
+        to: params.to.replace(/(.{3}).*@/, '$1***@'),
+        subject: params.subject,
+        messageId,
+      });
+    }
       consentType: params.consentType
     });
 
@@ -162,10 +168,12 @@ export const processUnsubscribe = async (params: {
     // 2. Update user preferences in the database
     // 3. Add email to suppression list
     
-    console.log('Unsubscribe processed:', {
-      email: params.email.replace(/(.{3}).*@/, '$1***@'),
-      token: params.token.substr(0, 8) + '...'
-    });
+    if (import.meta.env.DEV) {
+      console.log('Unsubscribe processed:', {
+        email: params.email.replace(/(.{3}).*@/, '$1***@'),
+        token: params.token.substr(0, 8) + '...'
+      });
+    }
 
     return { success: true };
 

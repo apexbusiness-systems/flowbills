@@ -24,7 +24,9 @@ const DashboardHeader = () => {
   const isHomePage = location.pathname === '/';
   
   const handleSearch = (query: string) => {
-    console.log("Searching for:", query);
+    if (import.meta.env.DEV) {
+      console.log("Searching for:", query);
+    }
     // Implement actual search logic
   };
 
