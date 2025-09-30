@@ -48,7 +48,6 @@ export const logConsentEvent = async (event: ConsentEvent): Promise<void> => {
         email: event.email ? event.email.replace(/(.{3}).*@/, '$1***@') : undefined
       });
     }
-    });
   } catch (err) {
     console.error('Consent tracking error:', err);
     throw err;
@@ -124,10 +123,9 @@ export const sendCompliantEmail = async (params: {
         to: params.to.replace(/(.{3}).*@/, '$1***@'),
         subject: params.subject,
         messageId,
+        consentType: params.consentType
       });
     }
-      consentType: params.consentType
-    });
 
     return {
       sent: true,
