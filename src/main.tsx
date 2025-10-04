@@ -3,9 +3,18 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { applySPNonce } from "./lib/security";
+import { performanceMonitor } from "./lib/performance-monitor";
+import { queryOptimizer } from "./lib/query-optimizer";
 
 // Apply CSP nonce at runtime
 applySPNonce();
+
+// Initialize performance monitoring in production
+if (!import.meta.env.DEV) {
+  performanceMonitor.initializeWebVitals();
+  performanceMonitor.startAPIMonitoring();
+  queryOptimizer.startPeriodicCleanup();
+}
 
 // Register service worker for PWA functionality
 if ('serviceWorker' in navigator) {

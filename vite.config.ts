@@ -17,25 +17,72 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom"],
   },
   build: {
-    // Production optimizations - only use terser in production
     minify: mode === 'production' ? 'esbuild' : false,
     sourcemap: mode !== 'production',
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-          charts: ['recharts'],
-          supabase: ['@supabase/supabase-js'],
+        manualChunks: (id) => {
+          // Core vendor chunk
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'vendor-react';
+          }
+          // Router chunk
+          if (id.includes('node_modules/react-router')) {
+            return 'vendor-router';
+          }
+          // Supabase chunk
+          if (id.includes('node_modules/@supabase')) {
+            return 'vendor-supabase';
+          }
+          // Query chunk
+          if (id.includes('node_modules/@tanstack')) {
+            return 'vendor-query';
+          }
+          // UI components chunk
+          if (id.includes('node_modules/@radix-ui')) {
+            return 'vendor-ui';
+          }
+          // Charts chunk
+          if (id.includes('node_modules/recharts')) {
+            return 'vendor-charts';
+          }
+          // Other large dependencies
+          if (id.includes('node_modules')) {
+            return 'vendor-misc';
+          }
         },
+        // Optimize asset file names
+        assetFileNames: (assetInfo) => {
+          const info = assetInfo.name?.split('.');
+          const ext = info?.[info.length - 1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext || '')) {
+            return `assets/images/[name]-[hash][extname]`;
+          } else if (/woff|woff2|eot|ttf|otf/i.test(ext || '')) {
+            return `assets/fonts/[name]-[hash][extname]`;
+          }
+          return `assets/[name]-[hash][extname]`;
+        },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+      },
+      treeshake: {
+        moduleSideEffects: false,
+        propertyReadSideEffects: false,
       },
     },
-    target: 'es2015',
+    target: 'es2020',
     cssCodeSplit: true,
+    reportCompressedSize: false, // Faster builds
   },
   esbuild: {
-    // Remove console.log in production
     drop: mode === 'production' ? ['console', 'debugger'] : [],
+    legalComments: 'none',
+    treeShaking: true,
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', '@supabase/supabase-js'],
+    exclude: ['@tanstack/react-query-devtools'],
   },
   preview: {
     host: "::",

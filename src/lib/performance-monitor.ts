@@ -51,7 +51,7 @@ class PerformanceMonitor {
   }
 
   // Initialize Web Vitals monitoring
-  private initializeWebVitals() {
+  initializeWebVitals() {
     if (typeof window === 'undefined' || !('PerformanceObserver' in window)) return;
 
     // Monitor Core Web Vitals
@@ -90,7 +90,7 @@ class PerformanceMonitor {
   }
 
   // Start API call monitoring using PerformanceObserver
-  private startAPIMonitoring() {
+  startAPIMonitoring() {
     if (typeof window === 'undefined') return;
 
     const queue: any[] = [];

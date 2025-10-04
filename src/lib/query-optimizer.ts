@@ -218,7 +218,7 @@ class QueryOptimizer {
   }
 
   // Periodic cache cleanup
-  private startPeriodicCleanup() {
+  startPeriodicCleanup() {
     setInterval(() => {
       const now = Date.now();
       for (const [key, entry] of this.cache.entries()) {

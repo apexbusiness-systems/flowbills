@@ -28,10 +28,10 @@ const StatusCard = ({
 }: StatusCardProps) => {
   const navigate = useNavigate();
   const { getInvoicesStats } = useInvoices();
+  const stats = getInvoicesStats;
 
   // Use real data for invoice-related metrics
   const getRealValue = (): string | number => {
-    const stats = getInvoicesStats();
     
     switch (title) {
       case 'Monthly Volume':
@@ -51,7 +51,6 @@ const StatusCard = ({
   };
 
   const getRealChange = (): string => {
-    const stats = getInvoicesStats();
     
     switch (title) {
       case 'Monthly Volume':

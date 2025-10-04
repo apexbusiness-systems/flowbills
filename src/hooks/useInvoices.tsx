@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
+import { queryOptimizer } from '@/lib/query-optimizer';
 
 export interface Invoice {
   id: string;
@@ -29,25 +30,34 @@ export const useInvoices = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const fetchPage = async (cursor?: { created_at: string; id: string }): Promise<Page> => {
+  const fetchPage = useCallback(async (cursor?: { created_at: string; id: string }): Promise<Page> => {
     if (!user) return { items: [] };
 
-    const q = supabase
-      .from('invoices')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .order('id', { ascending: false })
-      .limit(50);
-      
-    if (cursor) {
-      q.lt('created_at', cursor.created_at).or(`created_at.eq.${cursor.created_at},id.lt.${cursor.id}`);
-    }
+    const cacheKey = `invoices_${user.id}_${cursor?.created_at || 'initial'}`;
     
-    const { data, error } = await q;
+    const result = await queryOptimizer.supabaseQuery(
+      'invoices',
+      async (client) => {
+        const q = client
+          .from('invoices')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: false })
+          .limit(50);
+          
+        if (cursor) {
+          q.lt('created_at', cursor.created_at).or(`created_at.eq.${cursor.created_at},id.lt.${cursor.id}`);
+        }
+        
+        return await q;
+      },
+      cacheKey,
+      { ttl: 60000, cache: true }
+    );
     
-    if (error) throw error;
+    if (result.error) throw result.error;
     
-    const mappedInvoices = data?.map(record => ({
+    const mappedInvoices = result.data?.map(record => ({
       ...record,
       vendor_name: 'Unknown Vendor'
     })) as Invoice[] || [];
@@ -57,9 +67,9 @@ export const useInvoices = () => {
       items: mappedInvoices, 
       nextCursor: last ? { created_at: last.created_at, id: last.id } : undefined 
     };
-  };
+  }, [user]);
 
-  const fetchInvoices = async () => {
+  const fetchInvoices = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
@@ -76,7 +86,7 @@ export const useInvoices = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, fetchPage, toast]);
 
   const createInvoice = async (invoiceData: Omit<Invoice, 'id' | 'created_at' | 'updated_at' | 'user_id' | 'vendor_name'>) => {
     if (!user) return null;
@@ -191,7 +201,7 @@ export const useInvoices = () => {
     return invoices.filter(invoice => invoice.status === status);
   };
 
-  const getInvoicesStats = () => {
+  const getInvoicesStats = useMemo(() => {
     const totalAmount = invoices.reduce((sum, invoice) => sum + invoice.amount, 0);
     const pendingCount = invoices.filter(inv => inv.status === 'pending').length;
     const approvedCount = invoices.filter(inv => inv.status === 'approved').length;
@@ -206,7 +216,7 @@ export const useInvoices = () => {
       paidCount,
       rejectedCount,
     };
-  };
+  }, [invoices]);
 
   useEffect(() => {
     if (user) {

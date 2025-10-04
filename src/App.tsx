@@ -38,10 +38,21 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 10, // 10 minutes cache retention
       refetchOnWindowFocus: false,
+      refetchOnReconnect: 'always',
       retry: (failureCount, error: any) => {
         if (error?.status === 404) return false;
         return failureCount < 3;
+      },
+      structuralSharing: true, // Optimize re-renders
+    },
+    mutations: {
+      retry: 1,
+      onError: (error: any) => {
+        if (import.meta.env.DEV) {
+          console.error('Mutation error:', error);
+        }
       },
     },
   },

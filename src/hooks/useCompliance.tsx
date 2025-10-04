@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
+import { queryOptimizer } from '@/lib/query-optimizer';
 
 export interface ComplianceRecord {
   id: string;
@@ -42,30 +43,39 @@ export const useCompliance = () => {
   }) => {
     setLoading(true);
     try {
-      let query = supabase
-        .from('compliance_records')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const cacheKey = `compliance_${JSON.stringify(filters || {})}`;
+      
+      const result = await queryOptimizer.supabaseQuery(
+        'compliance_records',
+        async (client) => {
+          let query = client
+            .from('compliance_records')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-      if (filters?.status) {
-        query = query.eq('status', filters.status);
-      }
-      if (filters?.risk_level) {
-        query = query.eq('risk_level', filters.risk_level as 'low' | 'medium' | 'high' | 'critical');
-      }
-      if (filters?.entity_type) {
-        query = query.eq('entity_type', filters.entity_type);
-      }
-      if (filters?.due_soon) {
-        const thirtyDaysFromNow = new Date();
-        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-        query = query.lte('next_audit_date', thirtyDaysFromNow.toISOString());
-      }
+          if (filters?.status) {
+            query = query.eq('status', filters.status);
+          }
+          if (filters?.risk_level) {
+            query = query.eq('risk_level', filters.risk_level as 'low' | 'medium' | 'high' | 'critical');
+          }
+          if (filters?.entity_type) {
+            query = query.eq('entity_type', filters.entity_type);
+          }
+          if (filters?.due_soon) {
+            const thirtyDaysFromNow = new Date();
+            thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+            query = query.lte('next_audit_date', thirtyDaysFromNow.toISOString());
+          }
 
-      const { data, error } = await query;
+          return await query;
+        },
+        cacheKey,
+        { ttl: 120000, cache: true }
+      );
 
-      if (error) throw error;
-      setRecords((data || []) as ComplianceRecord[]);
+      if (result.error) throw result.error;
+      setRecords((result.data || []) as ComplianceRecord[]);
     } catch (error: any) {
       console.error('Error fetching compliance records:', error);
       toast({
