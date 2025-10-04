@@ -1036,6 +1036,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      validate_anonymous_consent: {
+        Args: { p_email: string; p_phone: string }
+        Returns: boolean
+      }
       validate_session_integrity: {
         Args: { session_data: Json }
         Returns: boolean

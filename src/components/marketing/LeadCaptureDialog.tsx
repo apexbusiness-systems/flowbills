@@ -107,7 +107,29 @@ const LeadCaptureDialog: React.FC<LeadCaptureDialogProps> = ({
         });
 
       if (error) {
+        // Provide user-friendly error messages
+        if (error.message.includes('Rate limit exceeded') || error.message.includes('5 per hour')) {
+          throw new Error('Too many submissions. Please try again in an hour.');
+        } else if (error.message.includes('duplicate') || error.message.includes('unique')) {
+          throw new Error('You have already submitted a request. Our team will contact you soon.');
+        }
         throw error;
+      }
+
+      // Log consent for marketing communications (CASL compliance)
+      try {
+        const { logConsentEvent } = await import('@/lib/consent-tracker');
+        await logConsentEvent({
+          email: formData.email,
+          phone: formData.phone || undefined,
+          consentType: 'marketing',
+          consentGiven: true,
+          consentText: `Lead capture form submission - ${interestType} interest`,
+          userAgent: navigator?.userAgent
+        });
+      } catch (consentError) {
+        // Log consent error but don't block lead submission
+        console.error('Consent logging failed:', consentError);
       }
 
       toast({
@@ -130,9 +152,21 @@ const LeadCaptureDialog: React.FC<LeadCaptureDialogProps> = ({
 
     } catch (error: any) {
       console.error('Lead capture error:', error);
+      
+      // User-friendly error messages
+      let errorMessage = "Please try again or contact us directly.";
+      
+      if (error.message.includes('Rate limit') || error.message.includes('hour')) {
+        errorMessage = "Too many submissions. Please try again in an hour or contact us directly at support@flowbills.ca";
+      } else if (error.message.includes('duplicate') || error.message.includes('already submitted')) {
+        errorMessage = "You've already submitted a request. Our team will contact you within 24 hours.";
+      } else if (error.message.includes('validation') || error.message.includes('Invalid')) {
+        errorMessage = error.message;
+      }
+      
       toast({
-        title: "Something went wrong",
-        description: "Please try again or contact us directly.",
+        title: "Submission Error",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
