@@ -65,7 +65,7 @@ class ProductionOptimizer {
   }
 
   /**
-   * Initialize performance monitoring
+   * Initialize performance monitoring (idempotent)
    */
   private initializePerformanceMonitoring(): void {
     performanceMonitor.initializeWebVitals();

@@ -33,6 +33,7 @@ class QueryOptimizer {
     ttl: 5 * 60 * 1000, // 5 minutes default
     maxSize: 1000
   };
+  private cleanupInterval: NodeJS.Timeout | null = null;
 
   static getInstance(): QueryOptimizer {
     if (!QueryOptimizer.instance) {
@@ -42,7 +43,7 @@ class QueryOptimizer {
   }
 
   constructor() {
-    this.startPeriodicCleanup();
+    // Do NOT auto-start cleanup - allow explicit control
   }
 
   // Configure cache settings
@@ -217,9 +218,11 @@ class QueryOptimizer {
     return oldestKey;
   }
 
-  // Periodic cache cleanup
+  // Periodic cache cleanup (idempotent)
   startPeriodicCleanup() {
-    setInterval(() => {
+    if (this.cleanupInterval) return; // Already started
+    
+    this.cleanupInterval = setInterval(() => {
       const now = Date.now();
       for (const [key, entry] of this.cache.entries()) {
         if (now - entry.timestamp > entry.ttl) {
@@ -227,6 +230,14 @@ class QueryOptimizer {
         }
       }
     }, 60000); // Cleanup every minute
+  }
+
+  // Stop cleanup (for cleanup/unmount)
+  stopPeriodicCleanup() {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
   }
 
   // Record query metrics

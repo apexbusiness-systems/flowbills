@@ -37,6 +37,7 @@ class PerformanceMonitor {
   private componentMetrics: Map<string, ComponentMetrics> = new Map();
   private apiMetrics: APIMetrics[] = [];
   private observer?: PerformanceObserver;
+  private initialized = false;
 
   static getInstance(): PerformanceMonitor {
     if (!PerformanceMonitor.instance) {
@@ -46,13 +47,13 @@ class PerformanceMonitor {
   }
 
   constructor() {
-    this.initializeWebVitals();
-    this.startAPIMonitoring();
+    // Do NOT auto-initialize - allow explicit control
   }
 
-  // Initialize Web Vitals monitoring
+  // Initialize Web Vitals monitoring (idempotent)
   initializeWebVitals() {
-    if (typeof window === 'undefined' || !('PerformanceObserver' in window)) return;
+    if (this.initialized || typeof window === 'undefined' || !('PerformanceObserver' in window)) return;
+    this.initialized = true;
 
     // Monitor Core Web Vitals
     try {

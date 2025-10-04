@@ -9,11 +9,20 @@ import { queryOptimizer } from "./lib/query-optimizer";
 // Apply CSP nonce at runtime
 applySPNonce();
 
-// Initialize performance monitoring in production
+// Initialize performance monitoring ONCE - only in production
 if (!import.meta.env.DEV) {
-  performanceMonitor.initializeWebVitals();
-  performanceMonitor.startAPIMonitoring();
-  queryOptimizer.startPeriodicCleanup();
+  const initPerformance = () => {
+    performanceMonitor.initializeWebVitals();
+    performanceMonitor.startAPIMonitoring();
+    queryOptimizer.startPeriodicCleanup();
+  };
+  
+  // Defer initialization to avoid blocking initial render
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPerformance);
+  } else {
+    initPerformance();
+  }
 }
 
 // Register service worker for PWA functionality
