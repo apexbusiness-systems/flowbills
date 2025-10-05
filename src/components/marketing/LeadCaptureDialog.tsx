@@ -181,11 +181,11 @@ const LeadCaptureDialog: React.FC<LeadCaptureDialogProps> = ({
   const getSuccessMessage = (type: string) => {
     switch (type) {
       case 'demo':
-        return "Our team at info@flowbills.ca will contact you within 24 hours to schedule your personalized demo.";
+        return "Our team will contact you within 24 hours to schedule your personalized demo.";
       case 'roi_calculator':
-        return "Check your email for the ROI calculator and pricing information. Questions? Contact info@flowbills.ca";
+        return "Check your email for the ROI calculator and pricing information.";
       default:
-        return "We'll get back to you shortly at info@flowbills.ca with more information.";
+        return "We'll get back to you shortly with more information.";
     }
   };
 
@@ -203,11 +203,11 @@ const LeadCaptureDialog: React.FC<LeadCaptureDialogProps> = ({
   const getDialogDescription = () => {
     switch (interestType) {
       case 'demo':
-        return "See FLOW Billing in action with a personalized demo tailored to your organization's needs. Our team at info@flowbills.ca will reach out within 24 hours.";
+        return "See FLOW Billing in action with a personalized demo tailored to your organization's needs.";
       case 'roi_calculator':
-        return "Discover your potential savings with our ROI calculator and pricing information. Contact info@flowbills.ca with questions.";
+        return "Discover your potential savings with our ROI calculator and pricing information.";
       default:
-        return "Learn more about how FLOW Billing can transform your operations. Reach us at info@flowbills.ca";
+        return "Learn more about how FLOW Billing can transform your operations.";
     }
   };
 
