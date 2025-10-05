@@ -61,6 +61,10 @@ const Landing = () => {
             <img src={companyLogo} alt="FLOWBills.ca Logo" className="h-8 w-8 object-contain rounded-lg bg-muted" />
             <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">FlowBills.ca</span>
           </div>
+          <Badge variant="secondary" className="bg-muted text-foreground border-primary/20">
+            <Shield className="h-4 w-4 mr-1" />
+            PIPEDA & CASL Compliant
+          </Badge>
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={() => handleCTA('contact')} className="hover:bg-primary/10">
               Contact
@@ -89,11 +93,6 @@ const Landing = () => {
       >
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20 rounded-lg"></div>
         <div className="relative z-10">
-          <Badge variant="secondary" className="mb-6 bg-background/90 backdrop-blur-sm border-primary/20">
-            <Shield className="h-4 w-4 mr-1" />
-            PIPEDA & CASL Compliant
-          </Badge>
-          
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
             AI-Powered Invoice Processing for
             <span className="text-primary block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent drop-shadow-none">Canadian Oil & Gas</span>
