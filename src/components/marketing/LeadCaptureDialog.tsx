@@ -159,7 +159,7 @@ const LeadCaptureDialog: React.FC<LeadCaptureDialogProps> = ({
       let errorMessage = "Please try again or contact us directly.";
       
       if (error.message.includes('Rate limit') || error.message.includes('Too many requests')) {
-        errorMessage = "Too many submissions. Please try again later or contact us at support@flowbills.ca";
+        errorMessage = "Too many submissions. Please try again later or contact us at info@flowbills.ca";
       } else if (error.message.includes('duplicate') || error.message.includes('already submitted')) {
         errorMessage = "You've already submitted a request. Our team will contact you within 24 hours.";
       } else if (error.message.includes('Daily limit')) {
@@ -181,11 +181,11 @@ const LeadCaptureDialog: React.FC<LeadCaptureDialogProps> = ({
   const getSuccessMessage = (type: string) => {
     switch (type) {
       case 'demo':
-        return "Our team will contact you within 24 hours to schedule your personalized demo.";
+        return "Our team at info@flowbills.ca will contact you within 24 hours to schedule your personalized demo.";
       case 'roi_calculator':
-        return "Check your email for the ROI calculator and pricing information.";
+        return "Check your email for the ROI calculator and pricing information. Questions? Contact info@flowbills.ca";
       default:
-        return "We'll get back to you shortly with more information.";
+        return "We'll get back to you shortly at info@flowbills.ca with more information.";
     }
   };
 
@@ -203,11 +203,11 @@ const LeadCaptureDialog: React.FC<LeadCaptureDialogProps> = ({
   const getDialogDescription = () => {
     switch (interestType) {
       case 'demo':
-        return "See FLOW Billing in action with a personalized demo tailored to your organization's needs.";
+        return "See FLOW Billing in action with a personalized demo tailored to your organization's needs. Our team at info@flowbills.ca will reach out within 24 hours.";
       case 'roi_calculator':
-        return "Discover your potential savings with our ROI calculator and pricing information.";
+        return "Discover your potential savings with our ROI calculator and pricing information. Contact info@flowbills.ca with questions.";
       default:
-        return "Learn more about how FLOW Billing can transform your operations.";
+        return "Learn more about how FLOW Billing can transform your operations. Reach us at info@flowbills.ca";
     }
   };
 
