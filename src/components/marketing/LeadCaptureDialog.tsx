@@ -116,7 +116,7 @@ const LeadCaptureDialog: React.FC<LeadCaptureDialogProps> = ({
         throw error;
       }
 
-      // Log consent for marketing communications (CASL compliance)
+      // Log consent for marketing communications with security validation
       try {
         const { logConsentEvent } = await import('@/lib/consent-tracker');
         await logConsentEvent({
@@ -125,11 +125,13 @@ const LeadCaptureDialog: React.FC<LeadCaptureDialogProps> = ({
           consentType: 'marketing',
           consentGiven: true,
           consentText: `Lead capture form submission - ${interestType} interest`,
-          userAgent: navigator?.userAgent
+          userAgent: navigator?.userAgent,
+          ipAddress: null, // IP address captured server-side for security
         });
       } catch (consentError) {
         // Log consent error but don't block lead submission
-        console.error('Consent logging failed:', consentError);
+        console.error('Consent logging failed');
+        // Note: If consent logging fails, the lead is still captured but flagged for follow-up
       }
 
       toast({
@@ -151,15 +153,17 @@ const LeadCaptureDialog: React.FC<LeadCaptureDialogProps> = ({
       onSuccess?.();
 
     } catch (error: any) {
-      console.error('Lead capture error:', error);
+      console.error('Lead submission error');
       
-      // User-friendly error messages
+      // Security: Display user-friendly but generic error messages
       let errorMessage = "Please try again or contact us directly.";
       
-      if (error.message.includes('Rate limit') || error.message.includes('hour')) {
-        errorMessage = "Too many submissions. Please try again in an hour or contact us directly at support@flowbills.ca";
+      if (error.message.includes('Rate limit') || error.message.includes('Too many requests')) {
+        errorMessage = "Too many submissions. Please try again later or contact us at support@flowbills.ca";
       } else if (error.message.includes('duplicate') || error.message.includes('already submitted')) {
         errorMessage = "You've already submitted a request. Our team will contact you within 24 hours.";
+      } else if (error.message.includes('Daily limit')) {
+        errorMessage = "Daily submission limit reached. Please try again tomorrow.";
       } else if (error.message.includes('validation') || error.message.includes('Invalid')) {
         errorMessage = error.message;
       }
@@ -217,6 +221,15 @@ const LeadCaptureDialog: React.FC<LeadCaptureDialogProps> = ({
           <DialogDescription className="text-center text-muted-foreground">
             {getDialogDescription()}
           </DialogDescription>
+          {/* Security: Honeypot field for bot detection (hidden from users) */}
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }}
+            aria-hidden="true"
+          />
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

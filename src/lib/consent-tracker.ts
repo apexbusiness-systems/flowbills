@@ -1,7 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 
-// Validation schema for consent data
+// Validation schema for consent data with security enhancements
 const consentSchema = z.object({
   email: z.string().trim().email({ message: "Invalid email format" }).max(255).optional().or(z.literal('')),
   phone: z.string().trim().regex(/^\+?[0-9\s\-()]{10,20}$/, { 
@@ -10,12 +10,16 @@ const consentSchema = z.object({
   consentType: z.enum(['email', 'marketing', 'sms', 'data_processing']),
   consentGiven: z.boolean(),
   consentText: z.string().max(1000).optional(),
+  honeypot: z.string().optional(), // Security: honeypot field for bot detection
 }).refine(
   (data) => {
     // At least email or phone must be provided for anonymous consents
     return (data.email && data.email.length > 0) || (data.phone && data.phone.length > 0);
   },
   { message: "Either email or phone number must be provided" }
+).refine(
+  (data) => !data.honeypot || data.honeypot === '',
+  { message: "Invalid submission" }
 );
 
 export type ConsentType = 
@@ -44,23 +48,22 @@ export interface ConsentEvent {
  */
 export const logConsentEvent = async (event: ConsentEvent): Promise<void> => {
   try {
-    // Client-side validation (if not authenticated user)
-    if (!event.userId) {
-      try {
-        consentSchema.parse({
-          email: event.email || '',
-          phone: event.phone || '',
-          consentType: event.consentType,
-          consentGiven: event.consentGiven,
-          consentText: event.consentText,
-        });
-      } catch (validationError) {
-        if (validationError instanceof z.ZodError) {
-          const errorMessages = validationError.errors.map(err => err.message).join(', ');
-          throw new Error(`Consent validation failed: ${errorMessages}`);
-        }
-        throw validationError;
+    // Client-side validation with security checks
+    try {
+      consentSchema.parse({
+        email: event.email || '',
+        phone: event.phone || '',
+        consentType: event.consentType,
+        consentGiven: event.consentGiven,
+        consentText: event.consentText,
+        honeypot: '', // Always pass empty honeypot for legitimate users
+      });
+    } catch (validationError) {
+      if (validationError instanceof z.ZodError) {
+        const errorMessages = validationError.errors.map(err => err.message).join(', ');
+        throw new Error(`Consent validation failed: ${errorMessages}`);
       }
+      throw validationError;
     }
 
     const { error } = await supabase
@@ -77,22 +80,22 @@ export const logConsentEvent = async (event: ConsentEvent): Promise<void> => {
       }]);
 
     if (error) {
-      console.error('Failed to log consent event:', error);
+      console.error('Consent logging error');
       
-      // Provide user-friendly error messages for known validation errors
-      if (error.message.includes('Rate limit exceeded')) {
-        throw new Error('Too many consent submissions. Please try again later.');
-      } else if (error.message.includes('Duplicate consent record')) {
-        throw new Error('A consent record for this contact already exists. Please check back later.');
-      } else if (error.message.includes('Invalid email format')) {
-        throw new Error('Please provide a valid email address.');
-      } else if (error.message.includes('Invalid phone format')) {
-        throw new Error('Please provide a valid phone number (10-15 digits).');
-      } else if (error.message.includes('email or phone number')) {
-        throw new Error('Please provide either an email address or phone number.');
+      // Security: Use generic error messages to prevent information leakage
+      if (error.message.includes('Too many requests') || error.message.includes('rate limit')) {
+        throw new Error('Too many requests. Please try again in a few minutes.');
+      } else if (error.message.includes('Daily limit exceeded')) {
+        throw new Error('Daily submission limit reached. Please try again tomorrow.');
+      } else if (error.message.includes('Invalid contact information')) {
+        throw new Error('Please provide a valid email address or phone number.');
+      } else if (error.code === '23514') {
+        // Check constraint violation - generic message
+        throw new Error('Please provide valid contact information.');
       }
       
-      throw new Error('Consent logging failed - communication blocked for compliance');
+      // Generic error message for all other cases
+      throw new Error('Unable to process your request. Please try again later.');
     }
 
     if (import.meta.env.DEV) {

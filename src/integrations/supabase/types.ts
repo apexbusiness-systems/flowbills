@@ -187,6 +187,33 @@ export type Database = {
         }
         Relationships: []
       }
+      consent_rate_limits: {
+        Row: {
+          attempt_count: number
+          blocked_until: string | null
+          created_at: string
+          id: string
+          ip_address: unknown
+          last_attempt_at: string
+        }
+        Insert: {
+          attempt_count?: number
+          blocked_until?: string | null
+          created_at?: string
+          id?: string
+          ip_address: unknown
+          last_attempt_at?: string
+        }
+        Update: {
+          attempt_count?: number
+          blocked_until?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          last_attempt_at?: string
+        }
+        Relationships: []
+      }
       country_validations: {
         Row: {
           country_code: string
@@ -1015,6 +1042,10 @@ export type Database = {
         Args: { admin_email: string; admin_password: string }
         Returns: string
       }
+      cleanup_consent_rate_limits: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       cleanup_stale_sessions: {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -1038,6 +1069,15 @@ export type Database = {
       }
       validate_anonymous_consent: {
         Args: { p_email: string; p_phone: string }
+        Returns: boolean
+      }
+      validate_anonymous_consent_secure: {
+        Args: {
+          p_email: string
+          p_honeypot?: string
+          p_ip_address: unknown
+          p_phone: string
+        }
         Returns: boolean
       }
       validate_session_integrity: {
