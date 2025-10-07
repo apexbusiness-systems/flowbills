@@ -1,1 +1,49 @@
 project_id = "yvyjzlbosmtesldczhnm"
+
+[auth]
+site_url = "https://flowbills.ca"
+additional_redirect_urls = ["http://localhost:5173", "http://localhost:3000"]
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+
+[functions.duplicate-check]
+verify_jwt = true
+
+[functions.hil-router]
+verify_jwt = true
+
+[functions.fraud_detect]
+verify_jwt = true
+
+[functions.ocr-extract]
+verify_jwt = true
+
+[functions.einvoice_validate]
+verify_jwt = false
+
+[functions.einvoice_send]
+verify_jwt = true
+
+[functions.einvoice_receive]
+verify_jwt = false
+
+[functions.health-check]
+verify_jwt = false
+
+[functions.metrics]
+verify_jwt = false
+
+[functions.policy-engine]
+verify_jwt = true
+
+[functions.policy_engine]
+verify_jwt = true
+
+[functions.ai-assistant]
+verify_jwt = true
+
+[functions.oil-gas-assistant]
+verify_jwt = true

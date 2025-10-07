@@ -123,30 +123,9 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get client IP and user agent for rate limiting
+    // Get client IP and user agent for logging
     const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     const userAgent = req.headers.get('user-agent') || 'unknown';
-    
-    // Rate limiting check
-    const { data: rateLimitData, error: rateLimitError } = await supabase
-      .rpc('check_rate_limit', {
-        identifier: clientIP,
-        action_type: 'hil_routing',
-        max_requests: 100, // 100 requests per hour
-        window_minutes: 60
-      });
-    
-    if (rateLimitError || !rateLimitData) {
-      console.warn('Rate limit exceeded for IP:', clientIP);
-      return new Response(JSON.stringify({ 
-        error: 'Rate limit exceeded. Please try again later.',
-        routing_decision: 'human_review',
-        requires_human_review: true
-      }), {
-        status: 429,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
 
     const requestBody = await req.json();
     const { invoice } = requestBody as { invoice: InvoiceAnalysis };
