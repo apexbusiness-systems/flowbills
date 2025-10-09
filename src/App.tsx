@@ -206,11 +206,15 @@ const AuthRoutes = () => {
 };
 
 function App() {
+  console.log('[FlowBills] App component initializing...');
+  
   useEffect(() => {
+    console.log('[FlowBills] App mounted, starting health monitoring');
     // Start health monitoring less frequently
     healthChecker.monitorHealth(300000); // Check every 5 minutes
   }, []);
 
+  console.log('[FlowBills] Rendering App JSX...');
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
