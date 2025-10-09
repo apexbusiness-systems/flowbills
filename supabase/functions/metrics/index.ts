@@ -70,9 +70,10 @@ Deno.serve(async (req) => {
     console.log(`Generating metrics for range: ${timeRange}, from: ${startTime.toISOString()}`);
 
     const metrics = await collectMetrics(supabase, startTime, now);
+    const navClicks = await getNavClickMetrics(supabase);
 
     if (format === 'prometheus') {
-      const prometheusMetrics = formatPrometheusMetrics(metrics);
+      const prometheusMetrics = formatPrometheusMetrics(metrics, navClicks);
       return new Response(prometheusMetrics, {
         headers: { ...corsHeaders, 'Content-Type': 'text/plain; version=0.0.4' },
       });
@@ -82,7 +83,8 @@ Deno.serve(async (req) => {
       success: true,
       timestamp: now.toISOString(),
       time_range: timeRange,
-      metrics
+      metrics,
+      nav_clicks: navClicks
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -230,7 +232,29 @@ async function collectMetrics(supabase: any, startTime: Date, endTime: Date): Pr
   }
 }
 
-function formatPrometheusMetrics(metrics: MetricsData): string {
+async function getNavClickMetrics(supabase: any): Promise<{ total: number; by_href: Record<string, number> }> {
+  try {
+    const { data, error } = await supabase
+      .from('audit_logs')
+      .select('metadata')
+      .eq('event_type', 'nav_click')
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()); // Last 24h
+
+    if (error) throw error;
+
+    const by_href: Record<string, number> = {};
+    data?.forEach((log: any) => {
+      const href = log.metadata?.href || 'unknown';
+      by_href[href] = (by_href[href] || 0) + 1;
+    });
+
+    return { total: data?.length || 0, by_href };
+  } catch {
+    return { total: 0, by_href: {} };
+  }
+}
+
+function formatPrometheusMetrics(metrics: MetricsData, navClicks?: { total: number; by_href: Record<string, number> }): string {
   const body = [
     "# HELP einvoice_validated_total Validated e-invoices",
     "# TYPE einvoice_validated_total counter",
@@ -247,7 +271,17 @@ function formatPrometheusMetrics(metrics: MetricsData): string {
     "# HELP ocr_errors_total OCR pipeline errors",
     "# TYPE ocr_errors_total counter",
     `ocr_errors_total ${metrics.ocr_failures_total}`,
-  ].join("\n");
+    "# HELP nav_link_clicks_total Total navigation link clicks",
+    "# TYPE nav_link_clicks_total counter",
+    `nav_link_clicks_total ${navClicks?.total || 0}`,
+  ];
   
-  return body + "\n";
+  // Add per-href metrics
+  if (navClicks?.by_href) {
+    for (const [href, count] of Object.entries(navClicks.by_href)) {
+      body.push(`nav_link_clicks_total{href="${href}"} ${count}`);
+    }
+  }
+  
+  return body.join("\n") + "\n";
 }

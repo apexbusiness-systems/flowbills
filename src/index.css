@@ -155,6 +155,29 @@
       --ring: 215 25% 15%;
     }
   }
+  
+  /* Hotfix: stop decorative overlays from intercepting taps/clicks */
+  [data-decorative="true"], 
+  .decorative, 
+  .bg-overlay, 
+  .gradient-overlay {
+    pointer-events: none !important;
+  }
+  
+  /* Ensure interactive elements remain clickable */
+  html, body {
+    height: 100%;
+  }
+  
+  header, 
+  footer, 
+  a, 
+  button, 
+  input, 
+  select, 
+  textarea {
+    pointer-events: auto;
+  }
 }
 
 @layer components {

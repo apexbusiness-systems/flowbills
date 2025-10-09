@@ -32,6 +32,11 @@ const Dashboard = React.lazy(() => import("./pages/Dashboard"));
 const Privacy = React.lazy(() => import("./pages/Privacy"));
 const Terms = React.lazy(() => import("./pages/Terms"));
 const Security = React.lazy(() => import("./pages/Security"));
+const Features = React.lazy(() => import("./pages/Features"));
+const Pricing = React.lazy(() => import("./pages/Pricing"));
+const APIDocs = React.lazy(() => import("./pages/APIDocs"));
+const About = React.lazy(() => import("./pages/About"));
+const Contact = React.lazy(() => import("./pages/Contact"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -193,6 +198,26 @@ const AuthRoutes = () => {
         <Route 
           path="/security" 
           element={<Security />} 
+        />
+        <Route 
+          path="/features" 
+          element={<Features />} 
+        />
+        <Route 
+          path="/pricing" 
+          element={<Pricing />} 
+        />
+        <Route 
+          path="/api-docs" 
+          element={<APIDocs />} 
+        />
+        <Route 
+          path="/about" 
+          element={<About />} 
+        />
+        <Route 
+          path="/contact" 
+          element={<Contact />} 
         />
         <Route 
           path="/" 
