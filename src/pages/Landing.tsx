@@ -70,11 +70,11 @@ const Landing = () => {
               Contact
             </Button>
             {user ? (
-              <Button onClick={() => navigate('/dashboard')} className="btn-secondary shadow-lg">
+              <Button onClick={() => navigate('/dashboard')} variant="secondary" className="shadow-lg">
                 Dashboard
               </Button>
             ) : (
-              <Button onClick={() => navigate('/auth')} className="btn-secondary shadow-lg">
+              <Button onClick={() => navigate('/auth')} variant="secondary" className="shadow-lg">
                 Sign In
               </Button>
             )}
@@ -104,7 +104,7 @@ const Landing = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" onClick={() => handleCTA('demo')} className="btn-secondary text-lg px-8 py-6 hover:scale-105 transition-all duration-300">
+            <Button size="lg" onClick={() => handleCTA('demo')} variant="secondary" className="text-lg px-8 py-6 hover:scale-105 transition-all duration-300">
               Book Free Demo
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
