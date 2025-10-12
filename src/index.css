@@ -22,9 +22,13 @@
     --primary: 203 89% 25%;      /* Deep maritime blue (#0766A7) */
     --primary-variant: 203 89% 35%;
     --primary-foreground: 0 0% 100%;
+    --primary-light: 203 89% 35%;
+    --primary-dark: 203 89% 20%;
     
     --secondary: 28 74% 55%;     /* Energy orange (#E8953A) */
     --secondary-foreground: 0 0% 0%;
+    --secondary-light: 28 74% 65%;
+    --secondary-muted: 28 74% 45%;
     
     --muted: 215 25% 95%;
     --muted-foreground: 215 15% 40%;
@@ -46,8 +50,13 @@
 
     /* Status colors for invoice workflow */
     --status-pending: 48 96% 53%;
+    --status-pending-foreground: 0 0% 0%;
     --status-approved: 142 71% 45%;
+    --status-approved-foreground: 0 0% 100%;
     --status-rejected: 0 84% 60%;
+    --status-rejected-foreground: 0 0% 100%;
+    --status-processing: 199 89% 48%;
+    --status-processing-foreground: 0 0% 100%;
     --status-review: 262 52% 47%;
 
     /* Enterprise UI elements */
@@ -76,6 +85,16 @@
 
     /* Accessibility */
     --focus-ring: 0 0 0 3px hsl(203 89% 25% / 0.2);
+
+    /* Sidebar colors */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 203 89% 25%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 25% 95%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 215 25% 88%;
+    --sidebar-ring: 203 89% 25%;
   }
 
   .dark {
@@ -111,6 +130,16 @@
     --border: 215 15% 20%;
     --input: 215 15% 20%;
     --ring: 203 89% 45%;
+
+    /* Sidebar colors - dark mode */
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 215 25% 95%;
+    --sidebar-primary: 203 89% 45%;
+    --sidebar-primary-foreground: 222 47% 8%;
+    --sidebar-accent: 215 15% 18%;
+    --sidebar-accent-foreground: 215 25% 95%;
+    --sidebar-border: 215 15% 20%;
+    --sidebar-ring: 203 89% 45%;
   }
 }
 
