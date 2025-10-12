@@ -59,9 +59,9 @@ const Landing = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <img src={companyLogo} alt="FLOWBills.ca Logo" className="h-8 w-8 object-contain rounded-lg bg-muted" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">FlowBills.ca</span>
+            <span className="text-2xl font-bold text-primary">FlowBills.ca</span>
           </div>
-          <Badge variant="secondary" className="bg-muted text-foreground border-primary/20">
+          <Badge variant="secondary" className="bg-muted text-foreground border-border">
             <Shield className="h-4 w-4 mr-1" />
             PIPEDA & CASL Compliant
           </Badge>
@@ -95,7 +95,7 @@ const Landing = () => {
         <div className="relative z-10">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
             AI-Powered Invoice Processing for
-            <span className="text-secondary block drop-shadow-md">Canadian Oil & Gas</span>
+            <span className="text-primary block drop-shadow-md">Canadian Oil & Gas</span>
           </h1>
           
           <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
@@ -117,15 +117,15 @@ const Landing = () => {
           {/* Key Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <div className="text-3xl font-bold text-secondary mb-2 drop-shadow-md">95%</div>
+              <div className="text-3xl font-bold text-primary mb-2 drop-shadow-md">95%</div>
               <div className="text-white/90">Straight-Through Processing</div>
             </div>
             <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <div className="text-3xl font-bold text-secondary mb-2 drop-shadow-md">80%</div>
+              <div className="text-3xl font-bold text-primary mb-2 drop-shadow-md">80%</div>
               <div className="text-white/90">Cost Reduction</div>
             </div>
             <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
-              <div className="text-3xl font-bold text-secondary mb-2 drop-shadow-md">24/7</div>
+              <div className="text-3xl font-bold text-primary mb-2 drop-shadow-md">24/7</div>
               <div className="text-white/90">Processing Uptime</div>
             </div>
           </div>
@@ -145,7 +145,7 @@ const Landing = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="border-2 hover:border-primary/20 transition-colors">
+            <Card className="border-2 hover:border-primary/50 transition-colors">
               <CardHeader>
                 <Zap className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>AI-Powered Processing</CardTitle>
@@ -171,7 +171,7 @@ const Landing = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-primary/20 transition-colors">
+            <Card className="border-2 hover:border-primary/50 transition-colors">
               <CardHeader>
                 <Shield className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Compliance & Security</CardTitle>
@@ -197,7 +197,7 @@ const Landing = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-primary/20 transition-colors">
+            <Card className="border-2 hover:border-primary/50 transition-colors">
               <CardHeader>
                 <Clock className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Smart Workflows</CardTitle>
