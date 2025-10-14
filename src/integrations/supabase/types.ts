@@ -409,6 +409,42 @@ export type Database = {
           },
         ]
       }
+      crm_sync_logs: {
+        Row: {
+          action: string
+          created_at: string
+          entity_data: Json | null
+          entity_id: string
+          entity_type: string
+          error_message: string | null
+          id: string
+          sync_status: string
+          synced_at: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_data?: Json | null
+          entity_id: string
+          entity_type: string
+          error_message?: string | null
+          id?: string
+          sync_status?: string
+          synced_at?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_data?: Json | null
+          entity_id?: string
+          entity_type?: string
+          error_message?: string | null
+          id?: string
+          sync_status?: string
+          synced_at?: string | null
+        }
+        Relationships: []
+      }
       einvoice_documents: {
         Row: {
           confidence_score: number | null
@@ -1100,6 +1136,60 @@ export type Database = {
           severity?: string
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      support_call_logs: {
+        Row: {
+          agent_email: string | null
+          agent_name: string | null
+          answered_at: string | null
+          created_at: string
+          direction: string
+          duration_seconds: number | null
+          ended_at: string | null
+          external_id: string
+          from_number: string | null
+          id: string
+          raw_data: Json | null
+          started_at: string | null
+          status: string
+          tags: string[] | null
+          to_number: string | null
+        }
+        Insert: {
+          agent_email?: string | null
+          agent_name?: string | null
+          answered_at?: string | null
+          created_at?: string
+          direction: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          external_id: string
+          from_number?: string | null
+          id?: string
+          raw_data?: Json | null
+          started_at?: string | null
+          status: string
+          tags?: string[] | null
+          to_number?: string | null
+        }
+        Update: {
+          agent_email?: string | null
+          agent_name?: string | null
+          answered_at?: string | null
+          created_at?: string
+          direction?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          external_id?: string
+          from_number?: string | null
+          id?: string
+          raw_data?: Json | null
+          started_at?: string | null
+          status?: string
+          tags?: string[] | null
+          to_number?: string | null
         }
         Relationships: []
       }

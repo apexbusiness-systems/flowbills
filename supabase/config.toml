@@ -53,3 +53,9 @@ verify_jwt = false
 
 [functions.usage-metering]
 verify_jwt = false
+
+[functions.aircall-webhook]
+verify_jwt = false
+
+[functions.crm-sync]
+verify_jwt = true
