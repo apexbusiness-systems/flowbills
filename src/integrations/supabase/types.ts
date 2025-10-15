@@ -1068,6 +1068,8 @@ export type Database = {
           reason: string
           resolution_notes: string | null
           resolved_at: string | null
+          sla_deadline: string | null
+          support_ticket_id: string | null
           updated_at: string
         }
         Insert: {
@@ -1081,6 +1083,8 @@ export type Database = {
           reason: string
           resolution_notes?: string | null
           resolved_at?: string | null
+          sla_deadline?: string | null
+          support_ticket_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -1094,6 +1098,8 @@ export type Database = {
           reason?: string
           resolution_notes?: string | null
           resolved_at?: string | null
+          sla_deadline?: string | null
+          support_ticket_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1102,6 +1108,13 @@ export type Database = {
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_queue_support_ticket_id_fkey"
+            columns: ["support_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
             referencedColumns: ["id"]
           },
         ]
@@ -1192,6 +1205,170 @@ export type Database = {
           to_number?: string | null
         }
         Relationships: []
+      }
+      support_playbooks: {
+        Row: {
+          created_at: string
+          description: string | null
+          estimated_duration_minutes: number | null
+          id: string
+          is_active: boolean
+          playbook_name: string
+          playbook_type: string
+          sla_hours: number | null
+          steps: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          playbook_name: string
+          playbook_type: string
+          sla_hours?: number | null
+          steps: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          playbook_name?: string
+          playbook_type?: string
+          sla_hours?: number | null
+          steps?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      support_qa_scorecards: {
+        Row: {
+          agent_email: string | null
+          aht_minutes: number | null
+          call_log_id: string | null
+          created_at: string
+          empathy_score: number | null
+          fcr_achieved: boolean | null
+          feedback: string | null
+          id: string
+          policy_accuracy_score: number | null
+          reason_score: number | null
+          reviewed_at: string
+          reviewer_id: string | null
+          ticket_id: string | null
+          total_score: number | null
+        }
+        Insert: {
+          agent_email?: string | null
+          aht_minutes?: number | null
+          call_log_id?: string | null
+          created_at?: string
+          empathy_score?: number | null
+          fcr_achieved?: boolean | null
+          feedback?: string | null
+          id?: string
+          policy_accuracy_score?: number | null
+          reason_score?: number | null
+          reviewed_at?: string
+          reviewer_id?: string | null
+          ticket_id?: string | null
+          total_score?: number | null
+        }
+        Update: {
+          agent_email?: string | null
+          aht_minutes?: number | null
+          call_log_id?: string | null
+          created_at?: string
+          empathy_score?: number | null
+          fcr_achieved?: boolean | null
+          feedback?: string | null
+          id?: string
+          policy_accuracy_score?: number | null
+          reason_score?: number | null
+          reviewed_at?: string
+          reviewer_id?: string | null
+          ticket_id?: string | null
+          total_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_qa_scorecards_call_log_id_fkey"
+            columns: ["call_log_id"]
+            isOneToOne: false
+            referencedRelation: "support_call_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_qa_scorecards_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          call_log_id: string | null
+          category: string
+          created_at: string
+          customer_id: string | null
+          id: string
+          masked_org_context: Json | null
+          priority: string
+          request_id: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          status: string
+          ticket_number: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          call_log_id?: string | null
+          category: string
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          masked_org_context?: Json | null
+          priority?: string
+          request_id: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+          ticket_number: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          call_log_id?: string | null
+          category?: string
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          masked_org_context?: Json | null
+          priority?: string
+          request_id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+          ticket_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_call_log_id_fkey"
+            columns: ["call_log_id"]
+            isOneToOne: false
+            referencedRelation: "support_call_logs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
