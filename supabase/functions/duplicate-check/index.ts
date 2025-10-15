@@ -1,91 +1,11 @@
-import { serve } from "https://deno.land/std@0.208.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
-
-// Enhanced input validation schema with security constraints
-const InvoiceIn = z.object({
-  vendor_id: z.string().uuid("Invalid vendor ID format"),
-  invoice_number: z.string()
-    .min(1, "Invoice number is required")
-    .max(100, "Invoice number too long")
-    .regex(/^[A-Za-z0-9\-_]+$/, "Invalid characters in invoice number"),
-  amount_cents: z.number()
-    .int("Amount must be an integer")
-    .nonnegative("Amount must be positive")
-    .max(1000000000, "Amount exceeds maximum allowed"), // $10M limit
-  currency: z.string()
-    .length(3, "Currency code must be 3 characters")
-    .regex(/^[A-Z]{3}$/, "Invalid currency format"),
-  invoice_date: z.string()
-    .min(4, "Invalid date format")
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
-    .refine(val => {
-      const date = new Date(val);
-      const now = new Date();
-      const maxPastDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000 * 10); // 10 years ago
-      const maxFutureDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // 1 year ahead
-      return date >= maxPastDate && date <= maxFutureDate;
-    }, "Invoice date must be within reasonable range"),
-  po_number: z.string()
-    .max(50, "PO number too long")
-    .regex(/^[A-Za-z0-9\-_]*$/, "Invalid characters in PO number")
-    .optional(),
-});
-
-// Rate limiting store (in-memory for demo, use Redis in production)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
-
-const RATE_LIMIT = {
-  maxRequests: 20,
-  windowMs: 60000, // 1 minute
-};
-
-// Security helper functions
-function getRateLimitKey(req: Request): string {
-  const forwarded = req.headers.get('x-forwarded-for');
-  const ip = forwarded ? forwarded.split(',')[0] : 'unknown';
-  return `duplicate-check:${ip}`;
-}
-
-function checkRateLimit(key: string): { allowed: boolean; remaining: number } {
-  const now = Date.now();
-  const record = rateLimitStore.get(key);
-  
-  if (!record || now > record.resetTime) {
-    rateLimitStore.set(key, { count: 1, resetTime: now + RATE_LIMIT.windowMs });
-    return { allowed: true, remaining: RATE_LIMIT.maxRequests - 1 };
-  }
-  
-  if (record.count >= RATE_LIMIT.maxRequests) {
-    return { allowed: false, remaining: 0 };
-  }
-  
-  record.count++;
-  return { allowed: true, remaining: RATE_LIMIT.maxRequests - record.count };
-}
-
-function sanitizeErrorMessage(error: any): string {
-  // Never expose internal system details in error messages
-  if (error.message?.includes('database') || error.message?.includes('auth')) {
-    return 'Internal processing error';
-  }
-  return 'Invalid request format';
-}
-
-function minusDays(dateStr: string, days: number): string {
-  const date = new Date(dateStr);
-  date.setDate(date.getDate() - days);
+...
   return date.toISOString().split('T')[0];
 }
 
-function plusDays(dateStr: string, days: number): string {
-  const date = new Date(dateStr);
-  date.setDate(date.getDate() + days);
-  return date.toISOString().split('T')[0];
-}
-
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

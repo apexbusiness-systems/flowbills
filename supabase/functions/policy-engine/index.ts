@@ -1,44 +1,10 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { toMessage } from "../_shared/errors.ts";
-
-type Vendor = { bank_account?: string | null };
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-interface PolicyRequest {
-  invoice_id: string;
-  invoice_data: {
-    amount: number;
-    vendor_id?: string;
-    confidence_score?: number;
-    extracted_data?: any;
-  };
-  policy_types?: string[];
-}
-
-interface PolicyResult {
-  policy_id: string;
-  policy_name: string;
-  triggered: boolean;
-  actions: any;
-  details?: string;
-}
-
-interface PolicyEngineResponse {
-  success: boolean;
-  invoice_id: string;
-  policies_evaluated: PolicyResult[];
-  final_decision: 'auto_approve' | 'require_approval' | 'flag_for_review' | 'block';
-  required_approvals: number;
-  routing_reason: string;
+...
   error?: string;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

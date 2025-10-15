@@ -1,97 +1,10 @@
-import { serve } from "https://deno.land/std@0.208.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
-
-// Rate limiting configuration
-const RATE_LIMIT_WINDOW = 60000; // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 10; // 10 requests per minute per IP
-const rateLimitStore = new Map<string, number[]>();
-
-// Enhanced rate limiting function
-function checkRateLimit(clientIp: string): boolean {
-  const now = Date.now();
-  const requests = rateLimitStore.get(clientIp) || [];
-  
-  // Remove old requests outside the window
-  const validRequests = requests.filter(time => now - time < RATE_LIMIT_WINDOW);
-  
-  if (validRequests.length >= RATE_LIMIT_MAX_REQUESTS) {
-    return false;
-  }
-  
-  validRequests.push(now);
-  rateLimitStore.set(clientIp, validRequests);
-  return true;
-}
-
-// Enhanced input validation with security checks
-function validateInputSecurity(input: any): { valid: boolean; errors: string[] } {
-  const errors: string[] = [];
-  
-  // Check for potential XSS/injection attempts
-  const suspiciousPatterns = [
-    /<script[^>]*>.*?<\/script>/gi,
-    /javascript:/gi,
-    /on\w+\s*=/gi,
-    /eval\s*\(/gi,
-    /'(\s*union\s+select|;\s*drop\s+table)/gi
-  ];
-  
-  const inputString = JSON.stringify(input);
-  for (const pattern of suspiciousPatterns) {
-    if (pattern.test(inputString)) {
-      errors.push(`Potential security threat detected: ${pattern.source}`);
-    }
-  }
-  
-  // Check for oversized payloads
-  if (inputString.length > 50000) { // 50KB limit
-    errors.push('Request payload too large');
-  }
-  
-  return { valid: errors.length === 0, errors };
-}
-
-interface InvoiceAnalysis {
-  invoice_id: string;
-  confidence_score: number;
-  extracted_data: Record<string, any>;
-  risk_factors: string[];
-  amount: number;
-  vendor_id?: string;
-}
-
-// Enhanced input validation schema
-const validateInput = (input: any): { valid: boolean; errors: string[] } => {
-  const errors: string[] = [];
-  
-  if (!input || typeof input !== 'object') {
-    errors.push('Invalid input format');
-    return { valid: false, errors };
-  }
-  
-  // Validate required fields
-  if (!input.invoice_id || typeof input.invoice_id !== 'string') {
-    errors.push('Invalid or missing invoice_id');
-  }
-  
-  if (typeof input.confidence_score !== 'number' || input.confidence_score < 0 || input.confidence_score > 100) {
-    errors.push('Invalid confidence_score (must be number between 0-100)');
-  }
-  
-  if (typeof input.amount !== 'number' || input.amount < 0) {
-    errors.push('Invalid amount (must be positive number)');
-  }
-  
-  // Sanitize risk factors
-  if (input.risk_factors && !Array.isArray(input.risk_factors)) {
-    errors.push('Invalid risk_factors (must be array)');
-  }
-  
+...
   return { valid: errors.length === 0, errors };
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

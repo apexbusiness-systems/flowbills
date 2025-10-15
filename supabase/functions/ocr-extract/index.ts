@@ -1,42 +1,10 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { toMessage } from "../_shared/errors.ts";
-
-const u = <T>(v: T | null | undefined): T | undefined => (v ?? undefined);
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-interface OCRRequest {
-  file_data: string; // base64 encoded file
-  file_type: string;
-  invoice_id?: string;
-}
-
-interface OCRResponse {
-  success: boolean;
-  extracted_data?: {
-    invoice_number?: string;
-    amount?: number;
-    currency?: string;
-    vendor_name?: string;
-    invoice_date?: string;
-    due_date?: string;
-    po_number?: string;
-  };
-  raw_text?: string;
-  confidence_scores?: Record<string, number>;
-  ocr_metadata?: {
-    processing_time: number;
-    method: string;
-    confidence_average: number;
-  };
+...
   error?: string;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
