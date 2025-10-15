@@ -20,4 +20,51 @@ if git diff --cached --name-only | grep -E '^(llm/|supabase/functions/llm/|supab
   exit 1
 fi
 
+# P10: Edge Function Pre-Commit Hygiene
+if git diff --cached --name-only | grep -E '^supabase/functions/.*\.ts$'; then
+  echo "🔍 Running Edge Function quality checks..."
+  
+  # Check if deno is available
+  if ! command -v deno &> /dev/null; then
+    echo "⚠️  Deno not found - skipping format/lint/check"
+  else
+    # Get changed function files
+    CHANGED_FUNCTIONS=$(git diff --cached --name-only | grep -E '^supabase/functions/.*\.ts$')
+    
+    # Run deno fmt check
+    echo "  → Format check..."
+    for file in $CHANGED_FUNCTIONS; do
+      if ! deno fmt --check "$file" &>/dev/null; then
+        echo "❌ Format check failed: $file"
+        echo "   Run: deno fmt $file"
+        exit 1
+      fi
+    done
+    
+    # Run deno lint
+    echo "  → Lint check..."
+    for file in $CHANGED_FUNCTIONS; do
+      if ! deno lint "$file" &>/dev/null; then
+        echo "❌ Lint check failed: $file"
+        echo "   Run: deno lint $file"
+        exit 1
+      fi
+    done
+    
+    # Run deno check for index.ts files
+    echo "  → Type check..."
+    for file in $CHANGED_FUNCTIONS; do
+      if [[ "$file" == */index.ts ]]; then
+        if ! deno check --import-map=./supabase/import_map.json "$file" &>/dev/null; then
+          echo "❌ Type check failed: $file"
+          echo "   Run: deno check --import-map=./supabase/import_map.json $file"
+          exit 1
+        fi
+      fi
+    done
+    
+    echo "  ✓ All Edge Function checks passed"
+  fi
+fi
+
 echo "✅ Pre-commit check passed"

@@ -65,3 +65,12 @@ verify_jwt = true
 
 [functions.dsar-delete]
 verify_jwt = true
+
+[functions.daily-report]
+verify_jwt = false
+
+[functions.track-click]
+verify_jwt = false
+
+[functions._control_hello-world]
+verify_jwt = false

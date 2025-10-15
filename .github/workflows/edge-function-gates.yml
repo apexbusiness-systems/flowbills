@@ -1,0 +1,275 @@
+name: Edge Function Quality Gates
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'supabase/functions/**'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/**'
+
+jobs:
+  deno-checks:
+    name: Deno Quality Checks (P0)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Deno Format Check
+        run: deno fmt --check supabase/functions/
+
+      - name: Deno Lint
+        run: deno lint supabase/functions/
+
+      - name: Type Check All Functions
+        run: |
+          for function_dir in supabase/functions/*/; do
+            if [ -f "${function_dir}index.ts" ]; then
+              function_name=$(basename "$function_dir")
+              
+              # Skip _shared and _control directories
+              if [[ "$function_name" != "_shared" && "$function_name" != "_control" ]]; then
+                echo "Type checking: $function_name"
+                deno check --import-map=./supabase/import_map.json "${function_dir}index.ts"
+              fi
+            fi
+          done
+
+  control-function-check:
+    name: Control Function Deployment (P6)
+    runs-on: ubuntu-latest
+    needs: deno-checks
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Verify Control Function
+        run: |
+          if [ ! -f "supabase/functions/_control/hello-world/index.ts" ]; then
+            echo "❌ Control function not found!"
+            exit 1
+          fi
+          
+          echo "✓ Control function exists"
+          deno check --import-map=./supabase/import_map.json supabase/functions/_control/hello-world/index.ts
+          echo "✓ Control function type check passed"
+
+  equivalence-check:
+    name: Local ≡ Deploy Equivalence (P7)
+    runs-on: ubuntu-latest
+    needs: deno-checks
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Make script executable
+        run: chmod +x scripts/equivalence-check.sh
+
+      - name: Run Equivalence Check
+        run: ./scripts/equivalence-check.sh
+
+  node-ism-detector:
+    name: Node.js API Detector (P9)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for Node.js-only APIs
+        run: |
+          echo "🔍 Scanning for Node.js-specific APIs..."
+          
+          NODEISMS_FOUND=false
+          
+          # Define Node.js-specific patterns to detect
+          declare -a patterns=(
+            "require\s*\("
+            "process\."
+            "Buffer\."
+            "__dirname"
+            "__filename"
+            "module\.exports"
+          )
+          
+          for pattern in "${patterns[@]}"; do
+            if grep -rE "$pattern" supabase/functions/ --include="*.ts" --exclude-dir="_shared" --exclude-dir="node_modules"; then
+              echo "❌ Found Node.js-specific API: $pattern"
+              NODEISMS_FOUND=true
+            fi
+          done
+          
+          if [ "$NODEISMS_FOUND" = true ]; then
+            echo ""
+            echo "❌ Node.js-specific APIs detected!"
+            echo "Please replace with Deno/Web-standard APIs:"
+            echo "  - require() → import"
+            echo "  - process.env → Deno.env"
+            echo "  - Buffer → Uint8Array or TextEncoder/TextDecoder"
+            echo "  - __dirname → import.meta.url"
+            echo "  - module.exports → export"
+            exit 1
+          else
+            echo "✓ No Node.js-specific APIs detected"
+          fi
+
+  import-discipline:
+    name: Import Discipline Check (P2)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Import Patterns
+        run: |
+          echo "🔍 Validating import patterns..."
+          
+          VIOLATIONS_FOUND=false
+          
+          # Check for imports escaping supabase/functions
+          if grep -rE "from\s+['\"](\.\./\.\./\.\.|\.\.\/\.\./)" supabase/functions/ --include="*.ts" --exclude-dir="node_modules"; then
+            echo "❌ Found imports escaping supabase/functions directory!"
+            VIOLATIONS_FOUND=true
+          fi
+          
+          # Check for bare imports (not relative, not URL, not npm:)
+          if grep -rE "from\s+['\"](?!https?://|npm:|\.)" supabase/functions/ --include="*.ts" --exclude-dir="node_modules" | grep -v "import_map"; then
+            echo "❌ Found bare imports without import map!"
+            VIOLATIONS_FOUND=true
+          fi
+          
+          if [ "$VIOLATIONS_FOUND" = true ]; then
+            echo ""
+            echo "❌ Import discipline violations detected!"
+            echo "Rules:"
+            echo "  - Use relative imports (./ or ../) within supabase/functions"
+            echo "  - Use explicit URLs (https://...) or npm: specifiers"
+            echo "  - Add frequently used imports to import_map.json"
+            exit 1
+          else
+            echo "✓ Import discipline checks passed"
+          fi
+
+  import-map-validation:
+    name: Import Map Validation (P3)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Single Import Map
+        run: |
+          echo "🔍 Checking for multiple import maps..."
+          
+          IMPORT_MAPS=$(find supabase/functions -name "import_map.json" -o -name "deno.json" | wc -l)
+          
+          if [ "$IMPORT_MAPS" -gt 1 ]; then
+            echo "❌ Multiple import maps or deno.json files found!"
+            echo "Found files:"
+            find supabase/functions -name "import_map.json" -o -name "deno.json"
+            echo ""
+            echo "There should be only ONE import map at supabase/import_map.json"
+            exit 1
+          fi
+          
+          if [ ! -f "supabase/import_map.json" ]; then
+            echo "❌ Import map not found at supabase/import_map.json"
+            exit 1
+          fi
+          
+          echo "✓ Single import map validated"
+
+      - name: Validate Import Map JSON
+        run: |
+          if ! python3 -m json.tool supabase/import_map.json > /dev/null; then
+            echo "❌ Import map has invalid JSON syntax"
+            exit 1
+          fi
+          echo "✓ Import map JSON is valid"
+
+  golden-regression:
+    name: Golden Regression Test (P8)
+    runs-on: ubuntu-latest
+    needs: deno-checks
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Run Golden Tests
+        run: |
+          echo "🔍 Running golden regression tests..."
+          
+          # Test _shared modules can be imported
+          for shared_file in supabase/functions/_shared/*.ts; do
+            if [ -f "$shared_file" ]; then
+              echo "Testing: $shared_file"
+              deno check --import-map=./supabase/import_map.json "$shared_file" || {
+                echo "❌ Golden test failed for $shared_file"
+                exit 1
+              }
+            fi
+          done
+          
+          echo "✓ Golden regression tests passed"
+
+  summary:
+    name: Quality Gates Summary
+    runs-on: ubuntu-latest
+    needs: [deno-checks, control-function-check, equivalence-check, node-ism-detector, import-discipline, import-map-validation, golden-regression]
+    if: always()
+    
+    steps:
+      - name: Check Results
+        run: |
+          echo "📊 Edge Function Quality Gates Summary"
+          echo "======================================"
+          echo "Deno Checks: ${{ needs.deno-checks.result }}"
+          echo "Control Function: ${{ needs.control-function-check.result }}"
+          echo "Equivalence Check: ${{ needs.equivalence-check.result }}"
+          echo "Node.js API Detector: ${{ needs.node-ism-detector.result }}"
+          echo "Import Discipline: ${{ needs.import-discipline.result }}"
+          echo "Import Map Validation: ${{ needs.import-map-validation.result }}"
+          echo "Golden Regression: ${{ needs.golden-regression.result }}"
+          echo "======================================"
+          
+          if [[ "${{ needs.deno-checks.result }}" != "success" ]] || \
+             [[ "${{ needs.control-function-check.result }}" != "success" ]] || \
+             [[ "${{ needs.equivalence-check.result }}" != "success" ]] || \
+             [[ "${{ needs.node-ism-detector.result }}" != "success" ]] || \
+             [[ "${{ needs.import-discipline.result }}" != "success" ]] || \
+             [[ "${{ needs.import-map-validation.result }}" != "success" ]] || \
+             [[ "${{ needs.golden-regression.result }}" != "success" ]]; then
+            echo "❌ Some quality gates failed"
+            exit 1
+          fi
+          
+          echo "✓ All quality gates passed"
