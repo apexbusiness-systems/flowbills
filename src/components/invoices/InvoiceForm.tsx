@@ -21,6 +21,7 @@ import { CalendarIcon, DollarSign, FileText, Save, X, Upload, AlertTriangle, Shi
 import { useAuth } from '@/hooks/useAuth';
 import { Invoice } from '@/hooks/useInvoices';
 import { useValidationRules, InvoiceValidationResult } from '@/hooks/useValidationRules';
+import { useFormPersistence } from '@/hooks/useFormPersistence';
 import FileUploadZone from './FileUploadZone';
 import DocumentList from './DocumentList';
 import CreateExceptionDialog from '@/components/exceptions/CreateExceptionDialog';
@@ -34,7 +35,7 @@ interface InvoiceFormProps {
 }
 
 const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceFormProps) => {
-  const { hasRole } = useAuth();
+  const { hasRole, user } = useAuth();
   const { validateInvoice } = useValidationRules();
   const [formData, setFormData] = useState({
     invoice_number: invoice?.invoice_number || '',
@@ -46,6 +47,17 @@ const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceForm
     description: invoice?.description || '',
     file_url: invoice?.file_url || ''
   });
+
+  // Auto-save form drafts (only for new invoices, not edits)
+  const { clearDraft, saveDraftNow } = useFormPersistence(
+    formData,
+    setFormData,
+    {
+      formId: invoice?.id || 'new-invoice',
+      enabled: !invoice, // Only enable for new invoices
+      autosaveDelay: 2000,
+    }
+  );
 
   const [invoiceDateOpen, setInvoiceDateOpen] = useState(false);
   const [dueDateOpen, setDueDateOpen] = useState(false);
@@ -75,7 +87,9 @@ const InvoiceForm = ({ invoice, onSave, onCancel, loading = false }: InvoiceForm
     // Run validation rules before saving
     await runValidation();
 
-    onSave(formData);
+    // Save and clear draft if successful
+    await onSave(formData);
+    clearDraft();
   };
 
   const runValidation = async () => {

@@ -12,6 +12,7 @@ import { SecurityHeaders } from "@/components/security/SecurityHeaders";
 import ErrorBoundary from "@/components/error-boundary/ErrorBoundary";
 import { healthChecker } from "@/lib/health-check";
 import { Footer } from "@/components/ui/footer";
+import { OfflineIndicator } from "@/components/ui/offline-indicator";
 
 // Lazy load all pages for code splitting
 const Landing = React.lazy(() => import("./pages/Landing"));
@@ -51,9 +52,12 @@ const queryClient = new QueryClient({
         return failureCount < 3;
       },
       structuralSharing: true, // Optimize re-renders
+      networkMode: 'offlineFirst', // Support offline-first strategy
     },
     mutations: {
       retry: 1,
+      retryDelay: 1000,
+      networkMode: 'offlineFirst',
       onError: (error: any) => {
         if (import.meta.env.DEV) {
           console.error('Mutation error:', error);
@@ -243,6 +247,7 @@ function App() {
           <SecurityHeaders />
           <Toaster />
           <Sonner />
+          <OfflineIndicator />
           <BrowserRouter>
             <AuthProvider>
               <SessionSecurityProvider>
