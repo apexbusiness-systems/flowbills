@@ -1,7 +1,66 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
-...
+
+// Input validation schema
+const InvoiceIn = z.object({
+  invoice_number: z.string().min(1),
+  vendor_id: z.string().uuid(),
+  amount_cents: z.number().int().positive(),
+  invoice_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  po_number: z.string().optional().nullable(),
+});
+
+// Rate limiting configuration
+const RATE_LIMIT = {
+  maxRequests: 100,
+  windowMs: 60000, // 1 minute
+};
+
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+function getRateLimitKey(req: Request): string {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 
+             req.headers.get('x-real-ip') || 
+             'unknown';
+  return `duplicate-check:${ip}`;
+}
+
+function checkRateLimit(key: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const record = rateLimitStore.get(key);
+
+  if (!record || now > record.resetTime) {
+    rateLimitStore.set(key, { count: 1, resetTime: now + RATE_LIMIT.windowMs });
+    return { allowed: true, remaining: RATE_LIMIT.maxRequests - 1 };
+  }
+
+  if (record.count >= RATE_LIMIT.maxRequests) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  record.count++;
+  return { allowed: true, remaining: RATE_LIMIT.maxRequests - record.count };
+}
+
+function sanitizeErrorMessage(error: Error): string {
+  // Remove sensitive information from error messages
+  const message = error.message.toLowerCase();
+  if (message.includes('password') || message.includes('secret') || message.includes('key')) {
+    return 'Internal processing error';
+  }
+  return error.message.substring(0, 200); // Truncate long messages
+}
+
+function minusDays(dateStr: string, days: number): string {
+  const date = new Date(dateStr);
+  date.setDate(date.getDate() - days);
+  return date.toISOString().split('T')[0];
+}
+
+function plusDays(dateStr: string, days: number): string {
+  const date = new Date(dateStr);
+  date.setDate(date.getDate() + days);
   return date.toISOString().split('T')[0];
 }
 
@@ -100,9 +159,9 @@ Deno.serve(async (req) => {
     // Check for exact hash match using safe queries with timeout
     const { data: exactDuplicate, error: exactError } = await supabase
       .from('invoices')
-      .select('id, invoice_number, vendor_id, amount_cents')
+      .select('id, invoice_number, vendor_id, amount')
       .eq('duplicate_hash', duplicateHash)
-      .neq('id', invoice.invoice_number)
+      .neq('invoice_number', invoice.invoice_number)
       .limit(1);
 
     if (exactError) {
@@ -113,13 +172,13 @@ Deno.serve(async (req) => {
     // Fuzzy matching with safe parameterized queries
     const { data: fuzzyDuplicates, error: fuzzyError } = await supabase
       .from('invoices')
-      .select('id, invoice_number, vendor_id, amount_cents, invoice_date')
+      .select('id, invoice_number, vendor_id, amount, invoice_date')
       .eq('vendor_id', invoice.vendor_id)
       .gte('invoice_date', minusDays(invoice.invoice_date, 7))
       .lte('invoice_date', plusDays(invoice.invoice_date, 7))
-      .gte('amount_cents', Math.round(invoice.amount_cents * 0.99))
-      .lte('amount_cents', Math.round(invoice.amount_cents * 1.01))
-      .neq('id', invoice.invoice_number)
+      .gte('amount', Math.round((invoice.amount_cents / 100) * 0.99))
+      .lte('amount', Math.round((invoice.amount_cents / 100) * 1.01))
+      .neq('invoice_number', invoice.invoice_number)
       .limit(5);
 
     if (fuzzyError) {
@@ -182,9 +241,7 @@ Deno.serve(async (req) => {
       headers: { 
         ...corsHeaders, 
         'Content-Type': 'application/json',
-        'X-RateLimit-Remaining': (rateLimitStore.get(getRateLimitKey(req))?.count ? 
-          RATE_LIMIT.maxRequests - rateLimitStore.get(getRateLimitKey(req))!.count : 
-          RATE_LIMIT.maxRequests).toString()
+        'X-RateLimit-Remaining': rateLimit.remaining.toString()
       },
     });
   }
