@@ -1,6 +1,70 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
-...
+
+// Type definitions
+interface InvoiceAnalysis {
+  invoice_id: string;
+  confidence_score: number;
+  amount: number;
+  risk_factors?: string[];
+  extracted_data?: Record<string, any>;
+}
+
+interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+}
+
+// Rate limiting
+const RATE_LIMIT_MAP = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = { maxRequests: 100, windowMs: 60000 }; // 100 requests per minute
+
+function checkRateLimit(clientIp: string): boolean {
+  const now = Date.now();
+  const record = RATE_LIMIT_MAP.get(clientIp);
+
+  if (!record || now > record.resetTime) {
+    RATE_LIMIT_MAP.set(clientIp, { count: 1, resetTime: now + RATE_LIMIT.windowMs });
+    return true;
+  }
+
+  if (record.count >= RATE_LIMIT.maxRequests) {
+    return false;
+  }
+
+  record.count++;
+  return true;
+}
+
+// Input validation with enhanced security checks
+const validateInput = (invoice: InvoiceAnalysis): ValidationResult => {
+  const errors: string[] = [];
+
+  if (!invoice) {
+    errors.push('Invoice data is required');
+    return { valid: false, errors };
+  }
+
+  if (!invoice.invoice_id || typeof invoice.invoice_id !== 'string') {
+    errors.push('Valid invoice_id is required');
+  }
+
+  if (typeof invoice.confidence_score !== 'number' || 
+      invoice.confidence_score < 0 || 
+      invoice.confidence_score > 100) {
+    errors.push('confidence_score must be a number between 0 and 100');
+  }
+
+  if (typeof invoice.amount !== 'number' || invoice.amount < 0) {
+    errors.push('amount must be a positive number');
+  }
+
+  // Prevent excessive data size (max 100KB)
+  const dataSize = JSON.stringify(invoice).length;
+  if (dataSize > 100000) {
+    errors.push('Invoice data exceeds maximum size limit');
+  }
+
   return { valid: errors.length === 0, errors };
 };
 
