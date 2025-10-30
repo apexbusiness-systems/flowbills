@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import * as React from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { BulkActionsToolbar } from './BulkActionsToolbar';
+import { useBulkActions } from '@/hooks/useBulkActions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -42,6 +45,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useFileUpload } from '@/hooks/useFileUpload';
+import { useToast } from '@/hooks/use-toast';
 import { Invoice } from '@/hooks/useInvoices';
 import { format } from 'date-fns';
 
@@ -56,11 +60,14 @@ interface InvoiceListProps {
 const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceListProps) => {
   const { hasRole } = useAuth();
   const { getDocuments } = useFileUpload();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   const [documentCounts, setDocumentCounts] = useState<Record<string, number>>({});
+  const [selectedInvoices, setSelectedInvoices] = useState<Set<string>>(new Set());
+  const { processing, bulkApprove, bulkReject, bulkDelete, bulkExport } = useBulkActions();
 
   const canEdit = hasRole('operator') || hasRole('admin');
   const canDelete = hasRole('operator') || hasRole('admin');
@@ -121,6 +128,52 @@ const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceL
     }
   };
 
+  const toggleInvoiceSelection = (invoiceId: string) => {
+    setSelectedInvoices(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(invoiceId)) {
+        newSet.delete(invoiceId);
+      } else {
+        newSet.add(invoiceId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedInvoices.size === filteredInvoices.length) {
+      setSelectedInvoices(new Set());
+    } else {
+      setSelectedInvoices(new Set(filteredInvoices.map(inv => inv.id)));
+    }
+  };
+
+  const handleBulkApprove = async () => {
+    const success = await bulkApprove(Array.from(selectedInvoices));
+    if (success) {
+      setSelectedInvoices(new Set());
+    }
+  };
+
+  const handleBulkReject = async () => {
+    const success = await bulkReject(Array.from(selectedInvoices));
+    if (success) {
+      setSelectedInvoices(new Set());
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const success = await bulkDelete(Array.from(selectedInvoices));
+    if (success) {
+      setSelectedInvoices(new Set());
+    }
+  };
+
+  const handleBulkExport = () => {
+    const selected = filteredInvoices.filter(inv => selectedInvoices.has(inv.id));
+    bulkExport(selected);
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -150,6 +203,16 @@ const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceL
 
   return (
     <>
+      <BulkActionsToolbar
+        selectedCount={selectedInvoices.size}
+        onApprove={handleBulkApprove}
+        onReject={handleBulkReject}
+        onDelete={handleBulkDelete}
+        onExport={handleBulkExport}
+        onSend={() => toast({ title: "Feature coming soon", description: "Vendor notification system" })}
+        onClearSelection={() => setSelectedInvoices(new Set())}
+        disabled={processing}
+      />
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -249,7 +312,13 @@ const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceL
               <Table>
                 <TableHeader>
                   <TableRow>
-                  <TableHead>Invoice #</TableHead>
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={selectedInvoices.size === filteredInvoices.length && filteredInvoices.length > 0}
+                        onCheckedChange={toggleSelectAll}
+                      />
+                    </TableHead>
+                    <TableHead>Invoice #</TableHead>
                   <TableHead>Vendor</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Date</TableHead>
@@ -262,6 +331,12 @@ const InvoiceList = ({ invoices, loading, onEdit, onDelete, onCreate }: InvoiceL
                 <TableBody>
                   {filteredInvoices.map((invoice) => (
                     <TableRow key={invoice.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedInvoices.has(invoice.id)}
+                          onCheckedChange={() => toggleInvoiceSelection(invoice.id)}
+                        />
+                      </TableCell>
                       <TableCell>{invoice.invoice_number}</TableCell>
                       <TableCell>{invoice.vendor_name}</TableCell>
                       <TableCell className="font-mono">

@@ -13,6 +13,8 @@ import ErrorBoundary from "@/components/error-boundary/ErrorBoundary";
 import { healthChecker } from "@/lib/health-check";
 import { Footer } from "@/components/ui/footer";
 import { OfflineIndicator } from "@/components/ui/offline-indicator";
+import { CommandPalette } from "@/components/ui/command-palette";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 
 // Lazy load all pages for code splitting
 const Landing = React.lazy(() => import("./pages/Landing"));
@@ -39,6 +41,7 @@ const APIDocs = React.lazy(() => import("./pages/APIDocs"));
 const About = React.lazy(() => import("./pages/About"));
 const Contact = React.lazy(() => import("./pages/Contact"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
+const SupplierPortal = React.lazy(() => import("./pages/supplier/SupplierPortal"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -224,6 +227,10 @@ const AuthRoutes = () => {
           element={<Contact />} 
         />
         <Route 
+          path="/supplier-portal" 
+          element={<SupplierPortal />} 
+        />
+        <Route 
           path="/" 
           element={<Landing />}
         />
@@ -248,6 +255,8 @@ function App() {
           <Toaster />
           <Sonner />
           <OfflineIndicator />
+          <CommandPalette />
+          <InstallPrompt />
           <BrowserRouter>
             <AuthProvider>
               <SessionSecurityProvider>

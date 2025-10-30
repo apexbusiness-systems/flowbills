@@ -4,6 +4,7 @@ import KPICards from "./KPICards";
 import ChartsSection from "./ChartsSection";
 import DateRangeFilter from "./DateRangeFilter";
 import ExportControls from "./ExportControls";
+import { PredictiveInsights } from "./PredictiveInsights";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -112,6 +113,9 @@ const AnalyticsDashboard = () => {
         </h3>
         <ChartsSection chartData={chartData} loading={loading} />
       </div>
+
+      {/* AI Insights */}
+      <PredictiveInsights />
 
       {/* Summary Insights */}
       <Card>
