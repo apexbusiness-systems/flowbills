@@ -255,9 +255,9 @@ function App() {
           <Toaster />
           <Sonner />
           <OfflineIndicator />
-          <CommandPalette />
           <InstallPrompt />
           <BrowserRouter>
+            <CommandPalette />
             <AuthProvider>
               <SessionSecurityProvider>
                 <CSRFProvider>
