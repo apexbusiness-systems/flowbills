@@ -1,8 +1,37 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { toMessage } from "../_shared/errors.ts";
-...
+import { corsHeaders } from '../_shared/cors.ts';
+
+// Type definitions
+interface OCRRequest {
+  file_data: string;
+  file_type: string;
+  invoice_id?: string;
+}
+
+interface OCRResponse {
+  success: boolean;
+  extracted_data?: {
+    invoice_number: string | null;
+    amount: number | null;
+    currency: string | null;
+    vendor_name: string | null;
+    invoice_date: string | null;
+    due_date: string | null;
+    po_number: string | null;
+  };
+  raw_text?: string;
+  confidence_scores?: Record<string, number>;
+  ocr_metadata?: {
+    processing_time: number;
+    method: string;
+    confidence_average: number;
+  };
   error?: string;
 }
+
+// Helper to handle undefined values
+const u = <T>(value: T | null | undefined): T | null => value ?? null;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
