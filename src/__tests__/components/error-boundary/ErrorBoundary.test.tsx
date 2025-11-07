@@ -1,9 +1,18 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import ErrorBoundary from '@/components/error-boundary/ErrorBoundary';
 
 // Mock console.error to prevent noise in tests
 const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+// Mock localStorage
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
+global.localStorage = localStorageMock as any;
 
 const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
   if (shouldThrow) {
@@ -13,6 +22,11 @@ const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
 };
 
 describe('ErrorBoundary', () => {
+  beforeEach(() => {
+    localStorageMock.getItem.mockReturnValue('[]');
+    localStorageMock.setItem.mockClear();
+  });
+
   afterEach(() => {
     consoleSpy.mockClear();
   });

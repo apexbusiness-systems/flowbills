@@ -34,10 +34,41 @@ class ErrorBoundary extends Component<Props, State> {
     console.error('============================================');
     console.error('[FlowBills ErrorBoundary] Caught an error!');
     console.error('Error:', error);
+    console.error('Error name:', error.name);
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
     console.error('Component stack:', errorInfo.componentStack);
+    console.error('Timestamp:', new Date().toISOString());
+    console.error('URL:', window.location.href);
+    console.error('User agent:', navigator.userAgent);
     console.error('============================================');
+
+    // Store error in localStorage for debugging
+    try {
+      const errorReport = {
+        error: {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        },
+        componentStack: errorInfo.componentStack,
+        timestamp: new Date().toISOString(),
+        url: window.location.href,
+        userAgent: navigator.userAgent
+      };
+      
+      const existingErrors = JSON.parse(localStorage.getItem('error_boundary_logs') || '[]');
+      existingErrors.push(errorReport);
+      
+      // Keep only last 10 errors
+      if (existingErrors.length > 10) {
+        existingErrors.splice(0, existingErrors.length - 10);
+      }
+      
+      localStorage.setItem('error_boundary_logs', JSON.stringify(existingErrors));
+    } catch (storageError) {
+      console.error('Failed to store error in localStorage:', storageError);
+    }
   }
 
   handleReset = () => {

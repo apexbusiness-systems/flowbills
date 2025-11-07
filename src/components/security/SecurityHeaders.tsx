@@ -113,34 +113,42 @@ export const SecurityHeaders = () => {
     // Listen for CSP violations
     document.addEventListener('securitypolicyviolation', handleCSPViolation);
 
-    // Set up additional security monitoring
-    const securityObserver = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              const element = node as Element;
-              
-              // Check for potentially dangerous script insertions
-              if (element.tagName === 'SCRIPT' && !element.hasAttribute('nonce')) {
-                console.warn('Potentially dangerous script insertion detected:', element);
+    // Set up additional security monitoring - only if body exists
+    let securityObserver: MutationObserver | null = null;
+    
+    if (document.body) {
+      securityObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                const element = node as Element;
+                
+                // Check for potentially dangerous script insertions
+                if (element.tagName === 'SCRIPT' && !element.hasAttribute('nonce')) {
+                  console.warn('Potentially dangerous script insertion detected:', element);
+                }
+                
+                // Check for iframe insertions
+                if (element.tagName === 'IFRAME') {
+                  console.warn('Iframe insertion detected:', element);
+                }
               }
-              
-              // Check for iframe insertions
-              if (element.tagName === 'IFRAME') {
-                console.warn('Iframe insertion detected:', element);
-              }
-            }
-          });
-        }
+            });
+          }
+        });
       });
-    });
 
-    // Start observing DOM changes
-    securityObserver.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
+      // Start observing DOM changes
+      try {
+        securityObserver.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+      } catch (error) {
+        console.error('Failed to start security observer:', error);
+      }
+    }
 
     // Set security-focused viewport
     const viewport = document.querySelector('meta[name="viewport"]');
@@ -178,7 +186,9 @@ export const SecurityHeaders = () => {
       document.removeEventListener('securitypolicyviolation', handleCSPViolation);
       document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('keydown', handleKeyDown);
-      securityObserver.disconnect();
+      if (securityObserver) {
+        securityObserver.disconnect();
+      }
     };
   }, []);
 
