@@ -3,7 +3,7 @@
  * Receives CSP violation reports via navigator.sendBeacon
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
