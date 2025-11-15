@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { SessionSecurityProvider } from "@/hooks/useSessionSecurity";
 import { CSRFProvider } from "@/hooks/useCSRFProtection";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { SecurityHeaders } from "@/components/security/SecurityHeaders";
@@ -17,21 +16,14 @@ import { CommandPalette } from "@/components/ui/command-palette";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 
 // Lazy load all pages for code splitting
-const Landing = React.lazy(() => import("./pages/Landing"));
 const Auth = React.lazy(() => import("./pages/Auth"));
 const PasswordChange = React.lazy(() => import("./pages/PasswordChange"));
 const ClientIntegration = React.lazy(() => import("./pages/ClientIntegration"));
 const Profile = React.lazy(() => import("./pages/Profile"));
-const Invoices = React.lazy(() => import("./pages/Invoices"));
-const Exceptions = React.lazy(() => import("./pages/Exceptions"));
 const ValidationRules = React.lazy(() => import("./pages/ValidationRules"));
-const Compliance = React.lazy(() => import("./pages/Compliance"));
 const Integrations = React.lazy(() => import("./pages/Integrations"));
-const Analytics = React.lazy(() => import("./pages/Analytics"));
 const Workflows = React.lazy(() => import("./pages/Workflows"));
-const Search = React.lazy(() => import("./pages/Search"));
 const CountryPacks = React.lazy(() => import("./pages/CountryPacks"));
-const Dashboard = React.lazy(() => import("./pages/Dashboard"));
 const Privacy = React.lazy(() => import("./pages/Privacy"));
 const Terms = React.lazy(() => import("./pages/Terms"));
 const Security = React.lazy(() => import("./pages/Security"));
@@ -112,22 +104,6 @@ const AuthRoutes = () => {
           } 
         />
         <Route 
-          path="/invoices" 
-          element={
-            <ProtectedRoute requiredRole="viewer">
-              <Invoices />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/exceptions" 
-          element={
-            <ProtectedRoute requiredRole="viewer">
-              <Exceptions />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
           path="/validation-rules" 
           element={
             <ProtectedRoute requiredRole="operator">
@@ -136,26 +112,10 @@ const AuthRoutes = () => {
           } 
         />
         <Route 
-          path="/compliance" 
-          element={
-            <ProtectedRoute requiredRole="viewer">
-              <Compliance />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/integrations" 
+          path="/integrations"
           element={
             <ProtectedRoute requiredRole="operator">
               <Integrations />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/analytics" 
-          element={
-            <ProtectedRoute requiredRole="viewer">
-              <Analytics />
             </ProtectedRoute>
           } 
         />
@@ -167,15 +127,7 @@ const AuthRoutes = () => {
             </ProtectedRoute>
           } 
         />
-        <Route 
-          path="/search" 
-          element={
-            <ProtectedRoute requiredRole="viewer">
-              <Search />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
+        <Route
           path="/country-packs" 
           element={
             <ProtectedRoute requiredRole="operator">
@@ -188,15 +140,7 @@ const AuthRoutes = () => {
           element={<ClientIntegration />} 
         />
         <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/privacy" 
+          path="/privacy"
           element={<Privacy />} 
         />
         <Route 
@@ -241,7 +185,7 @@ const AuthRoutes = () => {
         />
         <Route 
           path="/" 
-          element={<Landing />}
+          element={<Features />}
         />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
@@ -268,16 +212,14 @@ function App() {
           <BrowserRouter>
             <CommandPalette />
             <AuthProvider>
-              <SessionSecurityProvider>
-                <CSRFProvider>
-                  <div className="min-h-screen flex flex-col">
-                    <div className="flex-1">
-                      <AuthRoutes />
-                    </div>
-                    <Footer />
+              <CSRFProvider>
+                <div className="min-h-screen flex flex-col">
+                  <div className="flex-1">
+                    <AuthRoutes />
                   </div>
-                </CSRFProvider>
-              </SessionSecurityProvider>
+                  <Footer />
+                </div>
+              </CSRFProvider>
             </AuthProvider>
           </BrowserRouter>
         </ErrorBoundary>
