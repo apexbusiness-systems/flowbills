@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@/lib/test-utils';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import Index from '@/pages/Index';
 import Features from '@/pages/Features';
 import Pricing from '@/pages/Pricing';
 import APIDocs from '@/pages/APIDocs';
@@ -11,6 +12,39 @@ import Privacy from '@/pages/Privacy';
 import Terms from '@/pages/Terms';
 
 describe('Navigation Pages', () => {
+  // CRITICAL REGRESSION TEST: Ensure root route always renders Index page
+  describe('Root Route (/)', () => {
+    it('renders Index page at root path', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+          </Routes>
+        </MemoryRouter>
+      );
+
+      // Verify Index page is rendered by checking for brand tagline
+      expect(screen.getByText(/Automate invoices/i)).toBeInTheDocument();
+      expect(screen.getByText(/Approve faster/i)).toBeInTheDocument();
+    });
+
+    it('Index page does NOT contain banned terms', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+          </Routes>
+        </MemoryRouter>
+      );
+
+      // Ensure banned terms are not present
+      const pageText = document.body.textContent || '';
+      expect(pageText).not.toMatch(/never miss a call/i);
+      expect(pageText).not.toMatch(/work while you sleep/i);
+      expect(pageText).not.toMatch(/tradeline/i);
+      expect(pageText).not.toMatch(/call center/i);
+    });
+  });
   const pages = [
     { path: '/features', Component: Features, title: 'Features' },
     { path: '/pricing', Component: Pricing, title: 'Pricing' },
