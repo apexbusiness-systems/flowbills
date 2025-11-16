@@ -40,17 +40,17 @@ const Index = () => {
         <div className="absolute inset-0 bg-background/60" />
         <div className="relative z-10 container mx-auto px-4 py-12">
           <header className="max-w-3xl space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight tracking-tight">
-              {Brand?.tagline ?? "Energy-grade Invoice Automation"}
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight tracking-tight text-foreground">
+              Automate invoices. Approve faster. Close with confidence.
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground">
-              {Brand?.subline ?? "Cut AP costs, prevent duplicates, and approve on mobile in minutes."}
+            <p className="text-lg md:text-xl text-foreground/80">
+              Capture → validate → dedupe/fraud check → human-in-the-loop ⇒ approve → export to ERP.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button asChild size="lg">
+              <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
                 <Link to="/contact" aria-label="Book free demo">Book Free Demo</Link>
               </Button>
-              <Button asChild variant="secondary" size="lg">
+              <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
                 <Link to="/pricing" aria-label="Calculate ROI">Calculate ROI</Link>
               </Button>
             </div>
