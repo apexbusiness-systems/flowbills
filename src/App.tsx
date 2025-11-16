@@ -28,6 +28,7 @@ const Privacy = React.lazy(() => import("./pages/Privacy"));
 const Terms = React.lazy(() => import("./pages/Terms"));
 const Security = React.lazy(() => import("./pages/Security"));
 const Features = React.lazy(() => import("./pages/Features"));
+const Landing = React.lazy(() => import("./pages/Landing"));
 const IndexPage = React.lazy(() => import("./pages/Index"));
 const Pricing = React.lazy(() => import("./pages/Pricing"));
 const APIDocs = React.lazy(() => import("./pages/APIDocs"));
@@ -195,7 +196,7 @@ const AuthRoutes = () => {
         />
         <Route 
           path="/" 
-          element={<IndexPage />}
+          element={<Landing />}
         />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
