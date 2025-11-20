@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrackLink } from "@/components/ui/TrackLink";
@@ -5,10 +6,12 @@ import { BreadcrumbNav } from "@/components/ui/breadcrumb-nav";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Zap, Shield, Clock, CheckCircle2, ArrowRight, BarChart3 } from "lucide-react";
 import heroImage from "@/assets/hero-oilgas.jpg";
+import { SupportChat } from "@/components/support/SupportChat";
 import { useTranslation } from "react-i18next";
 
 const Index = () => {
   const { t } = useTranslation();
+  const [isSupportMinimized, setIsSupportMinimized] = useState(true);
   
   return (
     <main className="min-h-screen animate-fade-in">
@@ -276,6 +279,11 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      <SupportChat 
+        isMinimized={isSupportMinimized} 
+        onMinimize={() => setIsSupportMinimized(!isSupportMinimized)} 
+      />
     </main>
   );
 };

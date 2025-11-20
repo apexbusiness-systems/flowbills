@@ -9,10 +9,12 @@ import { StatsWidget } from '@/components/dashboard/widgets/StatsWidget';
 import { ActivityWidget } from '@/components/dashboard/widgets/ActivityWidget';
 import { UploadWidget } from '@/components/dashboard/widgets/UploadWidget';
 import { ChartWidget } from '@/components/dashboard/widgets/ChartWidget';
+import { SupportChat } from '@/components/support/SupportChat';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 export default function Dashboard() {
+  const [isSupportMinimized, setIsSupportMinimized] = useState(true);
   const {
     widgets,
     visibleWidgets,
@@ -133,6 +135,11 @@ export default function Dashboard() {
           <Button onClick={resetLayout}>Reset to Default Layout</Button>
         </div>
       )}
+
+      <SupportChat 
+        isMinimized={isSupportMinimized} 
+        onMinimize={() => setIsSupportMinimized(!isSupportMinimized)} 
+      />
     </div>
   );
 }
