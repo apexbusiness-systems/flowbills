@@ -44,6 +44,7 @@ const CSPMonitoring = React.lazy(() => import("./pages/CSPMonitoring"));
 const Support = React.lazy(() => import("./pages/Support"));
 const HelpCenter = React.lazy(() => import("./pages/HelpCenter"));
 const AFEManagement = React.lazy(() => import("./pages/AFEManagement"));
+const FieldTickets = React.lazy(() => import("./pages/FieldTickets"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -131,6 +132,14 @@ const AuthRoutes = () => {
           element={
             <ProtectedRoute>
               <AFEManagement />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/field-tickets" 
+          element={
+            <ProtectedRoute>
+              <FieldTickets />
             </ProtectedRoute>
           } 
         />
