@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { GripVertical, Layout, FileText, DollarSign, MapPin, BarChart3 } from 'lucide-react';
+import { GripVertical, Layout, FileText, DollarSign, MapPin, BarChart3, CheckCircle2 } from 'lucide-react';
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -84,7 +84,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Access Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate('/afe-management')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">AFE Management</CardTitle>
@@ -122,6 +122,16 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <CardDescription>View comprehensive reports</CardDescription>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate('/three-way-matching')}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Three-Way Matching</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <CardDescription>Automated invoice matching</CardDescription>
           </CardContent>
         </Card>
       </div>
