@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { GripVertical, Layout } from 'lucide-react';
+import { GripVertical, Layout, FileText, DollarSign, MapPin } from 'lucide-react';
 import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDashboardLayout } from '@/hooks/useDashboardLayout';
 import { DashboardConfigPanel } from '@/components/dashboard/DashboardConfigPanel';
 import { StatsWidget } from '@/components/dashboard/widgets/StatsWidget';
@@ -12,8 +13,10 @@ import { ChartWidget } from '@/components/dashboard/widgets/ChartWidget';
 import { SupportChat } from '@/components/support/SupportChat';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [isSupportMinimized, setIsSupportMinimized] = useState(true);
   const {
     widgets,
@@ -78,6 +81,39 @@ export default function Dashboard() {
             onResetLayout={resetLayout}
           />
         </div>
+      </div>
+
+      {/* Quick Access Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate('/afe-management')}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">AFE Management</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <CardDescription>Manage AFEs and track budgets</CardDescription>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate('/field-tickets')}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Field Tickets</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <CardDescription>Verify and link field tickets</CardDescription>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate('/uwi-registry')}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">UWI Registry</CardTitle>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <CardDescription>Manage well identifiers</CardDescription>
+          </CardContent>
+        </Card>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
