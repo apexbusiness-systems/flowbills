@@ -101,6 +101,59 @@ export type Database = {
         }
         Relationships: []
       }
+      approvals: {
+        Row: {
+          approval_date: string | null
+          approval_method: string | null
+          approval_status: string
+          approved_by: string | null
+          confidence_score: number | null
+          created_at: string
+          id: string
+          invoice_id: string
+          metadata: Json | null
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approval_date?: string | null
+          approval_method?: string | null
+          approval_status?: string
+          approved_by?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          invoice_id: string
+          metadata?: Json | null
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approval_date?: string | null
+          approval_method?: string | null
+          approval_status?: string
+          approved_by?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          metadata?: Json | null
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approvals_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       article_feedback: {
         Row: {
           article_id: string
@@ -671,6 +724,7 @@ export type Database = {
           amount: number
           created_at: string | null
           due_date: string | null
+          duplicate_hash: string | null
           file_name: string | null
           file_url: string | null
           id: string
@@ -686,6 +740,7 @@ export type Database = {
           amount: number
           created_at?: string | null
           due_date?: string | null
+          duplicate_hash?: string | null
           file_name?: string | null
           file_url?: string | null
           id?: string
@@ -701,6 +756,7 @@ export type Database = {
           amount?: number
           created_at?: string | null
           due_date?: string | null
+          duplicate_hash?: string | null
           file_name?: string | null
           file_url?: string | null
           id?: string
@@ -989,6 +1045,110 @@ export type Database = {
           resource_type?: string
           user_id?: string | null
           window_start?: string
+        }
+        Relationships: []
+      }
+      review_queue: {
+        Row: {
+          assigned_to: string | null
+          confidence_score: number | null
+          created_at: string
+          id: string
+          invoice_id: string
+          reason: string
+          review_decision: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_factors: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          invoice_id: string
+          reason: string
+          review_decision?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_factors?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          reason?: string
+          review_decision?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_factors?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_queue_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      security_events: {
+        Row: {
+          action: string
+          created_at: string
+          event_type: string
+          id: string
+          ip_address: unknown
+          message: string | null
+          metadata: Json | null
+          resource_id: string | null
+          resource_type: string | null
+          severity: string
+          status: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_address?: unknown
+          message?: string | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          severity: string
+          status?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_address?: unknown
+          message?: string | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          severity?: string
+          status?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
