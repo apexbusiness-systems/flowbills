@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://region1.google-analytics.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests;" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://region1.google-analytics.com; base-uri 'self'; object-src 'none'; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests;" />
     
     <!-- Performance: Preconnect to critical origins -->
     <link rel="preconnect" href="https://ullqluvzkgnwwqijhvjr.supabase.co" crossorigin>
@@ -387,20 +387,49 @@
     <meta property="business:contact_data:locality" content="Calgary" />
     <meta property="business:contact_data:region" content="Alberta" />
     <meta property="business:contact_data:country_name" content="Canada" />
-    
-    <!-- GTM -->
-    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-XXXX"></script>
-    <script nonce="CSP_NONCE_PLACEHOLDER">
-      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-      'https://www.googletagmanager.com/gtm.js?id=GTM-XXXX'+dl;f.parentNode.insertBefore(j,f);})
-      (window,document,'script','dataLayer','GTM-XXXX');
-    </script>
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="app-loading" style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #0f0f0f; color: #fff; font-family: system-ui, -apple-system, sans-serif; z-index: 9999;">
+        <div style="text-align: center;">
+          <div style="width: 48px; height: 48px; border: 4px solid #333; border-top-color: #D4AF37; border-radius: 50%; margin: 0 auto 16px; animation: spin 1s linear infinite;"></div>
+          <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Loading FlowBills...</div>
+          <div style="font-size: 14px; color: #888;">Initializing application</div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Remove loading indicator once React renders
+      setTimeout(() => {
+        const loading = document.getElementById('app-loading');
+        if (loading && loading.parentElement?.children.length > 1) {
+          loading.remove();
+        } else if (loading) {
+          // App failed to load - show error
+          loading.innerHTML = `
+            <div style="text-align: center; max-width: 500px; padding: 24px;">
+              <div style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #ef4444;">⚠️ Application Loading Error</div>
+              <div style="font-size: 14px; color: #ccc; margin-bottom: 24px; line-height: 1.6;">
+                The application failed to load. This is often caused by browser cache issues.
+              </div>
+              <button onclick="localStorage.clear(); sessionStorage.clear(); caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key)))).then(() => location.reload(true));" 
+                style="background: #D4AF37; color: #000; border: none; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                Clear Cache & Reload
+              </button>
+              <div style="font-size: 12px; color: #666; margin-top: 16px;">
+                If this persists, try opening in an incognito/private window
+              </div>
+            </div>
+          `;
+        }
+      }, 5000);
+    </script>
+    <style>
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

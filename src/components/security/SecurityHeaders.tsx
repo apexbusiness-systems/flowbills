@@ -26,8 +26,8 @@ const CSP_POLICY = {
   ],
   'connect-src': [
     "'self'",
-    'https://yvyjzlbosmtesldczhnm.supabase.co',
-    'wss://yvyjzlbosmtesldczhnm.supabase.co'
+    'https://ullqluvzkgnwwqijhvjr.supabase.co',
+    'wss://ullqluvzkgnwwqijhvjr.supabase.co'
   ],
   'frame-ancestors': ["'none'"],
   'form-action': ["'self'"],
