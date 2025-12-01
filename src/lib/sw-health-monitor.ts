@@ -25,6 +25,7 @@ class ServiceWorkerHealthMonitor {
 
   /**
    * Register service worker with health monitoring
+   * FIRST clears all existing registrations and caches for clean state
    */
   async register(): Promise<void> {
     if (!('serviceWorker' in navigator)) {
@@ -33,12 +34,27 @@ class ServiceWorkerHealthMonitor {
     }
 
     try {
+      // STEP 1: Clear all existing registrations to ensure clean state
+      const existingRegs = await navigator.serviceWorker.getRegistrations();
+      if (existingRegs.length > 0) {
+        console.log(`Clearing ${existingRegs.length} existing service worker(s)...`);
+        await Promise.all(existingRegs.map(reg => reg.unregister()));
+      }
+
+      // STEP 2: Clear all caches
+      const cacheKeys = await caches.keys();
+      if (cacheKeys.length > 0) {
+        console.log(`Clearing ${cacheKeys.length} cache(s)...`);
+        await Promise.all(cacheKeys.map(key => caches.delete(key)));
+      }
+
+      // STEP 3: Now register fresh
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
         updateViaCache: 'none', // Always fetch fresh SW
       });
 
-      console.log('✓ Service Worker registered successfully');
+      console.log('✓ Service Worker registered (clean state)');
       this.status.registered = true;
       this.status.failureCount = 0;
       this.status.error = undefined;
@@ -49,29 +65,19 @@ class ServiceWorkerHealthMonitor {
         console.log('✓ Service Worker is active');
       }
 
-      // Monitor for updates
+      // Monitor for updates (but don't prompt aggressively)
       registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
         console.log('→ Service Worker update found');
-        
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'activated') {
-              console.log('✓ Service Worker updated and activated');
-              // Reload page to use new SW
-              if (confirm('New version available! Reload to update?')) {
-                window.location.reload();
-              }
-            }
-          });
-        }
       });
 
       // Start health monitoring
       this.startHealthChecks();
 
     } catch (error) {
-      this.handleRegistrationError(error);
+      console.warn('SW registration skipped:', error);
+      // Don't retry aggressively - let the app work without SW
+      this.status.registered = false;
+      this.status.error = error instanceof Error ? error.message : 'Unknown error';
     }
   }
 

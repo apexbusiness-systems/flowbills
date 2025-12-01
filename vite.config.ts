@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: false, // Disable auto-registration - we use manual sw.js
       includeAssets: ['favicon.png', 'icons/*.png', 'icons/*.svg'],
       manifest: {
         name: 'FLOWBills - Invoice Automation',
