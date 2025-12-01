@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flowbills-v7'; // Fixed blank page loading issue
+const CACHE_NAME = 'flowbills-v8'; // Fixed SW conflicts - network-only for critical assets
 const urlsToCache = [
   '/',
   '/manifest.webmanifest',
@@ -27,24 +27,39 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Fetch Event
+// Fetch Event - NETWORK ONLY for critical assets
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') return;
 
   // Bypass Vite dev/HMR and source files
   if (url.pathname.startsWith('/@vite') || url.pathname.startsWith('/@id') || url.pathname.startsWith('/src/')) {
     return;
   }
 
-  // Always fetch HTML from network (never cache)
+  // NETWORK ONLY for HTML - never cache index.html to avoid stale app
   if (request.destination === 'document' || request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(fetch(request));
     return;
   }
 
-  // Network-first for images and static icons/assets
-  if (request.destination === 'image' || url.pathname.startsWith('/assets/') || url.pathname.startsWith('/icons/')) {
+  // NETWORK ONLY for JavaScript bundles - never cache app code
+  if (request.destination === 'script') {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  // NETWORK ONLY for CSS bundles - never cache styles
+  if (request.destination === 'style') {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  // Network-first for images and static assets (with cache fallback)
+  if (request.destination === 'image' || url.pathname.startsWith('/icons/')) {
     event.respondWith(
       fetch(request)
         .then((response) => {
@@ -57,53 +72,32 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first for JavaScript and CSS bundles
-  if (request.destination === 'script' || request.destination === 'style') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
-          return response;
-        })
-        .catch(() => caches.match(request))
-    );
-    return;
-  }
-
-  // Default: cache-first, then network
+  // Default: network-first for everything else
   event.respondWith(
-    caches.match(request).then((cached) => {
-      return (
-        cached ||
-        fetch(request).then((networkResponse) => {
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-            return networkResponse;
-          }
-          const responseToCache = networkResponse.clone();
+    fetch(request)
+      .then((response) => {
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
-          return networkResponse;
-        })
-      );
-    })
+        }
+        return response;
+      })
+      .catch(() => caches.match(request))
   );
 });
 
-// Activate Service Worker - Clean up old caches only
+// Activate Service Worker - Delete ALL old caches for clean state
 self.addEventListener('activate', (event) => {
-  console.log('FlowBills Service Worker activating...');
+  console.log('FlowBills Service Worker activating - clearing all old caches...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
+      // Delete ALL caches (including old versions)
+      return Promise.all(cacheNames.map((cacheName) => {
+        console.log('Deleting cache:', cacheName);
+        return caches.delete(cacheName);
+      }));
     }).then(() => {
-      // Take control of clients
+      // Take control of all clients immediately
       return self.clients.claim();
     })
   );

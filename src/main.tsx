@@ -1,6 +1,25 @@
 // Startup diagnostic - verify module loaded
 console.log('[FlowBills] Module loaded at', new Date().toISOString());
 
+// Emergency recovery: if we previously failed to load, clear everything
+const lastLoadFailed = localStorage.getItem('flowbills_load_failed') === 'true';
+if (lastLoadFailed) {
+  console.warn('[FlowBills] Previous load failed - clearing caches and service workers...');
+  localStorage.removeItem('flowbills_load_failed');
+  
+  // Clear all caches
+  if ('caches' in window) {
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+  }
+  
+  // Unregister all service workers
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(reg => reg.unregister());
+    });
+  }
+}
+
 // Declare global flag
 declare global {
   interface Window {
