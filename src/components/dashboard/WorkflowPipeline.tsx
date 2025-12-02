@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { 
   FileText, 
   CheckCircle, 
@@ -5,20 +6,32 @@ import {
   CreditCard, 
   Send,
   ArrowRight,
-  AlertTriangle 
+  AlertTriangle,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
-const workflowSteps = [
+interface WorkflowCounts {
+  inbox: number;
+  validated: number;
+  matched: number;
+  pending_approval: number;
+  approved: number;
+  paid: number;
+}
+
+const getWorkflowSteps = (counts: WorkflowCounts) => [
   {
     id: "inbox",
     title: "Inbox",
     description: "Invoice ingestion and validation",
     icon: FileText,
-    count: 24,
-    status: "active",
+    count: counts.inbox,
+    status: counts.inbox > 20 ? "attention" : "active",
     color: "bg-status-processing"
   },
   {
@@ -26,7 +39,7 @@ const workflowSteps = [
     title: "Validate",
     description: "Data validation and mapping",
     icon: CheckCircle,
-    count: 8,
+    count: counts.validated,
     status: "active", 
     color: "bg-status-pending"
   },
@@ -35,25 +48,25 @@ const workflowSteps = [
     title: "Match",
     description: "PO and field ticket matching",
     icon: Users,
-    count: 12,
-    status: "attention",
-    color: "bg-destructive"
+    count: counts.matched,
+    status: counts.matched > 10 ? "attention" : "active",
+    color: counts.matched > 10 ? "bg-destructive" : "bg-primary"
   },
   {
     id: "approve",
     title: "Approve",
     description: "Review and approval workflow",
     icon: CheckCircle,
-    count: 6,
+    count: counts.pending_approval,
     status: "active",
-    color: "bg-status-approved"
+    color: "bg-amber-500"
   },
   {
     id: "pay",
     title: "Pay",
     description: "Payment processing and batching",
     icon: CreditCard,
-    count: 18,
+    count: counts.approved,
     status: "completed",
     color: "bg-status-approved"
   },
@@ -62,7 +75,7 @@ const workflowSteps = [
     title: "Remit",
     description: "Remittance and reconciliation",
     icon: Send,
-    count: 15,
+    count: counts.paid,
     status: "completed",
     color: "bg-status-approved"
   }
@@ -70,6 +83,109 @@ const workflowSteps = [
 
 const WorkflowPipeline = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [counts, setCounts] = useState<WorkflowCounts>({
+    inbox: 0,
+    validated: 0,
+    matched: 0,
+    pending_approval: 0,
+    approved: 0,
+    paid: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [totalInvoices, setTotalInvoices] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchCounts = async () => {
+      try {
+        // Fetch invoice counts by status
+        const { data: invoices, error } = await supabase
+          .from('invoices')
+          .select('status')
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        const statusCounts = {
+          inbox: 0,
+          validated: 0,
+          matched: 0,
+          pending_approval: 0,
+          approved: 0,
+          paid: 0
+        };
+
+        invoices?.forEach(invoice => {
+          switch (invoice.status) {
+            case 'pending':
+            case 'processing':
+              statusCounts.inbox++;
+              break;
+            case 'extracted':
+            case 'validated':
+              statusCounts.validated++;
+              break;
+            case 'matched':
+              statusCounts.matched++;
+              break;
+            case 'pending_approval':
+              statusCounts.pending_approval++;
+              break;
+            case 'approved':
+            case 'approved_auto':
+              statusCounts.approved++;
+              break;
+            case 'paid':
+              statusCounts.paid++;
+              break;
+          }
+        });
+
+        setCounts(statusCounts);
+        setTotalInvoices(invoices?.length || 0);
+      } catch (error) {
+        console.error('Error fetching workflow counts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCounts();
+
+    // Subscribe to real-time updates
+    const channel = supabase
+      .channel('invoice-updates')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'invoices',
+        filter: `user_id=eq.${user.id}`
+      }, () => {
+        fetchCounts();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  const workflowSteps = getWorkflowSteps(counts);
+  const completionRate = totalInvoices > 0 
+    ? Math.round(((counts.approved + counts.paid) / totalInvoices) * 100) 
+    : 0;
+
+  if (loading) {
+    return (
+      <div className="card-enterprise">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="card-enterprise">
@@ -80,9 +196,9 @@ const WorkflowPipeline = () => {
         <p className="text-sm text-muted-foreground">
           Track invoices through the complete billing workflow
         </p>
-        <Progress value={72} className="mt-3" />
+        <Progress value={completionRate} className="mt-3" />
         <p className="text-xs text-muted-foreground mt-1">
-          72% of invoices processed successfully this period
+          {completionRate}% of invoices processed successfully ({totalInvoices} total)
         </p>
       </div>
 
