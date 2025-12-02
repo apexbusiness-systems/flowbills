@@ -12,6 +12,9 @@ import { UploadWidget } from '@/components/dashboard/widgets/UploadWidget';
 import { ChartWidget } from '@/components/dashboard/widgets/ChartWidget';
 import { SupportChat } from '@/components/support/SupportChat';
 import WorkflowPipeline from '@/components/dashboard/WorkflowPipeline';
+import InvoiceUpload from '@/components/dashboard/InvoiceUpload';
+import { InvoiceStatusTracker } from '@/components/dashboard/InvoiceStatusTracker';
+import { ApprovalWorkflowStatus } from '@/components/dashboard/ApprovalWorkflowStatus';
 import { TourTrigger } from '@/components/tour/TourTrigger';
 import { InvoiceTour } from '@/components/tour/InvoiceTour';
 import { ContextualTooltip } from '@/components/help/ContextualTooltip';
@@ -223,6 +226,17 @@ export default function Dashboard() {
       {/* Workflow Pipeline */}
       <div className="mb-6">
         <WorkflowPipeline />
+      </div>
+
+      {/* Invoice Upload & Processing */}
+      <div className="mb-6">
+        <InvoiceUpload />
+      </div>
+
+      {/* Status and Approvals Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <InvoiceStatusTracker />
+        <ApprovalWorkflowStatus />
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
