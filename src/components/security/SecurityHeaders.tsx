@@ -1,17 +1,29 @@
 import { useEffect } from 'react';
 
-// Enhanced CSP Policy with stricter security
+// Check if running in Lovable preview environment
+const isLovablePreview = typeof window !== 'undefined' && (
+  window.location.hostname.includes('lovableproject.com') ||
+  window.location.hostname.includes('lovable.app') ||
+  window.location.hostname === 'localhost'
+);
+
+// Enhanced CSP Policy - relaxed for Lovable preview, strict for production
 const CSP_POLICY = {
   'default-src': ["'self'"],
   'script-src': [
     "'self'",
-    "'unsafe-inline'", // Required for Vite in development
+    "'unsafe-inline'",
+    "'unsafe-eval'", // Required for some dev tools
     'https://unpkg.com',
-    'https://cdn.jsdelivr.net'
+    'https://cdn.jsdelivr.net',
+    'https://cdn.gpteng.co', // Lovable scripts
+    'https://www.googletagmanager.com',
+    'https://www.google-analytics.com',
+    ...(isLovablePreview ? ['https://*.lovable.dev', 'https://*.lovableproject.com'] : [])
   ],
   'style-src': [
     "'self'",
-    "'unsafe-inline'", // Required for Tailwind
+    "'unsafe-inline'",
     'https://fonts.googleapis.com'
   ],
   'font-src': [
@@ -27,17 +39,28 @@ const CSP_POLICY = {
   'connect-src': [
     "'self'",
     'https://ullqluvzkgnwwqijhvjr.supabase.co',
-    'wss://ullqluvzkgnwwqijhvjr.supabase.co'
+    'wss://ullqluvzkgnwwqijhvjr.supabase.co',
+    'https://*.supabase.co',
+    'wss://*.supabase.co',
+    ...(isLovablePreview ? [
+      'https://*.lovable.dev',
+      'https://*.lovableproject.com',
+      'wss://*.lovableproject.com',
+      'https://api.lovable.dev',
+      'https://*.firebaseio.com',
+      'https://*.googleapis.com',
+      'wss://*.firebaseio.com'
+    ] : [])
   ],
-  'frame-ancestors': ["'none'"],
   'form-action': ["'self'"],
   'base-uri': ["'self'"],
   'object-src': ["'none'"],
-  'media-src': ["'self'"],
-  'worker-src': ["'self'"],
-  'child-src': ["'none'"],
-  'frame-src': ["'none'"],
+  'media-src': ["'self'", 'blob:', 'data:'],
+  'worker-src': ["'self'", 'blob:'],
+  'child-src': ["'self'", 'blob:', ...(isLovablePreview ? ['https://*.lovableproject.com'] : [])],
+  'frame-src': ["'self'", ...(isLovablePreview ? ['https://*.lovableproject.com', 'https://*.lovable.dev'] : [])],
   'manifest-src': ["'self'"]
+  // Note: frame-ancestors cannot be set via meta tag, only HTTP header
 };
 
 // Generate a random nonce for CSP
@@ -54,18 +77,18 @@ const generateCSPString = (policy: typeof CSP_POLICY): string => {
     .join('; ');
 };
 
-// Comprehensive security headers
+// Security headers that CAN be set via meta tags
+// Note: X-Frame-Options, HSTS, COEP, COOP, CORP can ONLY be set via HTTP headers
 const SECURITY_HEADERS = {
   'Content-Security-Policy': generateCSPString(CSP_POLICY),
-  'X-Frame-Options': 'DENY',
   'X-Content-Type-Options': 'nosniff',
-  'X-XSS-Protection': '1; mode=block',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), speaker=()',
-  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-  'Cross-Origin-Embedder-Policy': 'credentialless',
-  'Cross-Origin-Opener-Policy': 'same-origin',
-  'Cross-Origin-Resource-Policy': 'cross-origin'
+  'Referrer-Policy': 'strict-origin-when-cross-origin'
+  // The following can only be set via HTTP headers (not meta tags):
+  // - X-Frame-Options
+  // - Strict-Transport-Security  
+  // - Cross-Origin-Embedder-Policy
+  // - Cross-Origin-Opener-Policy
+  // - Cross-Origin-Resource-Policy
 };
 
 export const SecurityHeaders = () => {
