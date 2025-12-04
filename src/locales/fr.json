@@ -101,6 +101,24 @@
     "topic5": "Intégration avec les systèmes comptables",
     "topic6": "Questions de conformité et de sécurité",
     "topic7": "Dépannage des problèmes techniques",
-    "topic8": "Assistance à la formation et à l'intégration"
+    "topic8": "Assistance à la formation et à l'intégration",
+    "title": "Assistance IA 24/7",
+    "welcome": "Bienvenue à l'assistance IA 24/7",
+    "welcomeDesc": "Connectez-vous pour commencer à discuter par voix ou texte",
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "speaking": "Parle...",
+    "connect": "Se connecter au support",
+    "connecting": "Connexion...",
+    "connected": "Connecté",
+    "connectedDesc": "L'assistance IA est prête à vous aider 24/7",
+    "disconnected": "Déconnecté",
+    "disconnectedDesc": "Chat d'assistance terminé",
+    "listening": "Écoute",
+    "listeningDesc": "Parlez maintenant, j'écoute...",
+    "startListening": "Voix",
+    "stopListening": "Arrêter",
+    "typePlaceholder": "Tapez un message...",
+    "error": "Erreur"
   }
 }
