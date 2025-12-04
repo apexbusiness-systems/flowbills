@@ -101,6 +101,24 @@
     "topic5": "与会计系统集成",
     "topic6": "合规性和安全问题",
     "topic7": "技术问题故障排除",
-    "topic8": "培训和入门协助"
+    "topic8": "培训和入门协助",
+    "title": "24/7 AI 支持",
+    "welcome": "欢迎使用 24/7 AI 支持",
+    "welcomeDesc": "连接以开始通过语音或文字聊天",
+    "online": "在线",
+    "offline": "离线",
+    "speaking": "正在说话...",
+    "connect": "连接支持",
+    "connecting": "正在连接...",
+    "connected": "已连接",
+    "connectedDesc": "AI 支持已准备好全天候为您服务",
+    "disconnected": "已断开",
+    "disconnectedDesc": "支持聊天已结束",
+    "listening": "正在听",
+    "listeningDesc": "现在说话，我在听...",
+    "startListening": "语音",
+    "stopListening": "停止",
+    "typePlaceholder": "输入消息...",
+    "error": "错误"
   }
 }

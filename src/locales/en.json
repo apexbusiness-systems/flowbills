@@ -102,6 +102,24 @@
     "topic5": "Integration with accounting systems",
     "topic6": "Compliance and security questions",
     "topic7": "Troubleshooting technical issues",
-    "topic8": "Training and onboarding assistance"
+    "topic8": "Training and onboarding assistance",
+    "title": "24/7 AI Support",
+    "welcome": "Welcome to 24/7 AI Support",
+    "welcomeDesc": "Connect to start chatting with voice or text",
+    "online": "Online",
+    "offline": "Offline",
+    "speaking": "Speaking...",
+    "connect": "Connect to Support",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "connectedDesc": "AI support is ready to help you 24/7",
+    "disconnected": "Disconnected",
+    "disconnectedDesc": "Support chat ended",
+    "listening": "Listening",
+    "listeningDesc": "Speak now, I'm listening...",
+    "startListening": "Voice",
+    "stopListening": "Stop",
+    "typePlaceholder": "Type a message...",
+    "error": "Error"
   }
 }

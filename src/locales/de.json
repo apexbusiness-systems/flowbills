@@ -101,6 +101,24 @@
     "topic5": "Integration mit Buchhaltungssystemen",
     "topic6": "Compliance- und Sicherheitsfragen",
     "topic7": "Fehlerbehebung bei technischen Problemen",
-    "topic8": "Schulungs- und Onboarding-Unterstützung"
+    "topic8": "Schulungs- und Onboarding-Unterstützung",
+    "title": "24/7 KI-Support",
+    "welcome": "Willkommen beim 24/7 KI-Support",
+    "welcomeDesc": "Verbinden Sie sich, um per Sprache oder Text zu chatten",
+    "online": "Online",
+    "offline": "Offline",
+    "speaking": "Spricht...",
+    "connect": "Mit Support verbinden",
+    "connecting": "Verbindung wird hergestellt...",
+    "connected": "Verbunden",
+    "connectedDesc": "KI-Support steht Ihnen rund um die Uhr zur Verfügung",
+    "disconnected": "Getrennt",
+    "disconnectedDesc": "Support-Chat beendet",
+    "listening": "Hört zu",
+    "listeningDesc": "Sprechen Sie jetzt, ich höre zu...",
+    "startListening": "Sprache",
+    "stopListening": "Stopp",
+    "typePlaceholder": "Nachricht eingeben...",
+    "error": "Fehler"
   }
 }
