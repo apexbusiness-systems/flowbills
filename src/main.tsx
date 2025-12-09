@@ -1,26 +1,7 @@
-// Startup diagnostic - verify module loaded
+// Startup diagnostic - verify module loaded successfully
 console.log('[FlowBills] Module loaded at', new Date().toISOString());
 
-// Emergency recovery: if we previously failed to load, clear everything
-const lastLoadFailed = localStorage.getItem('flowbills_load_failed') === 'true';
-if (lastLoadFailed) {
-  console.warn('[FlowBills] Previous load failed - clearing caches and service workers...');
-  localStorage.removeItem('flowbills_load_failed');
-  
-  // Clear all caches
-  if ('caches' in window) {
-    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
-  }
-  
-  // Unregister all service workers
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(reg => reg.unregister());
-    });
-  }
-}
-
-// Declare global flag
+// Declare global flag for load detection
 declare global {
   interface Window {
     __FLOWBILLS_LOADED__?: boolean;
@@ -133,26 +114,9 @@ if (!import.meta.env.DEV) {
   startPersistenceCleanup();
 }
 
-// TEMPORARILY DISABLED: Service worker registration
-// The SW was causing production issues by serving stale bundles.
-// App will run as plain SPA until SW strategy is refined.
-// See: P0 incident - "Application Loading Error"
-//
-// import('./lib/sw-health-monitor').then(({ swHealthMonitor }) => {
-//   window.addEventListener('load', () => {
-//     swHealthMonitor.register();
-//   });
-// });
-
-// Clear any existing service workers on startup to fix stuck users
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(registrations => {
-    registrations.forEach(reg => {
-      console.log('[FlowBills] Unregistering stale SW:', reg.scope);
-      reg.unregister();
-    });
-  });
-}
+// Service worker is managed by VitePWA plugin (vite.config.ts)
+// Service worker clearing is handled in index.html only when recovering from load failures
+// This allows PWA caching to work normally while maintaining a recovery mechanism
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
