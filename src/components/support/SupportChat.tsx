@@ -100,7 +100,7 @@ export const SupportChat: React.FC<SupportChatProps> = ({ isMinimized, onMinimiz
     return (
       <Button
         onClick={onMinimize}
-        className="fixed bottom-4 right-4 rounded-full w-16 h-16 shadow-lg"
+        className="fixed bottom-4 right-4 rounded-full w-16 h-16 shadow-lg z-[9999]"
         size="icon"
       >
         <Phone className="w-6 h-6" />
@@ -109,7 +109,7 @@ export const SupportChat: React.FC<SupportChatProps> = ({ isMinimized, onMinimiz
   }
 
   return (
-    <Card className="fixed bottom-4 right-4 w-96 h-[600px] flex flex-col shadow-2xl">
+    <Card className="fixed bottom-4 right-4 w-96 h-[600px] flex flex-col shadow-2xl z-[9999] bg-background">
       {/* Header */}
       <div className="p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
         <div className="flex items-center justify-between">
