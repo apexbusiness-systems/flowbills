@@ -1,4 +1,4 @@
-import { toast } from "@/hooks/use-toast";
+// Performance warnings are logged to console.debug only (not shown to users)
 
 // Performance metrics interface
 export interface PerformanceMetrics {
@@ -128,23 +128,13 @@ class PerformanceMonitor {
 
   // Record performance metrics
   recordMetric(type: string, value: number) {
-    const timestamp = Date.now();
-
-    // Warn on poor performance
+    // Log performance warnings to console only (not visible to users)
     if (type === "LCP" && value > 2500) {
-      toast({
-        title: "Performance Warning",
-        description: "Page load time is slower than recommended",
-        variant: "destructive",
-      });
+      console.debug(`Performance: LCP is ${value.toFixed(0)}ms (recommended: <2500ms)`);
     }
 
     if (type === "FID" && value > 100) {
-      toast({
-        title: "Performance Warning",
-        description: "Input delay detected - consider optimizing interactions",
-        variant: "destructive",
-      });
+      console.debug(`Performance: FID is ${value.toFixed(0)}ms (recommended: <100ms)`);
     }
 
     // Store metrics (keep last 100)
@@ -193,12 +183,9 @@ class PerformanceMonitor {
       this.apiMetrics.shift();
     }
 
-    // Warn on slow API calls
+    // Log slow API calls to console only (not visible to users)
     if (metric.duration > 3000) {
-      toast({
-        title: "Slow API Response",
-        description: `${metric.endpoint} took ${(metric.duration / 1000).toFixed(1)}s`,
-      });
+      console.debug(`Performance: Slow API - ${metric.endpoint} took ${(metric.duration / 1000).toFixed(1)}s`);
     }
   }
 
