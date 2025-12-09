@@ -71,7 +71,7 @@ function extractTaxInfo(xmlContent: string): { vat_id?: string; tax_id?: string 
 async function checkDuplicateBank(
   supabase: any,
   document: any,
-  tenantId: string,
+  _tenantId: string,
 ): Promise<FraudFlag | null> {
   if (!document.xml_content) return null;
 
@@ -127,7 +127,7 @@ async function checkDuplicateBank(
 async function checkDuplicateTaxId(
   supabase: any,
   document: any,
-  tenantId: string,
+  _tenantId: string,
 ): Promise<FraudFlag | null> {
   if (!document.xml_content) return null;
 
@@ -164,7 +164,7 @@ async function checkDuplicateTaxId(
 async function checkAmountAnomaly(
   supabase: any,
   document: any,
-  tenantId: string,
+  _tenantId: string,
 ): Promise<FraudFlag | null> {
   if (!document.total_amount || !document.sender_id) return null;
 
@@ -222,7 +222,7 @@ async function checkAmountAnomaly(
 async function checkFrequencyAnomaly(
   supabase: any,
   document: any,
-  tenantId: string,
+  _tenantId: string,
 ): Promise<FraudFlag | null> {
   if (!document.sender_id) return null;
 
@@ -264,7 +264,7 @@ async function checkFrequencyAnomaly(
 async function checkVendorMismatch(
   supabase: any,
   document: any,
-  tenantId: string,
+  _tenantId: string,
 ): Promise<FraudFlag | null> {
   if (!document.sender_id) return null;
 

@@ -200,7 +200,7 @@ Deno.serve(async (req) => {
     if (requiresReview) {
       console.log('Step 5: Adding to review queue...');
 
-      const priority = dupResult?.is_exact_duplicate
+      const _priority = dupResult?.is_exact_duplicate
         ? 1
         : extractResult.budget_status === 'over_budget'
         ? 1

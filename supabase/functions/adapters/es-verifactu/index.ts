@@ -155,7 +155,7 @@ async function generateLogbookEntry(
   }
 }
 
-async function validateVerifactu(invoiceData: any): Promise<VerifactuResponse> {
+function validateVerifactu(invoiceData: any): Promise<VerifactuResponse> {
   try {
     const errors: string[] = [];
 
@@ -190,9 +190,9 @@ async function validateVerifactu(invoiceData: any): Promise<VerifactuResponse> {
   }
 }
 
-async function submitToAEAT(
+function submitToAEAT(
   invoiceData: any,
-  baseUrl: string,
+  _baseUrl: string,
   certificate?: string,
 ): Promise<VerifactuResponse> {
   if (!certificate) {

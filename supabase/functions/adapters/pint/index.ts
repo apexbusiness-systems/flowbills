@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
   }
 });
 
-async function buildPINT(invoiceData: any, sourceFormat?: string): Promise<PINTResponse> {
+async function buildPINT(invoiceData: any, _sourceFormat?: string): Promise<PINTResponse> {
   try {
     // Build PINT-compliant invoice XML
     const pintXml = generatePINTXML(invoiceData);
@@ -164,7 +164,7 @@ async function convertToPINT(invoiceData: any, sourceFormat?: string): Promise<P
   }
 }
 
-async function testPINTReadiness(): Promise<PINTResponse> {
+function testPINTReadiness(): Promise<PINTResponse> {
   try {
     // Test PINT readiness checklist
     const readinessChecks = {
@@ -349,7 +349,7 @@ function generatePINTXML(invoiceData: any): string {
   return pintXml;
 }
 
-async function validatePINTCompliance(xmlData: string): Promise<any> {
+function validatePINTCompliance(xmlData: string): Promise<any> {
   // PINT compliance validation using regex patterns instead of DOM parsing
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -430,7 +430,7 @@ function isValidIdentifierScheme(schemeId: string): boolean {
   return validSchemes.includes(schemeId);
 }
 
-async function convertBIS30ToPINT(invoiceData: any): Promise<any> {
+function convertBIS30ToPINT(invoiceData: any): Promise<any> {
   // Convert BIS 3.0 to PINT format
   return {
     ...invoiceData,
@@ -438,7 +438,7 @@ async function convertBIS30ToPINT(invoiceData: any): Promise<any> {
   };
 }
 
-async function convertXRechnungToPINT(invoiceData: any): Promise<any> {
+function convertXRechnungToPINT(invoiceData: any): Promise<any> {
   // Convert XRechnung to PINT format
   return {
     ...invoiceData,
@@ -446,7 +446,7 @@ async function convertXRechnungToPINT(invoiceData: any): Promise<any> {
   };
 }
 
-async function convertFacturXToPINT(invoiceData: any): Promise<any> {
+function convertFacturXToPINT(invoiceData: any): Promise<any> {
   // Convert Factur-X to PINT format
   return {
     ...invoiceData,

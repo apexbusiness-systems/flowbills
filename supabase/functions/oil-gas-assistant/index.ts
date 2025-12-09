@@ -7,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-import { assertLLMLock, DENO_ENDPOINT, DENO_MODEL_ID } from '../_shared/llm_guard.ts';
+import { assertLLMLock, DENO_MODEL_ID } from '../_shared/llm_guard.ts';
 
 // Oil & Gas Query Validation
 function validateOilGasQuery(query: string): void {
@@ -24,7 +24,7 @@ function validateOilGasQuery(query: string): void {
 }
 
 // Industry-specific RAG retrieval
-async function retrieveOilGasContext(query: string, supabase: any): Promise<string[]> {
+function retrieveOilGasContext(query: string, _supabase: any): Promise<string[]> {
   console.log('📚 Retrieving O&G industry context...');
 
   try {

@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
       if (typeof body !== 'object' || Array.isArray(body)) {
         throw new Error('Request body must be a valid object');
       }
-    } catch (parseError) {
+    } catch (_parseError) {
       return new Response(
         JSON.stringify({ error: 'Invalid JSON format' }),
         {

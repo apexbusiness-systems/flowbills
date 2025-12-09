@@ -235,7 +235,7 @@ async function checkKSeFStatus(
   }
 }
 
-async function transformToKSeF(invoiceXml: string): Promise<string> {
+function transformToKSeF(invoiceXml: string): Promise<string> {
   // Basic transformation to KSeF format without DOMParser
   // In production, this would use proper XML parsing
 
