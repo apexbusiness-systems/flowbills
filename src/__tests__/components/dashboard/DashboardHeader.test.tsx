@@ -20,8 +20,8 @@ describe("DashboardHeader", () => {
   it("renders dashboard header with user greeting", () => {
     render(<DashboardHeader />);
 
-    expect(screen.getByText(/Welcome back/)).toBeInTheDocument();
-    expect(screen.getByText(/Oil & Gas Billing Platform/)).toBeInTheDocument();
+    expect(screen.getByText(/Flow Billing/)).toBeInTheDocument();
+    expect(screen.getByText(/Oil & Gas Payment Platform/)).toBeInTheDocument();
   });
 
   it("displays user menu when user is authenticated", () => {
@@ -58,7 +58,7 @@ describe("DashboardHeader", () => {
   it("displays search functionality", () => {
     render(<DashboardHeader />);
 
-    const searchInput = screen.getByPlaceholderText(/Search invoices/i);
+    const searchInput = screen.getByPlaceholderText(/Search invoices, vendors, POs/i);
     expect(searchInput).toBeInTheDocument();
   });
 
@@ -66,7 +66,7 @@ describe("DashboardHeader", () => {
     const user = userEvent.setup();
     render(<DashboardHeader />);
 
-    const searchInput = screen.getByPlaceholderText(/Search invoices/i);
+    const searchInput = screen.getByPlaceholderText(/Search invoices, vendors, POs/i);
     await user.type(searchInput, "test search");
 
     expect(searchInput).toHaveValue("test search");
