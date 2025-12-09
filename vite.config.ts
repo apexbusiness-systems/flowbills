@@ -71,12 +71,35 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Define chunks as static config instead of function
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-router': ['react-router-dom'],
-          'vendor-supabase': ['@supabase/supabase-js'],
-          'vendor-query': ['@tanstack/react-query'],
+        manualChunks: (id) => {
+          // Core vendor chunk
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'vendor-react';
+          }
+          // Router chunk
+          if (id.includes('node_modules/react-router')) {
+            return 'vendor-router';
+          }
+          // Supabase chunk
+          if (id.includes('node_modules/@supabase')) {
+            return 'vendor-supabase';
+          }
+          // Query chunk
+          if (id.includes('node_modules/@tanstack')) {
+            return 'vendor-query';
+          }
+          // UI components chunk
+          if (id.includes('node_modules/@radix-ui')) {
+            return 'vendor-ui';
+          }
+          // Charts chunk
+          if (id.includes('node_modules/recharts')) {
+            return 'vendor-charts';
+          }
+          // Other large dependencies
+          if (id.includes('node_modules')) {
+            return 'vendor-misc';
+          }
         },
         // Optimize asset file names
         assetFileNames: (assetInfo) => {
@@ -92,10 +115,9 @@ export default defineConfig(({ mode }) => ({
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
       },
-      // FIXED: Use safe tree-shaking settings - allow side effects
       treeshake: {
-        moduleSideEffects: true, // Preserve module side effects (React rendering, CSS imports, etc.)
-        propertyReadSideEffects: true, // Property reads can have side effects
+        moduleSideEffects: false,
+        propertyReadSideEffects: false,
       },
     },
     target: 'es2020',
