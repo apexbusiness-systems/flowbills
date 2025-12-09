@@ -72,13 +72,30 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Define chunks as static config instead of function
+          // Core vendor chunks - load first, highest priority
           'vendor-react': ['react', 'react-dom'],
           'vendor-router': ['react-router-dom'],
+          // Supabase in separate chunk - loaded async after initial render
           'vendor-supabase': ['@supabase/supabase-js'],
           'vendor-query': ['@tanstack/react-query'],
+          // UI framework - lazy loaded on demand
+          'vendor-ui-core': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-tooltip',
+          ],
+          'vendor-ui-form': [
+            '@radix-ui/react-checkbox',
+            '@radix-ui/react-select',
+            '@radix-ui/react-switch',
+            '@radix-ui/react-tabs',
+          ],
+          // Animation and charts - loaded on demand
+          'vendor-motion': ['framer-motion'],
+          'vendor-charts': ['recharts'],
         },
-        // Optimize asset file names
+        // Optimize asset file names for caching
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name?.split('.');
           const ext = info?.[info.length - 1];
@@ -92,15 +109,15 @@ export default defineConfig(({ mode }) => ({
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
       },
-      // FIXED: Use safe tree-shaking settings - allow side effects
+      // Safe tree-shaking - preserve all side effects
       treeshake: {
-        moduleSideEffects: true, // Preserve module side effects (React rendering, CSS imports, etc.)
-        propertyReadSideEffects: true, // Property reads can have side effects
+        moduleSideEffects: true,
+        propertyReadSideEffects: true,
       },
     },
     target: 'es2020',
     cssCodeSplit: true,
-    reportCompressedSize: false, // Faster builds
+    reportCompressedSize: false,
   },
   esbuild: {
     drop: mode === 'production' ? ['debugger'] : [], // Keep console logs for production debugging
