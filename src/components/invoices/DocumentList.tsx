@@ -58,7 +58,7 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
     }
   };
 
-  const handleDragEnd = (result: DropResult) => {
+  const handleDragEnd = (result: { destination?: { index: number }; source: { index: number } }) => {
     if (!result.destination) return;
     
     const items = Array.from(documents);
@@ -233,94 +233,13 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
                     onClick={() => handleDeleteClick(doc)}
                     title="Delete document"
                   >
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        className={`flex items-center gap-4 p-4 border border-border rounded-lg bg-card transition-all ${
-                          snapshot.isDragging 
-                            ? "shadow-lg ring-2 ring-primary/20 rotate-1" 
-                            : "hover:shadow-sm"
-                        }`}
-                      >
-                        {/* Drag Handle */}
-                        {canReorder && (
-                          <div
-                            {...provided.dragHandleProps}
-                            className="flex-shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            <GripVertical className="h-5 w-5" />
-                          </div>
-                        )}
-
-                        {/* File Icon */}
-                        <div className="flex-shrink-0">{getFileIcon(doc.file_type)}</div>
-
-                        {/* File Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="text-sm font-medium text-foreground truncate">{doc.file_name}</h4>
-                            <Badge variant="outline" className="text-xs">
-                              {getFileTypeBadge(doc.file_type)}
-                            </Badge>
-                          </div>
-
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <HardDrive className="h-3 w-3" />
-                              {formatFileSize(doc.file_size)}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {formatDate(doc.created_at)}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <User className="h-3 w-3" />
-                              Uploaded by user
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center gap-1">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handlePreview(doc)}
-                            title="Preview document"
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
-
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDownload(doc)}
-                            title="Download document"
-                          >
-                            <Download className="h-3 w-3" />
-                          </Button>
-
-                          {canDelete && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteClick(doc)}
-                              title="Delete document"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                )}
               </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Delete Confirmation Dialog */}
@@ -344,15 +263,6 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Inline Document Preview Dialog */}
-      <DocumentPreviewDialog
-        document={previewDocument}
-        previewUrl={previewUrl}
-        open={previewOpen}
-        onOpenChange={setPreviewOpen}
-        onDownload={handleDownload}
-      />
     </>
   );
 };

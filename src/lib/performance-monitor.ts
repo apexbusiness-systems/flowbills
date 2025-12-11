@@ -123,21 +123,13 @@ class PerformanceMonitor {
   recordMetric(type: string, value: number) {
     const timestamp = Date.now();
     
-    // Warn on poor performance
+    // Warn on poor performance (dev only console warnings)
     if (type === 'LCP' && value > 2500) {
-      toast({
-        title: "Performance Warning",
-        description: "Page load time is slower than recommended",
-        variant: "destructive"
-      });
+      console.warn('[Performance] Page load time is slower than recommended:', value, 'ms');
     }
 
     if (type === 'FID' && value > 100) {
-      toast({
-        title: "Performance Warning", 
-        description: "Input delay detected - consider optimizing interactions",
-        variant: "destructive"
-      });
+      console.warn('[Performance] Input delay detected:', value, 'ms');
     }
 
     // Store metrics (keep last 100)
@@ -187,10 +179,7 @@ class PerformanceMonitor {
 
     // Log slow API calls to console only (not visible to users)
     if (metric.duration > 3000) {
-      toast({
-        title: "Slow API Response",
-        description: `${metric.endpoint} took ${(metric.duration/1000).toFixed(1)}s`,
-      });
+      console.warn(`[Performance] Slow API: ${metric.endpoint} took ${(metric.duration/1000).toFixed(1)}s`);
     }
   }
 
