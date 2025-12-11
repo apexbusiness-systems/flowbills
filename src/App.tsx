@@ -104,7 +104,6 @@ const AuthRoutes = () => {
 
   return (
     <>
-      {showPublicHeader && <PublicHeader />}
       <React.Suspense fallback={
         <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="text-center" role="status" aria-live="polite">

@@ -1,4 +1,4 @@
-import { Building2, Bell, User, LogOut, Shield, Settings, Home, ArrowLeft, Palette } from "lucide-react";
+import { Building2, Bell, User, LogOut, Shield, Settings, Home, ArrowLeft, Palette, FileText, DollarSign, Ticket, MapPin, CheckCircle2, BarChart3, Plug, Activity, HelpCircle, Menu } from "lucide-react";
 import companyLogo from "@/assets/company-logo.png";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +42,7 @@ const DashboardHeader = () => {
   const { user, userRole, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isNavOpen, setIsNavOpen] = useState(false);
   
   // Check if we're on the homepage
   const isHomePage = location.pathname === '/';
@@ -116,22 +117,8 @@ const DashboardHeader = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/')}
-              className="gap-2 hover:bg-primary/10"
-              aria-label="Back to dashboard"
-            >
-              <Home className="h-4 w-4" />
-              <span className="hidden md:inline">Dashboard</span>
-            </Button>
-          )}
-          
-          {!isHomePage && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.history.back()}
               className="gap-2 hover:bg-muted"
-              aria-label="Go back"
+              aria-label="Open navigation menu"
             >
               <Menu className="h-5 w-5" />
               <span className="hidden md:inline">Menu</span>
