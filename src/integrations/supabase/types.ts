@@ -536,6 +536,36 @@ export type Database = {
           },
         ]
       }
+      flowbills_compliance_receipts: {
+        Row: {
+          compliance_result: Json
+          created_at: string | null
+          id: string
+          idempotency_key: string
+          invoice_id: string
+          processed_at: string | null
+          tenant_id: string
+        }
+        Insert: {
+          compliance_result?: Json
+          created_at?: string | null
+          id?: string
+          idempotency_key: string
+          invoice_id: string
+          processed_at?: string | null
+          tenant_id: string
+        }
+        Update: {
+          compliance_result?: Json
+          created_at?: string | null
+          id?: string
+          idempotency_key?: string
+          invoice_id?: string
+          processed_at?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       integration_status: {
         Row: {
           config: Json | null
