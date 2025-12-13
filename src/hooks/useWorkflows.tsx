@@ -136,13 +136,37 @@ export const useWorkflows = () => {
   const updateWorkflow = async (id: string, updates: Partial<Workflow>) => {
     if (!user) return false;
 
-    // Stub implementation
-    toast({
-      title: "Workflow Updated",
-      description: "Workflow has been updated successfully (stub implementation)",
-    });
+    try {
+      const { error } = await supabase
+        .from('workflows')
+        .update({
+          name: updates.name,
+          description: updates.description,
+          workflow_type: updates.workflow_type,
+          steps: updates.steps as any,
+          is_active: updates.is_active,
+        })
+        .eq('id', id)
+        .eq('user_id', user.id);
 
-    return true;
+      if (error) throw error;
+
+      toast({
+        title: "Workflow Updated",
+        description: "Workflow has been updated successfully",
+      });
+
+      await fetchWorkflows();
+      return true;
+    } catch (error: any) {
+      console.error('Error updating workflow:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update workflow",
+        variant: "destructive",
+      });
+      return false;
+    }
   };
 
   const deleteWorkflow = async (id: string) => {
@@ -210,37 +234,94 @@ export const useWorkflows = () => {
   const pauseWorkflow = async (instanceId: string) => {
     if (!user) return false;
 
-    // Stub implementation
-    toast({
-      title: "Workflow Paused",
-      description: "Workflow instance has been paused (stub implementation)",
-    });
+    try {
+      const { error } = await supabase
+        .from('workflow_instances')
+        .update({ status: 'paused' })
+        .eq('id', instanceId)
+        .eq('user_id', user.id);
 
-    return true;
+      if (error) throw error;
+
+      toast({
+        title: "Workflow Paused",
+        description: "Workflow instance has been paused",
+      });
+
+      await fetchInstances();
+      return true;
+    } catch (error: any) {
+      console.error('Error pausing workflow:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to pause workflow",
+        variant: "destructive",
+      });
+      return false;
+    }
   };
 
   const resumeWorkflow = async (instanceId: string) => {
     if (!user) return false;
 
-    // Stub implementation
-    toast({
-      title: "Workflow Resumed",
-      description: "Workflow instance has been resumed (stub implementation)",
-    });
+    try {
+      const { error } = await supabase
+        .from('workflow_instances')
+        .update({ status: 'running' })
+        .eq('id', instanceId)
+        .eq('user_id', user.id);
 
-    return true;
+      if (error) throw error;
+
+      toast({
+        title: "Workflow Resumed",
+        description: "Workflow instance has been resumed",
+      });
+
+      await fetchInstances();
+      return true;
+    } catch (error: any) {
+      console.error('Error resuming workflow:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to resume workflow",
+        variant: "destructive",
+      });
+      return false;
+    }
   };
 
   const cancelWorkflow = async (instanceId: string) => {
     if (!user) return false;
 
-    // Stub implementation
-    toast({
-      title: "Workflow Cancelled",
-      description: "Workflow instance has been cancelled (stub implementation)",
-    });
+    try {
+      const { error } = await supabase
+        .from('workflow_instances')
+        .update({ 
+          status: 'failed',
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', instanceId)
+        .eq('user_id', user.id);
 
-    return true;
+      if (error) throw error;
+
+      toast({
+        title: "Workflow Cancelled",
+        description: "Workflow instance has been cancelled",
+      });
+
+      await fetchInstances();
+      return true;
+    } catch (error: any) {
+      console.error('Error cancelling workflow:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to cancel workflow",
+        variant: "destructive",
+      });
+      return false;
+    }
   };
 
   // Legacy API kept for compatibility - executeWorkflow is alias for startWorkflow

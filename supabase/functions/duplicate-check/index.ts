@@ -5,7 +5,7 @@ import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 // Input validation schema
 const InvoiceIn = z.object({
   invoice_number: z.string().min(1),
-  vendor_id: z.string().uuid(),
+  vendor_id: z.string().min(1), // Accept any non-empty string (vendor name or ID)
   amount_cents: z.number().int().positive(),
   invoice_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   po_number: z.string().optional().nullable(),
@@ -169,11 +169,11 @@ Deno.serve(async (req) => {
       throw exactError;
     }
 
-    // Fuzzy matching with safe parameterized queries
+    // Fuzzy matching with safe parameterized queries - use vendor_name comparison
     const { data: fuzzyDuplicates, error: fuzzyError } = await supabase
       .from('invoices')
-      .select('id, invoice_number, vendor_id, amount, invoice_date')
-      .eq('vendor_id', invoice.vendor_id)
+      .select('id, invoice_number, vendor_name, amount, invoice_date')
+      .eq('vendor_name', invoice.vendor_id) // vendor_id is actually vendor_name from caller
       .gte('invoice_date', minusDays(invoice.invoice_date, 7))
       .lte('invoice_date', plusDays(invoice.invoice_date, 7))
       .gte('amount', Math.round((invoice.amount_cents / 100) * 0.99))
