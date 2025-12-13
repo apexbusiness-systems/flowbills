@@ -1,6 +1,6 @@
 # FLOWBills.ca — Technical Product Specification
 
-**Version:** 1.0.0 | **Last Updated:** December 2025 | **Classification:** Technical Stakeholder Documentation
+**Version:** 1.1.0 | **Last Updated:** December 13, 2025 | **Classification:** Technical Stakeholder Documentation
 
 ---
 
@@ -217,6 +217,77 @@ cleanup_old_audit_logs()       -- Retention policy enforcement
 
 ---
 
+## Document Management System
+
+### File Upload & Storage
+
+| Feature | Implementation | Status |
+|---------|---------------|--------|
+| **Storage Bucket** | `invoice-documents` with RLS | ✅ Deployed |
+| **File Size Limit** | 20MB per upload | ✅ Enforced |
+| **Supported Formats** | PDF, Excel, CSV, XML, PNG, JPEG | ✅ Validated |
+| **Ownership Model** | User-scoped RLS policies | ✅ Secure |
+
+### Document Preview & Interaction
+
+| Capability | Description |
+|------------|-------------|
+| **Inline Preview** | PDF and image preview without download |
+| **Zoom Controls** | Zoom in/out with percentage display |
+| **Image Rotation** | 90° rotation for scanned documents |
+| **Download** | Direct download with original filename |
+| **Open in Tab** | View in new browser tab |
+| **Drag-and-Drop Reorder** | Reorder documents with @hello-pangea/dnd |
+
+### Integration Points
+
+```typescript
+// Document management hooks
+useFileUpload({
+  bucket: 'invoice-documents',
+  maxFileSize: 20 * 1024 * 1024,
+  allowedTypes: ['application/pdf', 'image/*', '.xlsx', '.csv', '.xml']
+})
+```
+
+---
+
+## User Experience Features
+
+### Authenticated Navigation
+
+| Component | Function | Pattern |
+|-----------|----------|---------|
+| **DashboardHeader** | Global authenticated header | Conditional render |
+| **Burger Menu** | Sheet-based side navigation | Enterprise standard |
+| **MobileBottomNav** | Touch-friendly mobile nav | Responsive |
+| **User Avatar** | Initials badge display | Personalized |
+
+### Onboarding Tour System
+
+| Feature | Implementation |
+|---------|---------------|
+| **9-Step Tour** | Guided product introduction |
+| **Escape Key Exit** | Exit tour at any step |
+| **Body-Targeted Steps** | Centered positioning for visibility |
+| **Completion Tracking** | localStorage persistence |
+| **Manual Trigger** | Re-accessible via help menu |
+
+### Layout Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  UNAUTHENTICATED                  │  AUTHENTICATED               │
+├───────────────────────────────────┼──────────────────────────────┤
+│  PublicHeader                     │  DashboardHeader (global)    │
+│  Page Content                     │  Burger Menu Navigation      │
+│  Footer                           │  Page Content                │
+│                                   │  MobileBottomNav (mobile)    │
+└───────────────────────────────────┴──────────────────────────────┘
+```
+
+---
+
 ## Oil & Gas Domain Features
 
 ### AFE (Authority for Expenditure) Management
@@ -364,6 +435,35 @@ idx_security_events_severity
 
 ---
 
+## Workflow Management
+
+### Workflow Hook Implementation
+
+| Function | Database Operation | Status |
+|----------|-------------------|--------|
+| `createWorkflow` | INSERT into workflows | ✅ Implemented |
+| `updateWorkflow` | UPDATE workflows SET | ✅ Implemented |
+| `deleteWorkflow` | DELETE from workflows | ✅ Implemented |
+| `pauseWorkflow` | UPDATE instances SET status='paused' | ✅ Implemented |
+| `resumeWorkflow` | UPDATE instances SET status='running' | ✅ Implemented |
+| `cancelWorkflow` | UPDATE instances SET status='cancelled' | ✅ Implemented |
+
+### Workflow Instance Lifecycle
+
+```
+┌──────────┐    ┌──────────┐    ┌──────────┐    ┌───────────┐
+│ CREATED  │───▶│ RUNNING  │───▶│ PAUSED   │───▶│ COMPLETED │
+│          │    │          │◀───│ (resume) │    │           │
+└──────────┘    └──────────┘    └──────────┘    └───────────┘
+                     │
+                     ▼
+               ┌───────────┐
+               │ CANCELLED │
+               └───────────┘
+```
+
+---
+
 ## Observability & Monitoring
 
 ### Health Endpoints
@@ -472,5 +572,42 @@ idx_security_events_severity
 **API Docs:** https://flowbills.ca/api-docs
 
 ---
+
+## Recent Updates (v1.1.0)
+
+### December 2025 Release
+
+| Category | Update | Impact |
+|----------|--------|--------|
+| **Document Management** | Full upload/preview/reorder system | Enhanced UX |
+| **Authenticated Layout** | Global DashboardHeader pattern | Consistent nav |
+| **Burger Menu Navigation** | Enterprise-grade side panel | Professional UX |
+| **Onboarding Tour** | 9-step tour with escape key exit | Better onboarding |
+| **Workflow Hooks** | Full CRUD + pause/resume/cancel | Complete lifecycle |
+| **Duplicate Detection** | Fixed vendor_name fuzzy matching | Improved accuracy |
+| **HIL Router** | Corrected user_id and column mappings | Fixed routing |
+| **Avatar Display** | User initials instead of icon | Personalization |
+| **Performance Diagnostics** | Console-only (no user toasts) | Clean UX |
+
+### Edge Function Fixes
+
+| Function | Fix Applied |
+|----------|-------------|
+| `duplicate-check` | Vendor validation now accepts strings; fuzzy match on vendor_name |
+| `hil-router` | Added user_id to review_queue; corrected approval_status column |
+
+### Frontend Component Fixes
+
+| Component | Fix Applied |
+|-----------|-------------|
+| `DocumentList` | Proper drag-and-drop with DragDropContext/Droppable/Draggable |
+| `FileUploadZone` | Fixed uploadProgress array access pattern |
+| `InvoiceTour` | Added missing useEffect dependencies |
+| `DashboardHeader` | Corrected navigation paths (/performance, /help) |
+| `App.tsx` | Fixed authenticated redirect from /auth to /dashboard |
+
+---
+
+*Document generated from production codebase analysis. All features verified against actual implementation.*
 
 *This document reflects the actual production architecture and capabilities of FLOWBills.ca as of December 2025. All metrics, features, and compliance claims are based on implemented code and validated test results.*
