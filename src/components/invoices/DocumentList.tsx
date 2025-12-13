@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -19,11 +20,14 @@ import {
   File, 
   Calendar,
   User,
-  HardDrive
+  HardDrive,
+  GripVertical
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useFileUpload, InvoiceDocument } from '@/hooks/useFileUpload';
 import { format } from 'date-fns';
+import DocumentPreviewDialog from './DocumentPreviewDialog';
+import { cn } from '@/lib/utils';
 
 interface DocumentListProps {
   invoiceId: string;
@@ -35,6 +39,9 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<InvoiceDocument | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewDocument, setPreviewDocument] = useState<InvoiceDocument | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
   const { hasRole } = useAuth();
   const { getDocuments, deleteDocument, downloadDocument, getFilePreviewUrl } = useFileUpload();
@@ -58,7 +65,7 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
     }
   };
 
-  const handleDragEnd = (result: { destination?: { index: number }; source: { index: number } }) => {
+  const handleDragEnd = useCallback((result: DropResult) => {
     if (!result.destination) return;
     
     const items = Array.from(documents);
@@ -67,7 +74,7 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
     
     setDocuments(items);
     onDocumentsChange?.(items);
-  };
+  }, [documents, onDocumentsChange]);
 
   const handleDeleteClick = (doc: InvoiceDocument) => {
     setDocumentToDelete(doc);
@@ -91,10 +98,10 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
   };
 
   const handlePreview = async (doc: InvoiceDocument) => {
-    const previewUrl = await getFilePreviewUrl(doc.id);
-    if (previewUrl) {
-      window.open(previewUrl, '_blank');
-    }
+    setPreviewDocument(doc);
+    setPreviewOpen(true);
+    const url = await getFilePreviewUrl(doc.id);
+    setPreviewUrl(url);
   };
 
   const getFileIcon = (fileType: string) => {
@@ -115,6 +122,7 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
     if (fileType.includes('excel') || fileType.includes('spreadsheet')) return 'Excel';
     if (fileType === 'text/csv') return 'CSV';
     if (fileType.includes('xml')) return 'XML';
+    if (fileType.startsWith('image/')) return 'Image';
     return 'File';
   };
 
@@ -166,81 +174,118 @@ const DocumentList = ({ invoiceId, onDocumentsChange }: DocumentListProps) => {
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
           <HardDrive className="h-4 w-4" />
           {documents.length} Document{documents.length > 1 ? 's' : ''} Attached
+          <span className="text-xs">(drag to reorder)</span>
         </div>
 
-        <div className="space-y-3">
-          {documents.map((doc) => (
-            <div
-              key={doc.id}
-              className="flex items-center gap-4 p-4 border border-border rounded-lg bg-card hover:shadow-sm transition-shadow"
-            >
-              {/* File Icon */}
-              <div className="flex-shrink-0">
-                {getFileIcon(doc.file_type)}
-              </div>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="documents-list">
+            {(provided) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="space-y-3"
+              >
+                {documents.map((doc, index) => (
+                  <Draggable key={doc.id} draggableId={doc.id} index={index}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className={cn(
+                          "flex items-center gap-4 p-4 border border-border rounded-lg bg-card transition-all",
+                          snapshot.isDragging && "shadow-lg ring-2 ring-primary/20"
+                        )}
+                      >
+                        {/* Drag Handle */}
+                        <div
+                          {...provided.dragHandleProps}
+                          className="flex-shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
+                        >
+                          <GripVertical className="h-4 w-4" />
+                        </div>
 
-              {/* File Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="text-sm font-medium text-foreground truncate">
-                    {doc.file_name}
-                  </h4>
-                  <Badge variant="outline" className="text-xs">
-                    {getFileTypeBadge(doc.file_type)}
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <HardDrive className="h-3 w-3" />
-                    {formatFileSize(doc.file_size)}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {formatDate(doc.created_at)}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <User className="h-3 w-3" />
-                    Uploaded by user
-                  </div>
-                </div>
-              </div>
+                        {/* File Icon */}
+                        <div className="flex-shrink-0">
+                          {getFileIcon(doc.file_type)}
+                        </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-1">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handlePreview(doc)}
-                  title="Preview document"
-                >
-                  <Eye className="h-3 w-3" />
-                </Button>
-                
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleDownload(doc)}
-                  title="Download document"
-                >
-                  <Download className="h-3 w-3" />
-                </Button>
+                        {/* File Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="text-sm font-medium text-foreground truncate">
+                              {doc.file_name}
+                            </h4>
+                            <Badge variant="outline" className="text-xs">
+                              {getFileTypeBadge(doc.file_type)}
+                            </Badge>
+                          </div>
+                          
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <HardDrive className="h-3 w-3" />
+                              {formatFileSize(doc.file_size)}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {formatDate(doc.created_at)}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <User className="h-3 w-3" />
+                              Uploaded by user
+                            </div>
+                          </div>
+                        </div>
 
-                {canDelete && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDeleteClick(doc)}
-                    title="Delete document"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                )}
+                        {/* Actions */}
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handlePreview(doc)}
+                            title="Preview document"
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                          
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDownload(doc)}
+                            title="Download document"
+                          >
+                            <Download className="h-3 w-3" />
+                          </Button>
+
+                          {canDelete && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteClick(doc)}
+                              title="Delete document"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </div>
+
+      {/* Document Preview Dialog */}
+      <DocumentPreviewDialog
+        document={previewDocument}
+        previewUrl={previewUrl}
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        onDownload={handleDownload}
+      />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
