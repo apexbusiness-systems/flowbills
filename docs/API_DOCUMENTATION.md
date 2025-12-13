@@ -22,7 +22,7 @@ Public endpoints (marked with `verify_jwt = false` in config.toml) do not requir
 
 ### `health-check`
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/health-check`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/health-check`  
 **Method**: `GET`  
 **Authentication**: Not required  
 **Purpose**: System health monitoring
@@ -39,14 +39,14 @@ Public endpoints (marked with `verify_jwt = false` in config.toml) do not requir
 
 **Usage**:
 ```bash
-curl https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/health-check
+curl https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/health-check
 ```
 
 ---
 
 ### `metrics`
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/metrics`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/metrics`  
 **Method**: `GET`  
 **Authentication**: Not required  
 **Purpose**: Prometheus metrics export for monitoring
@@ -68,7 +68,7 @@ invoice_dup_detected_total 56
 
 ### `duplicate-check`
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/duplicate-check`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/duplicate-check`  
 **Method**: `POST`  
 **Authentication**: Required  
 **Purpose**: Detect duplicate invoices before approval
@@ -103,7 +103,7 @@ invoice_dup_detected_total 56
 
 ### `hil-router`
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/hil-router`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/hil-router`  
 **Method**: `POST`  
 **Authentication**: Required  
 **Purpose**: Route low-confidence invoices to human review queue
@@ -141,7 +141,7 @@ invoice_dup_detected_total 56
 
 ### `fraud-detect`
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/fraud-detect`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/fraud-detect`  
 **Method**: `POST`  
 **Authentication**: Required  
 **Purpose**: Detect fraudulent invoice patterns
@@ -187,7 +187,7 @@ invoice_dup_detected_total 56
 
 ### `ocr-extract`
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/ocr-extract`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/ocr-extract`  
 **Method**: `POST`  
 **Authentication**: Required  
 **Purpose**: Extract structured data from invoice images/PDFs
@@ -238,7 +238,7 @@ invoice_dup_detected_total 56
 
 ### `einvoice_validate`
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/einvoice_validate`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/einvoice_validate`  
 **Method**: `POST`  
 **Authentication**: Required  
 **Purpose**: Validate e-invoices against EN 16931 and country-specific rules
@@ -273,7 +273,7 @@ invoice_dup_detected_total 56
 
 ### `einvoice_send`
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/einvoice_send`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/einvoice_send`  
 **Method**: `POST`  
 **Authentication**: Required  
 **Purpose**: Send e-invoices via Peppol network
@@ -302,7 +302,7 @@ invoice_dup_detected_total 56
 
 ### `einvoice_receive`
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/einvoice_receive`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/einvoice_receive`  
 **Method**: `POST`  
 **Authentication**: Required (webhook from Access Point)  
 **Purpose**: Receive incoming e-invoices from Peppol
@@ -332,7 +332,7 @@ invoice_dup_detected_total 56
 
 ### `policy-engine`
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/policy-engine`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/policy-engine`  
 **Method**: `POST`  
 **Authentication**: Required  
 **Purpose**: Execute approval policies based on business rules
@@ -369,7 +369,7 @@ invoice_dup_detected_total 56
 
 ### `ai-assistant`
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/ai-assistant`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/ai-assistant`  
 **Method**: `POST`  
 **Authentication**: Required  
 **Purpose**: AI-powered assistance for invoice processing
@@ -402,7 +402,7 @@ invoice_dup_detected_total 56
 
 ### `oil-gas-assistant`
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/oil-gas-assistant`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/oil-gas-assistant`  
 **Method**: `POST`  
 **Authentication**: Required  
 **Purpose**: Industry-specific AI assistance for oil & gas sector
@@ -433,7 +433,7 @@ invoice_dup_detected_total 56
 
 ### Spain: VerificaTu (`es-verifactu`)
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/adapters/es-verifactu`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/adapters/es-verifactu`  
 **Method**: `POST`  
 **Authentication**: Public (verify_jwt = false)  
 **Purpose**: Validate invoices for Spanish tax authority (AEAT)
@@ -466,7 +466,7 @@ invoice_dup_detected_total 56
 
 ### Poland: KSeF (`pl-ksef`)
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/adapters/pl-ksef`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/adapters/pl-ksef`  
 **Method**: `POST`  
 **Authentication**: Public (verify_jwt = false)  
 **Purpose**: Submit invoices to Polish National e-Invoice System
@@ -494,7 +494,7 @@ invoice_dup_detected_total 56
 
 ### PINT (`pint`)
 
-**Endpoint**: `https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/adapters/pint`  
+**Endpoint**: `https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/adapters/pint`  
 **Method**: `POST`  
 **Authentication**: Public (verify_jwt = false)  
 **Purpose**: Validate invoices against PINT (Peppol International) model
@@ -517,6 +517,250 @@ invoice_dup_detected_total 56
   "warnings": []
 }
 ```
+
+---
+
+## Document Management API
+
+The Document Management system provides endpoints for uploading, previewing, and managing invoice attachments.
+
+### Storage Bucket Configuration
+
+**Bucket**: `invoice-documents`  
+**Max File Size**: 20MB  
+**Allowed MIME Types**: `application/pdf`, `image/png`, `image/jpeg`, `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, `text/csv`, `application/xml`
+
+---
+
+### Upload Document
+
+**Method**: Supabase Storage SDK  
+**Authentication**: Required (User must be authenticated)  
+**Purpose**: Upload invoice documents to secure storage
+
+**Usage (TypeScript)**:
+```typescript
+import { supabase } from "@/integrations/supabase/client";
+
+const uploadDocument = async (file: File, invoiceId: string) => {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  const filePath = `${userId}/${invoiceId}/${file.name}`;
+  
+  const { data, error } = await supabase.storage
+    .from('invoice-documents')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if (error) throw error;
+  
+  // Record in database
+  await supabase.from('invoice_documents').insert({
+    invoice_id: invoiceId,
+    file_name: file.name,
+    file_path: filePath,
+    file_size: file.size,
+    file_type: file.type,
+    uploaded_by: userId
+  });
+
+  return data;
+};
+```
+
+**Response**:
+```json
+{
+  "path": "user-uuid/invoice-uuid/document.pdf",
+  "id": "file-uuid",
+  "fullPath": "invoice-documents/user-uuid/invoice-uuid/document.pdf"
+}
+```
+
+---
+
+### Get Document Preview URL
+
+**Method**: Supabase Storage SDK  
+**Authentication**: Required  
+**Purpose**: Generate signed URL for document preview
+
+**Usage (TypeScript)**:
+```typescript
+const getPreviewUrl = async (filePath: string) => {
+  const { data, error } = await supabase.storage
+    .from('invoice-documents')
+    .createSignedUrl(filePath, 3600); // 1 hour expiry
+
+  if (error) throw error;
+  return data.signedUrl;
+};
+```
+
+**Response**:
+```json
+{
+  "signedUrl": "https://ullqluvzkgnwwqijhvjr.supabase.co/storage/v1/object/sign/invoice-documents/..."
+}
+```
+
+---
+
+### Download Document
+
+**Method**: Supabase Storage SDK  
+**Authentication**: Required  
+**Purpose**: Download document as blob
+
+**Usage (TypeScript)**:
+```typescript
+const downloadDocument = async (filePath: string) => {
+  const { data, error } = await supabase.storage
+    .from('invoice-documents')
+    .download(filePath);
+
+  if (error) throw error;
+  
+  // Create download link
+  const url = URL.createObjectURL(data);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filePath.split('/').pop() || 'document';
+  link.click();
+  URL.revokeObjectURL(url);
+};
+```
+
+---
+
+### Delete Document
+
+**Method**: Supabase Storage SDK  
+**Authentication**: Required (Owner only via RLS)  
+**Purpose**: Remove document from storage
+
+**Usage (TypeScript)**:
+```typescript
+const deleteDocument = async (filePath: string, documentId: string) => {
+  // Delete from storage
+  const { error: storageError } = await supabase.storage
+    .from('invoice-documents')
+    .remove([filePath]);
+
+  if (storageError) throw storageError;
+
+  // Remove database record
+  const { error: dbError } = await supabase
+    .from('invoice_documents')
+    .delete()
+    .eq('id', documentId);
+
+  if (dbError) throw dbError;
+};
+```
+
+---
+
+### List Invoice Documents
+
+**Method**: Supabase Database Query  
+**Authentication**: Required (RLS enforced)  
+**Purpose**: Retrieve all documents for an invoice
+
+**Usage (TypeScript)**:
+```typescript
+const listDocuments = async (invoiceId: string) => {
+  const { data, error } = await supabase
+    .from('invoice_documents')
+    .select('*')
+    .eq('invoice_id', invoiceId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+};
+```
+
+**Response**:
+```json
+[
+  {
+    "id": "uuid",
+    "invoice_id": "invoice-uuid",
+    "file_name": "invoice-scan.pdf",
+    "file_path": "user-uuid/invoice-uuid/invoice-scan.pdf",
+    "file_size": 1048576,
+    "file_type": "application/pdf",
+    "uploaded_by": "user-uuid",
+    "created_at": "2025-12-13T10:00:00Z",
+    "updated_at": "2025-12-13T10:00:00Z"
+  }
+]
+```
+
+---
+
+### Reorder Documents (Client-Side)
+
+**Method**: React Drag-and-Drop  
+**Library**: `@hello-pangea/dnd`  
+**Purpose**: Reorder documents in UI (client-side state management)
+
+**Usage (React)**:
+```tsx
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+
+const DocumentList = ({ documents, onReorder }) => {
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+    
+    const reordered = Array.from(documents);
+    const [removed] = reordered.splice(result.source.index, 1);
+    reordered.splice(result.destination.index, 0, removed);
+    
+    onReorder(reordered);
+  };
+
+  return (
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Droppable droppableId="documents">
+        {(provided) => (
+          <div ref={provided.innerRef} {...provided.droppableProps}>
+            {documents.map((doc, index) => (
+              <Draggable key={doc.id} draggableId={doc.id} index={index}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                  >
+                    {doc.file_name}
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
+};
+```
+
+---
+
+### RLS Policies for Document Storage
+
+Documents are secured with Row-Level Security:
+
+| Operation | Policy | Condition |
+|-----------|--------|-----------|
+| **SELECT** | Users can view their invoice documents | `invoice.user_id = auth.uid()` |
+| **INSERT** | Operators can upload documents | `user_role IN ('admin', 'operator') AND invoice.user_id = auth.uid()` |
+| **UPDATE** | Operators can update documents | `user_role IN ('admin', 'operator') AND invoice.user_id = auth.uid()` |
+| **DELETE** | Operators can delete documents | `user_role IN ('admin', 'operator') AND invoice.user_id = auth.uid()` |
 
 ---
 
@@ -569,7 +813,7 @@ X-RateLimit-Reset: 1696089600
 
 ### Viewing Edge Function Logs
 
-1. Go to Supabase Dashboard: https://supabase.com/dashboard/project/yvyjzlbosmtesldczhnm/functions
+1. Go to Supabase Dashboard: https://supabase.com/dashboard/project/ullqluvzkgnwwqijhvjr/functions
 2. Click on function name
 3. Navigate to "Logs" tab
 
@@ -588,13 +832,13 @@ X-RateLimit-Reset: 1696089600
 
 **Health Check**:
 ```bash
-curl https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/health-check
+curl https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/health-check
 ```
 
 **Duplicate Check** (requires auth):
 ```bash
 curl -X POST \
-  https://yvyjzlbosmtesldczhnm.supabase.co/functions/v1/duplicate-check \
+  https://ullqluvzkgnwwqijhvjr.supabase.co/functions/v1/duplicate-check \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -615,7 +859,7 @@ curl -X POST \
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
-  'https://yvyjzlbosmtesldczhnm.supabase.co',
+  'https://ullqluvzkgnwwqijhvjr.supabase.co',
   'YOUR_ANON_KEY'
 );
 
@@ -658,5 +902,5 @@ For API issues or questions:
 
 ---
 
-**Last Updated**: September 30, 2025  
-**API Version**: 1.0.0
+**Last Updated**: December 13, 2025  
+**API Version**: 1.1.0
