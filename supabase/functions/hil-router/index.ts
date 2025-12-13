@@ -202,31 +202,37 @@ Deno.serve(async (req) => {
 
     // If requires human review, add to review queue
     if (routingDecision === 'human_review') {
-      const { error: queueError } = await supabase
-        .from('review_queue')
-        .insert({
-          invoice_id: invoice.invoice_id,
-          priority: priority,
-          reason: reason,
-          confidence_score: invoice.confidence_score,
-          flagged_fields: flaggedFields
-        });
+      // Get user_id from invoice
+      const { data: invoiceData } = await supabase
+        .from('invoices')
+        .select('user_id')
+        .eq('id', invoice.invoice_id)
+        .single();
+      
+      if (invoiceData?.user_id) {
+        const { error: queueError } = await supabase
+          .from('review_queue')
+          .insert({
+            invoice_id: invoice.invoice_id,
+            user_id: invoiceData.user_id,
+            reason: reason,
+            confidence_score: invoice.confidence_score,
+            risk_factors: flaggedFields.length > 0 ? flaggedFields : []
+          });
 
-      if (queueError) {
-        console.error('Error adding to review queue:', queueError);
-      } else {
-        console.log('Invoice added to review queue:', invoice.invoice_id);
+        if (queueError) {
+          console.error('Error adding to review queue:', queueError);
+        } else {
+          console.log('Invoice added to review queue:', invoice.invoice_id);
+        }
       }
     }
 
-    // Update invoice status
+    // Update invoice status (confidence_score is stored in invoice_extractions, not invoices)
     const newStatus = routingDecision === 'auto_approve' ? 'approved' : 'processing';
     const { error: updateError } = await supabase
       .from('invoices')
-      .update({ 
-        status: newStatus,
-        confidence_score: invoice.confidence_score
-      })
+      .update({ status: newStatus })
       .eq('id', invoice.invoice_id);
 
     if (updateError) {
@@ -235,19 +241,29 @@ Deno.serve(async (req) => {
 
     // Create approval record for auto-approved invoices
     if (routingDecision === 'auto_approve') {
-      const { error: approvalError } = await supabase
-        .from('approvals')
-        .insert({
-          invoice_id: invoice.invoice_id,
-          status: 'approved',
-          amount_approved: invoice.amount,
-          approval_date: new Date().toISOString(),
-          comments: 'Auto-approved by HIL router',
-          auto_approved: true
-        });
+      // Get user_id from invoice for the approval record
+      const { data: invData } = await supabase
+        .from('invoices')
+        .select('user_id')
+        .eq('id', invoice.invoice_id)
+        .single();
+      
+      if (invData?.user_id) {
+        const { error: approvalError } = await supabase
+          .from('approvals')
+          .insert({
+            invoice_id: invoice.invoice_id,
+            user_id: invData.user_id,
+            approval_status: 'approved',
+            amount_approved: invoice.amount,
+            approval_date: new Date().toISOString(),
+            comments: 'Auto-approved by HIL router',
+            auto_approved: true
+          });
 
-      if (approvalError) {
-        console.error('Error creating approval record:', approvalError);
+        if (approvalError) {
+          console.error('Error creating approval record:', approvalError);
+        }
       }
     }
 
