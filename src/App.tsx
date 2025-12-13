@@ -354,13 +354,32 @@ function App() {
   );
 }
 
-// Separate component to access auth context for footer visibility
+// Separate component to access auth context for header/footer visibility
 const AppLayout = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const isAuthenticated = !!user;
+  
+  // Don't render headers while loading to prevent flash
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <div className="flex-1">
+          <AuthRoutes />
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Render appropriate header based on auth state */}
+      {isAuthenticated ? (
+        <React.Suspense fallback={null}>
+          <DashboardHeader />
+        </React.Suspense>
+      ) : (
+        <PublicHeader />
+      )}
       <div className="flex-1">
         <AuthRoutes />
       </div>
